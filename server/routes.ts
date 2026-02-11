@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generatePrediction, getFearGreedForDepth } from "./openai-predictions";
 import { getExchangeAggregatedData } from "./exchange-data";
+import { fetchPolymarketCryptoMarkets } from "./polymarket";
+import { getNewsPredictions } from "./news-predictions";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -996,6 +998,26 @@ export async function registerRoutes(
       }
       res.json(predictions);
     } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/polymarket/markets", async (_req, res) => {
+    try {
+      const markets = await fetchPolymarketCryptoMarkets();
+      res.json(markets);
+    } catch (error: any) {
+      console.error("Polymarket route error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/news/predictions", async (_req, res) => {
+    try {
+      const predictions = await getNewsPredictions();
+      res.json(predictions);
+    } catch (error: any) {
+      console.error("News predictions route error:", error);
       res.status(500).json({ message: error.message });
     }
   });

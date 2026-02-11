@@ -14,6 +14,7 @@ import {
   Crown, Zap, Shield, CheckCircle2, TrendingUp, TrendingDown,
   Minus, Clock, Brain, Info, RefreshCw, Wallet, ChevronLeft, ChevronRight,
   Search, RotateCcw, Send, Copy, Eye, EyeOff, Key, Link2, MessageCircle,
+  Newspaper, Globe, ExternalLink, BarChart3, Sparkles,
 } from "lucide-react";
 import type { Strategy, StrategySubscription, Profile, HedgePosition, InsurancePurchase, AiPrediction } from "@shared/schema";
 import { StrategyHeader } from "@/components/strategy/strategy-header";
@@ -59,6 +60,7 @@ export default function StrategyPage() {
   const [showApiPassphrase, setShowApiPassphrase] = useState(false);
   const [bindTelegramOpen, setBindTelegramOpen] = useState(false);
   const [telegramUsername, setTelegramUsername] = useState("");
+  const [predSubTab, setPredSubTab] = useState<"polymarket" | "news" | "ai">("polymarket");
 
   const { data: strategies = [], isLoading } = useQuery<Strategy[]>({
     queryKey: ["/api/strategies"],
@@ -92,6 +94,43 @@ export default function StrategyPage() {
     queryKey: ["/api/ai/predictions/list"],
     staleTime: 60_000,
     refetchInterval: 5 * 60_000,
+  });
+
+  interface PolymarketMarket {
+    id: string;
+    question: string;
+    yesPrice: number;
+    noPrice: number;
+    volume: number;
+    liquidity: number;
+    endDate: string;
+    category: string;
+    slug: string;
+  }
+
+  interface NewsPred {
+    id: string;
+    headline: string;
+    source: string;
+    publishedAt: string;
+    url: string;
+    asset: string;
+    prediction: "BULLISH" | "BEARISH" | "NEUTRAL";
+    confidence: number;
+    impact: "HIGH" | "MEDIUM" | "LOW";
+    reasoning: string;
+  }
+
+  const { data: polymarkets = [], isLoading: polyLoading } = useQuery<PolymarketMarket[]>({
+    queryKey: ["/api/polymarket/markets"],
+    staleTime: 5 * 60_000,
+    refetchInterval: 5 * 60_000,
+  });
+
+  const { data: newsPredictions = [], isLoading: newsLoading } = useQuery<NewsPred[]>({
+    queryKey: ["/api/news/predictions"],
+    staleTime: 5 * 60_000,
+    refetchInterval: 10 * 60_000,
   });
 
   const subscribeMutation = useMutation({
@@ -525,124 +564,301 @@ export default function StrategyPage() {
 
         {activeTab === "predictions" && (
           <div className="space-y-3" style={{ animation: "fadeSlideIn 0.3s ease-out" }}>
-            <h3 className="text-sm font-bold" data-testid="text-predictions-title">AI Predictions</h3>
+            <div className="flex gap-0 bg-card border border-border rounded-md overflow-hidden" data-testid="prediction-sub-tabs">
+              {[
+                { id: "polymarket" as const, label: "Polymarket", icon: Globe },
+                { id: "news" as const, label: "News", icon: Newspaper },
+                { id: "ai" as const, label: "AI Predict", icon: Brain },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`flex-1 py-2 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1 ${
+                    predSubTab === tab.id
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white"
+                      : "text-muted-foreground"
+                  }`}
+                  onClick={() => setPredSubTab(tab.id)}
+                  data-testid={`button-pred-tab-${tab.id}`}
+                >
+                  <tab.icon className="h-3 w-3" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-            {predsLoading ? (
+            {predSubTab === "polymarket" && (
               <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-24 w-full rounded-md" />
-                ))}
-              </div>
-            ) : aiPredictions.length > 0 ? (
-              aiPredictions.map((pred) => {
-                const isBullish = pred.prediction === "BULLISH";
-                const isBearish = pred.prediction === "BEARISH";
-                const confidence = Number(pred.confidence || 0);
-                const current = Number(pred.currentPrice || 0);
-                const target = Number(pred.targetPrice || 0);
-                const pctChange = current > 0 ? ((target - current) / current * 100) : 0;
+                {polyLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full rounded-md" />
+                  ))
+                ) : polymarkets.length > 0 ? (
+                  polymarkets.map((market) => {
+                    const yesPercent = (market.yesPrice * 100).toFixed(1);
+                    const noPercent = (market.noPrice * 100).toFixed(1);
+                    const vol = market.volume >= 1_000_000
+                      ? `$${(market.volume / 1_000_000).toFixed(1)}M`
+                      : market.volume >= 1_000
+                        ? `$${(market.volume / 1_000).toFixed(0)}K`
+                        : `$${market.volume.toFixed(0)}`;
+                    const endStr = market.endDate
+                      ? new Date(market.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                      : "";
 
-                return (
-                  <Card key={pred.id} className="border-border bg-card" data-testid={`prediction-card-${pred.asset}`}>
-                    <CardContent className="p-3">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <div
-                            className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                              isBullish ? "bg-emerald-500/20" : isBearish ? "bg-red-500/20" : "bg-yellow-500/20"
-                            }`}
-                            style={{
-                              boxShadow: isBullish
-                                ? "0 0 10px rgba(16,185,129,0.3)"
-                                : isBearish
-                                  ? "0 0 10px rgba(239,68,68,0.3)"
-                                  : undefined,
-                            }}
-                          >
-                            {isBullish ? (
-                              <TrendingUp className="h-4 w-4 text-emerald-400" />
-                            ) : isBearish ? (
-                              <TrendingDown className="h-4 w-4 text-red-400" />
-                            ) : (
-                              <Minus className="h-4 w-4 text-yellow-400" />
-                            )}
+                    return (
+                      <Card key={market.id} className="border-border bg-card" data-testid={`polymarket-card-${market.id}`}>
+                        <CardContent className="p-3">
+                          <div className="text-xs font-bold mb-2 leading-snug" data-testid={`text-poly-question-${market.id}`}>
+                            {market.question}
                           </div>
-                          <div>
-                            <div className="text-xs font-bold">{pred.asset}/USDT</div>
-                            <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-2.5 w-2.5" /> {pred.timeframe}
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
+                                <span className="text-[10px] text-emerald-400 font-bold">Yes {yesPercent}%</span>
+                                <span className="text-[10px] text-red-400 font-bold">No {noPercent}%</span>
+                              </div>
+                              <div className="flex h-2 overflow-hidden rounded-full">
+                                <div
+                                  className="bg-emerald-500 transition-all duration-500"
+                                  style={{ width: `${yesPercent}%` }}
+                                />
+                                <div
+                                  className="bg-red-500 transition-all duration-500"
+                                  style={{ width: `${noPercent}%` }}
+                                />
+                              </div>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="text-right">
-                          <Badge
-                            className={`text-[9px] no-default-hover-elevate no-default-active-elevate ${
-                              isBullish
-                                ? "bg-emerald-500/20 text-emerald-400"
-                                : isBearish
-                                  ? "bg-red-500/20 text-red-400"
-                                  : "bg-yellow-500/20 text-yellow-400"
-                            }`}
-                            style={{
-                              boxShadow: isBullish
-                                ? "0 0 6px rgba(16,185,129,0.25)"
-                                : isBearish
-                                  ? "0 0 6px rgba(239,68,68,0.25)"
-                                  : undefined,
-                            }}
-                          >
-                            {pred.prediction} {confidence}%
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 mt-2">
-                        <div>
-                          <div className="text-[9px] text-muted-foreground">Current</div>
-                          <div className="text-[11px] font-bold">{current > 0 ? formatUSD(current) : "--"}</div>
-                        </div>
-                        <div>
-                          <div className="text-[9px] text-muted-foreground">Target</div>
-                          <div className={`text-[11px] font-bold ${isBullish ? "text-emerald-400" : isBearish ? "text-red-400" : ""}`}>
-                            {target > 0 ? formatUSD(target) : "--"}
+                          <div className="flex items-center justify-between gap-2 text-[9px] text-muted-foreground flex-wrap">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="flex items-center gap-0.5">
+                                <BarChart3 className="h-2.5 w-2.5" /> Vol: {vol}
+                              </span>
+                              {endStr && <span>Ends: {endStr}</span>}
+                            </div>
+                            <a
+                              href={`https://polymarket.com/event/${market.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-0.5 text-primary"
+                              data-testid={`link-poly-${market.id}`}
+                            >
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
                           </div>
-                        </div>
-                        <div>
-                          <div className="text-[9px] text-muted-foreground">Change</div>
-                          <div className={`text-[11px] font-bold ${pctChange >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                            {pctChange >= 0 ? "+" : ""}{pctChange.toFixed(2)}%
-                          </div>
-                        </div>
-                      </div>
-
-                      {pred.reasoning && (
-                        <div className="mt-2 bg-background/30 rounded-md p-2 border border-border/20">
-                          <div className="flex items-center gap-1 mb-0.5">
-                            <Brain className="h-2.5 w-2.5 text-primary" />
-                            <span className="text-[9px] text-muted-foreground">AI Analysis</span>
-                          </div>
-                          <p className="text-[10px] text-foreground/70">{pred.reasoning}</p>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between gap-2 mt-2 text-[9px] text-muted-foreground flex-wrap">
-                        <span>Fear & Greed: {pred.fearGreedIndex} ({pred.fearGreedLabel})</span>
-                        {pred.createdAt && (
-                          <span>{new Date(pred.createdAt).toLocaleTimeString()}</span>
-                        )}
-                      </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Card className="border-border bg-card">
+                    <CardContent className="p-6 text-center">
+                      <Globe className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">No Polymarket data available. Markets will refresh automatically.</p>
                     </CardContent>
                   </Card>
-                );
-              })
-            ) : (
-              <Card className="border-border bg-card">
-                <CardContent className="p-6 text-center">
-                  <Brain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground">No predictions available yet. Predictions are generated when you visit the Dashboard.</p>
-                </CardContent>
-              </Card>
+                )}
+              </div>
+            )}
+
+            {predSubTab === "news" && (
+              <div className="space-y-2">
+                {newsLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-24 w-full rounded-md" />
+                  ))
+                ) : newsPredictions.length > 0 ? (
+                  newsPredictions.map((news) => {
+                    const isBullish = news.prediction === "BULLISH";
+                    const isBearish = news.prediction === "BEARISH";
+                    const impactColor = news.impact === "HIGH"
+                      ? "bg-red-500/15 text-red-400"
+                      : news.impact === "MEDIUM"
+                        ? "bg-yellow-500/15 text-yellow-400"
+                        : "bg-muted/50 text-muted-foreground";
+                    const predColor = isBullish
+                      ? "text-emerald-400"
+                      : isBearish
+                        ? "text-red-400"
+                        : "text-yellow-400";
+                    const predBg = isBullish
+                      ? "bg-emerald-500/15"
+                      : isBearish
+                        ? "bg-red-500/15"
+                        : "bg-yellow-500/15";
+                    const timeAgo = (() => {
+                      const diff = Date.now() - new Date(news.publishedAt).getTime();
+                      const mins = Math.floor(diff / 60000);
+                      if (mins < 60) return `${mins}m ago`;
+                      const hrs = Math.floor(mins / 60);
+                      if (hrs < 24) return `${hrs}h ago`;
+                      return `${Math.floor(hrs / 24)}d ago`;
+                    })();
+
+                    return (
+                      <Card key={news.id} className="border-border bg-card" data-testid={`news-card-${news.id}`}>
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-2">
+                            <div className={`mt-0.5 h-7 w-7 shrink-0 rounded-full flex items-center justify-center ${predBg}`}>
+                              {isBullish ? (
+                                <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                              ) : isBearish ? (
+                                <TrendingDown className="h-3.5 w-3.5 text-red-400" />
+                              ) : (
+                                <Minus className="h-3.5 w-3.5 text-yellow-400" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[11px] font-bold leading-snug mb-1 line-clamp-2">{news.headline}</div>
+                              <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                                <Badge className={`text-[8px] ${predBg} ${predColor} no-default-hover-elevate no-default-active-elevate`}>
+                                  {news.prediction} {news.confidence}%
+                                </Badge>
+                                <Badge className={`text-[8px] ${impactColor} no-default-hover-elevate no-default-active-elevate`}>
+                                  {news.impact}
+                                </Badge>
+                                <Badge variant="outline" className="text-[8px] no-default-hover-elevate no-default-active-elevate">
+                                  {news.asset}
+                                </Badge>
+                              </div>
+                              <div className="text-[10px] text-foreground/60 leading-snug mb-1">{news.reasoning}</div>
+                              <div className="flex items-center justify-between gap-2 text-[9px] text-muted-foreground flex-wrap">
+                                <span>{news.source} &middot; {timeAgo}</span>
+                                <a
+                                  href={news.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-0.5 text-primary"
+                                  data-testid={`link-news-${news.id}`}
+                                >
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Card className="border-border bg-card">
+                    <CardContent className="p-6 text-center">
+                      <Newspaper className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">No news predictions available. News analysis refreshes every 10 minutes.</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {predSubTab === "ai" && (
+              <div className="space-y-2">
+                {predsLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-24 w-full rounded-md" />
+                  ))
+                ) : aiPredictions.length > 0 ? (
+                  aiPredictions.map((pred) => {
+                    const isBullish = pred.prediction === "BULLISH";
+                    const isBearish = pred.prediction === "BEARISH";
+                    const confidence = Number(pred.confidence || 0);
+                    const current = Number(pred.currentPrice || 0);
+                    const target = Number(pred.targetPrice || 0);
+                    const pctChange = current > 0 ? ((target - current) / current * 100) : 0;
+
+                    return (
+                      <Card key={pred.id} className="border-border bg-card" data-testid={`prediction-card-${pred.asset}`}>
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <div
+                                className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                  isBullish ? "bg-emerald-500/20" : isBearish ? "bg-red-500/20" : "bg-yellow-500/20"
+                                }`}
+                                style={{
+                                  boxShadow: isBullish
+                                    ? "0 0 10px rgba(16,185,129,0.3)"
+                                    : isBearish
+                                      ? "0 0 10px rgba(239,68,68,0.3)"
+                                      : undefined,
+                                }}
+                              >
+                                {isBullish ? (
+                                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                                ) : isBearish ? (
+                                  <TrendingDown className="h-4 w-4 text-red-400" />
+                                ) : (
+                                  <Minus className="h-4 w-4 text-yellow-400" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="text-xs font-bold">{pred.asset}/USDT</div>
+                                <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-2.5 w-2.5" /> {pred.timeframe}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge
+                              className={`text-[9px] no-default-hover-elevate no-default-active-elevate ${
+                                isBullish
+                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  : isBearish
+                                    ? "bg-red-500/20 text-red-400"
+                                    : "bg-yellow-500/20 text-yellow-400"
+                              }`}
+                            >
+                              {pred.prediction} {confidence}%
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 mt-2">
+                            <div>
+                              <div className="text-[9px] text-muted-foreground">Current</div>
+                              <div className="text-[11px] font-bold tabular-nums">{current > 0 ? formatUSD(current) : "--"}</div>
+                            </div>
+                            <div>
+                              <div className="text-[9px] text-muted-foreground">Target</div>
+                              <div className={`text-[11px] font-bold tabular-nums ${isBullish ? "text-emerald-400" : isBearish ? "text-red-400" : ""}`}>
+                                {target > 0 ? formatUSD(target) : "--"}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-[9px] text-muted-foreground">Change</div>
+                              <div className={`text-[11px] font-bold tabular-nums ${pctChange >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                {pctChange >= 0 ? "+" : ""}{pctChange.toFixed(2)}%
+                              </div>
+                            </div>
+                          </div>
+
+                          {pred.reasoning && (
+                            <div className="mt-2 bg-background/30 rounded-md p-2 border border-border/20">
+                              <div className="flex items-center gap-1 mb-0.5">
+                                <Sparkles className="h-2.5 w-2.5 text-primary" />
+                                <span className="text-[9px] text-muted-foreground">AI Analysis</span>
+                              </div>
+                              <p className="text-[10px] text-foreground/70">{pred.reasoning}</p>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between gap-2 mt-2 text-[9px] text-muted-foreground flex-wrap">
+                            <span>Fear & Greed: {pred.fearGreedIndex} ({pred.fearGreedLabel})</span>
+                            {pred.createdAt && (
+                              <span>{new Date(pred.createdAt).toLocaleTimeString()}</span>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Card className="border-border bg-card">
+                    <CardContent className="p-6 text-center">
+                      <Brain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">No AI predictions yet. Visit the Dashboard to generate predictions.</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
           </div>
         )}
