@@ -393,6 +393,91 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/market/calendar", async (_req, res) => {
+    try {
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily"
+      );
+      if (!response.ok) throw new Error("Failed to fetch price data");
+      const data = await response.json();
+      const prices = data.prices as [number, number][];
+
+      const dailyChanges: { date: string; day: number; change: number }[] = [];
+      for (let i = 1; i < prices.length; i++) {
+        const [ts, price] = prices[i];
+        const prevPrice = prices[i - 1][1];
+        const change = ((price - prevPrice) / prevPrice) * 100;
+        const d = new Date(ts);
+        dailyChanges.push({
+          date: d.toISOString().split("T")[0],
+          day: d.getDate(),
+          change: parseFloat(change.toFixed(2)),
+        });
+      }
+
+      res.json({ dailyChanges, currentPrice: prices[prices.length - 1]?.[1] || 0 });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/market/fear-greed-history", async (_req, res) => {
+    try {
+      const response = await fetch("https://api.alternative.me/fng/?limit=365");
+      const data = await response.json();
+      const entries = data.data || [];
+
+      const buckets = { extremeFear: 0, fear: 0, neutral: 0, greed: 0, extremeGreed: 0 };
+      for (const entry of entries) {
+        const v = parseInt(entry.value);
+        if (v <= 25) buckets.extremeFear++;
+        else if (v <= 45) buckets.fear++;
+        else if (v <= 55) buckets.neutral++;
+        else if (v <= 75) buckets.greed++;
+        else buckets.extremeGreed++;
+      }
+
+      const current = entries[0] ? { value: parseInt(entries[0].value), label: entries[0].value_classification } : { value: 50, label: "Neutral" };
+
+      res.json({ current, buckets, totalDays: entries.length });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/market/sentiment", async (_req, res) => {
+    try {
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin,dogecoin,solana&order=market_cap_desc&sparkline=false&price_change_percentage=24h,7d"
+      );
+      if (!response.ok) throw new Error("Failed to fetch sentiment data");
+      const coins = await response.json();
+
+      const sentiment = coins.map((coin: any) => {
+        const vol = coin.total_volume || 0;
+        const change = coin.price_change_percentage_24h || 0;
+        const mcapRatio = vol / Math.max(coin.market_cap || 1, 1);
+        const netFlow = vol * (change / 100) * mcapRatio * 100;
+        return {
+          id: coin.id,
+          symbol: coin.symbol?.toUpperCase(),
+          name: coin.name,
+          image: coin.image,
+          price: coin.current_price,
+          change24h: change,
+          change7d: coin.price_change_percentage_7d_in_currency || 0,
+          marketCap: coin.market_cap || 0,
+          volume: vol,
+          netFlow,
+        };
+      });
+
+      res.json(sentiment);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/referrals/:walletAddress", async (req, res) => {
     try {
       const profile = await storage.getProfileByWallet(req.params.walletAddress);

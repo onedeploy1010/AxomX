@@ -104,13 +104,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Feb 2026)
 
+- Renamed app to NEXA with clickable logo navigating home
+- Added Market Analysis page (`/market`) with:
+  - BTC price calendar grid showing daily % changes with color-coded cells
+  - Fear & Greed Index with SVG gauge and 365-day historical breakdown
+  - Market Sentiment section with top coins, volume, and computed net flow
+  - Navigation button (BarChart3 icon) on Dashboard chart area
+- API endpoints: `/api/market/calendar`, `/api/market/fear-greed-history`, `/api/market/sentiment`
+- Trade page: Big Road grid with arrows (↑↓) and blinking last cell, Small Road grid with colored circles
+- Node membership and Vault Plans converted to dialog/modal popups
+- Profile page shows full layout even without wallet connected (placeholders for data)
+- 6 pages total: Dashboard, Trade, Vault, Strategy, Profile, Market
 - Restructured frontend into component-based architecture with reusable components under `client/src/components/`:
   - `dashboard/`: PriceHeader, PriceChart, AssetTabs, DepthBar, ExchangeDepth, TrendingFeed
   - `trade/`: PredictionGrid, BetControls, MarketCard, StatsPanel
   - `vault/`: VaultChart, VaultStats, VaultPlans
   - `strategy/`: StrategyHeader, StrategyCard, HedgeSection
-  - `profile/`: AssetsOverview, NodeSection, ReferralCard, SettingsList
+  - `profile/`: NodeSection, ReferralCard
 - Added `client/src/lib/constants.ts` for shared formatting utilities and asset mappings
 - Added Binance order book depth data integration (via direct API calls)
-- Fixed tsx binary symlink issue in node_modules
-- All 5 pages (Dashboard, Trade, Vault, Strategy, Profile) fully functional with real API data

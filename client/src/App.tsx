@@ -14,6 +14,7 @@ import Trade from "@/pages/trade";
 import Vault from "@/pages/vault";
 import StrategyPage from "@/pages/strategy";
 import ProfilePage from "@/pages/profile";
+import MarketPage from "@/pages/market";
 import NotFound from "@/pages/not-found";
 
 const wallets = [
@@ -95,6 +96,7 @@ function Router() {
       <Route path="/vault" component={Vault} />
       <Route path="/strategy" component={StrategyPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/market" component={MarketPage} />
       <Route component={NotFound} />
     </Switch>
   );

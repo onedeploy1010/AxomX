@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { ASSET_IDS } from "@/lib/constants";
 import { useCryptoPrices, usePriceChart, useOrderBook } from "@/hooks/use-crypto-price";
 import { PriceHeader } from "@/components/dashboard/price-header";
@@ -8,8 +9,11 @@ import { AssetTabs } from "@/components/dashboard/asset-tabs";
 import { DepthBar } from "@/components/dashboard/depth-bar";
 import { TrendingFeed } from "@/components/dashboard/trending-feed";
 import { ExchangeDepth } from "@/components/dashboard/exchange-depth";
+import { Button } from "@/components/ui/button";
+import { BarChart3 } from "lucide-react";
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const coinId = ASSET_IDS[selectedAsset] || "bitcoin";
 
@@ -53,7 +57,18 @@ export default function Dashboard() {
         className="gradient-green-dark rounded-b-2xl p-4 pt-2"
         style={{ animation: "fadeSlideIn 0.5s ease-out" }}
       >
-        <PriceHeader coin={selectedCoin} isLoading={pricesLoading} />
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <PriceHeader coin={selectedCoin} isLoading={pricesLoading} />
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => navigate("/market")}
+            className="mt-1 shrink-0"
+            data-testid="button-market-analysis"
+          >
+            <BarChart3 className="h-5 w-5" />
+          </Button>
+        </div>
         <PriceChart
           data={chartData}
           isLoading={chartLoading}
