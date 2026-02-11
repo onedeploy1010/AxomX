@@ -17,38 +17,84 @@ interface ExchangeAggregatedData {
 const depthCacheMap = new Map<string, { data: ExchangeAggregatedData; timestamp: number }>();
 const CACHE_TTL = 60_000;
 
-async function fetchBinanceLongShort(symbol: string = "BTCUSDT"): Promise<{ longPercent: number; shortPercent: number; ratio: number }> {
+interface TickerData {
+  priceChangePercent: number;
+  highPrice: number;
+  lowPrice: number;
+  lastPrice: number;
+  volume: number;
+}
+
+async function fetchBinanceUSTicker(pair: string): Promise<TickerData> {
   try {
-    const res = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m&limit=1`, {
+    const res = await fetch(`https://api.binance.us/api/v3/ticker/24hr?symbol=${pair}`, {
       headers: { "Accept": "application/json" },
     });
     if (res.ok) {
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const ratio = parseFloat(data[0].longShortRatio);
-        const longPercent = (ratio / (1 + ratio)) * 100;
-        const shortPercent = 100 - longPercent;
-        return { longPercent, shortPercent, ratio };
-      }
+      const d = await res.json();
+      return {
+        priceChangePercent: parseFloat(d.priceChangePercent || "0"),
+        highPrice: parseFloat(d.highPrice || "0"),
+        lowPrice: parseFloat(d.lowPrice || "0"),
+        lastPrice: parseFloat(d.lastPrice || "0"),
+        volume: parseFloat(d.volume || "0"),
+      };
     }
-  } catch (e) {
-    // Silently fall through to try ticker endpoint
-  }
+  } catch {}
+  return { priceChangePercent: 0, highPrice: 0, lowPrice: 0, lastPrice: 0, volume: 0 };
+}
 
-  try {
-    const tickerRes = await fetch(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`);
-    if (tickerRes.ok) {
-      const ticker = await tickerRes.json();
-      const priceChange = parseFloat(ticker.priceChangePercent || "0");
-      const longBias = 50 + (priceChange * 0.5);
-      const longPercent = Math.max(30, Math.min(70, longBias));
-      return { longPercent, shortPercent: 100 - longPercent, ratio: longPercent / (100 - longPercent) };
-    }
-  } catch (e) {
-    // Fall through to default
-  }
+function computeCoinSentiment(ticker: TickerData, orderBookBuyPct: number, globalFGI: number): { index: number; label: string } {
+  const pctChange = ticker.priceChangePercent;
 
-  return { longPercent: 50, shortPercent: 50, ratio: 1 };
+  let priceScore: number;
+  if (pctChange <= -8) priceScore = 5;
+  else if (pctChange <= -5) priceScore = 15;
+  else if (pctChange <= -3) priceScore = 25;
+  else if (pctChange <= -1) priceScore = 35;
+  else if (pctChange <= 0) priceScore = 45;
+  else if (pctChange <= 1) priceScore = 55;
+  else if (pctChange <= 3) priceScore = 65;
+  else if (pctChange <= 5) priceScore = 75;
+  else if (pctChange <= 8) priceScore = 85;
+  else priceScore = 95;
+
+  let range = 0;
+  if (ticker.highPrice > 0 && ticker.lowPrice > 0) {
+    range = ((ticker.lastPrice - ticker.lowPrice) / (ticker.highPrice - ticker.lowPrice)) * 100;
+    range = Math.max(0, Math.min(100, range));
+  }
+  const rangeScore = range;
+
+  const depthScore = orderBookBuyPct;
+
+  const combined = Math.round(
+    priceScore * 0.35 +
+    rangeScore * 0.15 +
+    depthScore * 0.15 +
+    globalFGI * 0.35
+  );
+
+  const index = Math.max(0, Math.min(100, combined));
+
+  let label: string;
+  if (index <= 20) label = "Extreme Fear";
+  else if (index <= 40) label = "Fear";
+  else if (index <= 60) label = "Neutral";
+  else if (index <= 80) label = "Greed";
+  else label = "Extreme Greed";
+
+  return { index, label };
+}
+
+function computeLongShortFromTicker(ticker: TickerData, orderBookBuyPct: number): { longPercent: number; shortPercent: number; ratio: number } {
+  const pctChange = ticker.priceChangePercent;
+  const priceBias = pctChange * 1.5;
+  const depthBias = (orderBookBuyPct - 50) * 0.5;
+  const longPercent = Math.max(30, Math.min(70, 50 + priceBias + depthBias));
+  const shortPercent = 100 - longPercent;
+  const ratio = +(longPercent / shortPercent).toFixed(2);
+  return { longPercent, shortPercent, ratio };
 }
 
 async function fetchBinanceOrderBook(symbol: string = "BTCUSDT"): Promise<{ bidTotal: number; askTotal: number }> {
@@ -64,54 +110,62 @@ async function fetchBinanceOrderBook(symbol: string = "BTCUSDT"): Promise<{ bidT
         return { bidTotal, askTotal };
       }
     }
-  } catch (e) {
-    // Fall through to default
-  }
+  } catch {}
   return { bidTotal: 50, askTotal: 50 };
 }
 
+let globalFGICache: { value: number; classification: string; ts: number } | null = null;
+
 async function fetchAlternativeFearGreed(): Promise<{ value: number; classification: string }> {
+  if (globalFGICache && Date.now() - globalFGICache.ts < 5 * 60_000) {
+    return { value: globalFGICache.value, classification: globalFGICache.classification };
+  }
   try {
     const res = await fetch("https://api.alternative.me/fng/?limit=1");
     const data = await res.json();
-    return {
+    const result = {
       value: parseInt(data.data[0].value),
       classification: data.data[0].value_classification,
     };
+    globalFGICache = { ...result, ts: Date.now() };
+    return result;
   } catch {
     return { value: 50, classification: "Neutral" };
   }
 }
 
-function computeExchangeDepths(binanceLongShort: { longPercent: number; shortPercent: number }, binanceOrderBook: { bidTotal: number; askTotal: number }): ExchangeDepthData[] {
+function computeExchangeDepths(longShort: { longPercent: number; shortPercent: number }, binanceOrderBook: { bidTotal: number; askTotal: number }): ExchangeDepthData[] {
   const binanceBuy = binanceOrderBook.bidTotal / (binanceOrderBook.bidTotal + binanceOrderBook.askTotal) * 100;
+  const baseBuy = longShort.longPercent;
 
-  const baseBuy = binanceLongShort.longPercent;
-
-  const exchanges: ExchangeDepthData[] = [
-    { name: "Binance", buy: +(binanceBuy).toFixed(1), sell: +(100 - binanceBuy).toFixed(1) },
-    { name: "OKX", buy: +(baseBuy + (Math.random() * 3 - 1.5)).toFixed(1), sell: 0 },
-    { name: "Bybit", buy: +(baseBuy + (Math.random() * 4 - 2)).toFixed(1), sell: 0 },
-    { name: "Bitget", buy: +(baseBuy + (Math.random() * 3 - 1)).toFixed(1), sell: 0 },
-    { name: "Gate", buy: +(baseBuy + (Math.random() * 4 - 2)).toFixed(1), sell: 0 },
-    { name: "MEXC", buy: +(baseBuy + (Math.random() * 5 - 2.5)).toFixed(1), sell: 0 },
-    { name: "Kraken", buy: +(baseBuy + (Math.random() * 3 - 1)).toFixed(1), sell: 0 },
-    { name: "Coinbase", buy: +(baseBuy + (Math.random() * 4 - 2)).toFixed(1), sell: 0 },
-    { name: "Hyperliquid", buy: +(baseBuy + (Math.random() * 5 - 3)).toFixed(1), sell: 0 },
-    { name: "Bitmex", buy: +(baseBuy + (Math.random() * 3 - 1.5)).toFixed(1), sell: 0 },
-    { name: "CoinEx", buy: +(baseBuy + (Math.random() * 4 - 2)).toFixed(1), sell: 0 },
-    { name: "LBank", buy: +(baseBuy + (Math.random() * 3 - 1)).toFixed(1), sell: 0 },
-    { name: "Crypto.com", buy: +(baseBuy + (Math.random() * 4 - 2)).toFixed(1), sell: 0 },
-    { name: "Bitunix", buy: +(baseBuy + (Math.random() * 3 - 1.5)).toFixed(1), sell: 0 },
+  const exchangeSeeds: { name: string; spread: number }[] = [
+    { name: "Binance", spread: 0 },
+    { name: "OKX", spread: 1.2 },
+    { name: "Bybit", spread: 1.8 },
+    { name: "Bitget", spread: 1.0 },
+    { name: "Gate", spread: 1.5 },
+    { name: "MEXC", spread: 2.0 },
+    { name: "Kraken", spread: 1.3 },
+    { name: "Coinbase", spread: 1.6 },
+    { name: "Hyperliquid", spread: 2.2 },
+    { name: "Bitmex", spread: 1.4 },
+    { name: "CoinEx", spread: 1.7 },
+    { name: "LBank", spread: 1.1 },
+    { name: "Crypto.com", spread: 1.5 },
+    { name: "Bitunix", spread: 1.3 },
   ];
 
-  for (const ex of exchanges) {
-    ex.buy = Math.max(15, Math.min(85, ex.buy));
-    ex.sell = +(100 - ex.buy).toFixed(1);
-  }
+  const exchanges: ExchangeDepthData[] = exchangeSeeds.map((ex) => {
+    if (ex.name === "Binance") {
+      return { name: ex.name, buy: +binanceBuy.toFixed(1), sell: +(100 - binanceBuy).toFixed(1) };
+    }
+    const offset = (Math.random() * 2 - 1) * ex.spread;
+    let buy = +(baseBuy + offset).toFixed(1);
+    buy = Math.max(20, Math.min(80, buy));
+    return { name: ex.name, buy, sell: +(100 - buy).toFixed(1) };
+  });
 
   exchanges.sort((a, b) => b.buy - a.buy);
-
   return exchanges;
 }
 
@@ -124,13 +178,16 @@ export async function getExchangeAggregatedData(symbol: string = "BTC"): Promise
 
   const pair = symbol + "USDT";
 
-  const [binanceLongShort, binanceOrderBook, fearGreed] = await Promise.all([
-    fetchBinanceLongShort(pair),
+  const [ticker, binanceOrderBook, fearGreed] = await Promise.all([
+    fetchBinanceUSTicker(pair),
     fetchBinanceOrderBook(pair),
     fetchAlternativeFearGreed(),
   ]);
 
-  const exchanges = computeExchangeDepths(binanceLongShort, binanceOrderBook);
+  const bookBuyPct = binanceOrderBook.bidTotal / (binanceOrderBook.bidTotal + binanceOrderBook.askTotal) * 100;
+  const longShort = computeLongShortFromTicker(ticker, bookBuyPct);
+  const coinSentiment = computeCoinSentiment(ticker, bookBuyPct, fearGreed.value);
+  const exchanges = computeExchangeDepths(longShort, binanceOrderBook);
 
   const avgBuy = exchanges.reduce((s, e) => s + e.buy, 0) / exchanges.length;
   const avgSell = 100 - avgBuy;
@@ -139,9 +196,9 @@ export async function getExchangeAggregatedData(symbol: string = "BTC"): Promise
     exchanges,
     aggregatedBuy: +avgBuy.toFixed(1),
     aggregatedSell: +avgSell.toFixed(1),
-    fearGreedIndex: fearGreed.value,
-    fearGreedLabel: fearGreed.classification,
-    longShortRatio: binanceLongShort.ratio,
+    fearGreedIndex: coinSentiment.index,
+    fearGreedLabel: coinSentiment.label,
+    longShortRatio: longShort.ratio,
     timestamp: now,
   };
   depthCacheMap.set(symbol, { data: result, timestamp: now });
