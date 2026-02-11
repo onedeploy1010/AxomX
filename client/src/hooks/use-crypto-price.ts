@@ -19,6 +19,26 @@ export interface ChartDataPoint {
   timestamp: number;
 }
 
+export type ChartTimeframe = "1m" | "10m" | "30m" | "1H" | "4H" | "1D" | "7D";
+
+const BINANCE_INTERVALS: Record<ChartTimeframe, { interval: string; limit: number }> = {
+  "1m": { interval: "1m", limit: 60 },
+  "10m": { interval: "1m", limit: 120 },
+  "30m": { interval: "1m", limit: 180 },
+  "1H": { interval: "5m", limit: 72 },
+  "4H": { interval: "15m", limit: 96 },
+  "1D": { interval: "1h", limit: 24 },
+  "7D": { interval: "4h", limit: 42 },
+};
+
+function formatTimeLabel(ts: number, tf: ChartTimeframe): string {
+  const d = new Date(ts);
+  if (tf === "7D" || tf === "1D") {
+    return d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 export function useCryptoPrices() {
   return useQuery<CryptoPrice[]>({
     queryKey: ["crypto-prices"],
@@ -51,6 +71,39 @@ export function usePriceChart(coinId: string, days: number = 1) {
     },
     refetchInterval: 60000,
     staleTime: 30000,
+  });
+}
+
+export function useBinanceChart(symbol: string, timeframe: ChartTimeframe) {
+  return useQuery<ChartDataPoint[]>({
+    queryKey: ["binance-chart", symbol, timeframe],
+    queryFn: async () => {
+      const pair = symbol === "DOGE" ? "DOGEUSDT" : `${symbol}USDT`;
+      const cfg = BINANCE_INTERVALS[timeframe];
+      const res = await fetch(
+        `https://api.binance.us/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
+      );
+      if (!res.ok) {
+        const fallbackRes = await fetch(
+          `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
+        );
+        if (!fallbackRes.ok) throw new Error("Failed to fetch klines");
+        const fallbackData = await fallbackRes.json();
+        return (fallbackData as any[]).map((k: any) => ({
+          timestamp: k[0],
+          time: formatTimeLabel(k[0], timeframe),
+          price: parseFloat(k[4]),
+        }));
+      }
+      const data = await res.json();
+      return (data as any[]).map((k: any) => ({
+        timestamp: k[0],
+        time: formatTimeLabel(k[0], timeframe),
+        price: parseFloat(k[4]),
+      }));
+    },
+    refetchInterval: timeframe === "1m" ? 10000 : timeframe === "10m" ? 15000 : 30000,
+    staleTime: timeframe === "1m" ? 5000 : 15000,
   });
 }
 

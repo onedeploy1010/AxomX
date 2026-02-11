@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { ASSET_IDS } from "@/lib/constants";
-import { useCryptoPrices, usePriceChart, useOrderBook } from "@/hooks/use-crypto-price";
+import { useCryptoPrices, useBinanceChart, useOrderBook } from "@/hooks/use-crypto-price";
+import type { ChartTimeframe } from "@/hooks/use-crypto-price";
 import { PriceHeader } from "@/components/dashboard/price-header";
 import { PriceChart } from "@/components/dashboard/price-chart";
 import { AssetTabs } from "@/components/dashboard/asset-tabs";
@@ -13,13 +14,25 @@ import { AiPredictionGrid } from "@/components/dashboard/ai-prediction-grid";
 import { Button } from "@/components/ui/button";
 import { BarChart3 } from "lucide-react";
 
+interface ForecastResponse {
+  asset: string;
+  timeframe: string;
+  direction: string;
+  confidence: number;
+  currentPrice: number;
+  targetPrice: number;
+  reasoning: string;
+  forecastPoints: { timestamp: number; time: string; price: number; predicted: boolean }[];
+}
+
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const [selectedAsset, setSelectedAsset] = useState("BTC");
+  const [selectedTimeframe, setSelectedTimeframe] = useState<ChartTimeframe>("1H");
   const coinId = ASSET_IDS[selectedAsset] || "bitcoin";
 
   const { data: prices, isLoading: pricesLoading } = useCryptoPrices();
-  const { data: chartData, isLoading: chartLoading } = usePriceChart(coinId);
+  const { data: chartData, isLoading: chartLoading } = useBinanceChart(selectedAsset, selectedTimeframe);
   const { data: orderBook, isLoading: bookLoading } = useOrderBook(selectedAsset);
 
   const { data: exchangeData, isLoading: exchangeLoading } = useQuery<{
@@ -36,16 +49,15 @@ export default function Dashboard() {
     refetchInterval: 60_000,
   });
 
-  const { data: prediction } = useQuery<{
-    prediction: string;
-    confidence: string;
-    targetPrice: string;
-    currentPrice: string;
-    reasoning: string;
-  }>({
-    queryKey: ["/api/ai/prediction", selectedAsset],
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 10 * 60 * 1000,
+  const { data: forecast, isLoading: forecastLoading } = useQuery<ForecastResponse>({
+    queryKey: ["/api/ai/forecast", selectedAsset, selectedTimeframe],
+    queryFn: async () => {
+      const res = await fetch(`/api/ai/forecast/${selectedAsset}?timeframe=${selectedTimeframe}`);
+      if (!res.ok) throw new Error("Forecast failed");
+      return res.json();
+    },
+    staleTime: 3 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
   });
 
   const selectedCoin = prices?.find(
@@ -76,11 +88,10 @@ export default function Dashboard() {
         <PriceChart
           data={chartData}
           isLoading={chartLoading}
-          prediction={prediction ? {
-            prediction: prediction.prediction,
-            confidence: prediction.confidence,
-            targetPrice: prediction.targetPrice,
-          } : undefined}
+          forecast={forecast || null}
+          forecastLoading={forecastLoading}
+          selectedTimeframe={selectedTimeframe}
+          onTimeframeChange={setSelectedTimeframe}
         />
       </div>
 

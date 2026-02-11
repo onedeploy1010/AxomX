@@ -14,8 +14,7 @@ interface ExchangeAggregatedData {
   timestamp: number;
 }
 
-let cachedData: ExchangeAggregatedData | null = null;
-let lastFetchTime = 0;
+const depthCacheMap = new Map<string, { data: ExchangeAggregatedData; timestamp: number }>();
 const CACHE_TTL = 60_000;
 
 async function fetchBinanceLongShort(symbol: string = "BTCUSDT"): Promise<{ longPercent: number; shortPercent: number; ratio: number }> {
@@ -118,8 +117,9 @@ function computeExchangeDepths(binanceLongShort: { longPercent: number; shortPer
 
 export async function getExchangeAggregatedData(symbol: string = "BTC"): Promise<ExchangeAggregatedData> {
   const now = Date.now();
-  if (cachedData && now - lastFetchTime < CACHE_TTL) {
-    return cachedData;
+  const cached = depthCacheMap.get(symbol);
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.data;
   }
 
   const pair = symbol + "USDT";
@@ -135,7 +135,7 @@ export async function getExchangeAggregatedData(symbol: string = "BTC"): Promise
   const avgBuy = exchanges.reduce((s, e) => s + e.buy, 0) / exchanges.length;
   const avgSell = 100 - avgBuy;
 
-  cachedData = {
+  const result: ExchangeAggregatedData = {
     exchanges,
     aggregatedBuy: +avgBuy.toFixed(1),
     aggregatedSell: +avgSell.toFixed(1),
@@ -144,7 +144,7 @@ export async function getExchangeAggregatedData(symbol: string = "BTC"): Promise
     longShortRatio: binanceLongShort.ratio,
     timestamp: now,
   };
-  lastFetchTime = now;
+  depthCacheMap.set(symbol, { data: result, timestamp: now });
 
-  return cachedData;
+  return result;
 }

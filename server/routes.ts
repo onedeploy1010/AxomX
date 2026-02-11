@@ -265,6 +265,69 @@ export async function registerRoutes(
     }
   });
 
+  const forecastCache = new Map<string, { data: any; timestamp: number }>();
+  const FORECAST_CACHE_DURATION = 3 * 60 * 1000;
+
+  app.get("/api/ai/forecast/:asset", async (req, res) => {
+    try {
+      const asset = req.params.asset.toUpperCase();
+      const timeframe = (req.query.timeframe as string) || "1H";
+      const cacheKey = `${asset}-${timeframe}`;
+
+      const cached = forecastCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < FORECAST_CACHE_DURATION) {
+        return res.json(cached.data);
+      }
+
+      const prediction = await generatePrediction(asset, timeframe);
+      const currentPrice = Number(prediction.currentPrice) || 0;
+      const targetPrice = Number(prediction.targetPrice) || currentPrice;
+      const direction = prediction.prediction || "NEUTRAL";
+      const confidence = Number(prediction.confidence) || 50;
+
+      const tfMinutes: Record<string, number> = {
+        "1m": 1, "10m": 10, "30m": 30, "1H": 60, "4H": 240, "1D": 1440, "7D": 10080,
+      };
+      const totalMinutes = tfMinutes[timeframe] || 60;
+      const numPoints = 8;
+      const stepMs = (totalMinutes * 60 * 1000) / numPoints;
+      const now = Date.now();
+
+      const diff = targetPrice - currentPrice;
+      const points: { timestamp: number; time: string; price: number; predicted: boolean }[] = [];
+
+      for (let i = 1; i <= numPoints; i++) {
+        const t = i / numPoints;
+        const ease = t * t * (3 - 2 * t);
+        const noise = (Math.random() - 0.5) * Math.abs(diff) * 0.15 * (1 - t);
+        const price = currentPrice + diff * ease + noise;
+        const ts = now + stepMs * i;
+        const d = new Date(ts);
+        const time = totalMinutes >= 1440
+          ? d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        points.push({ timestamp: ts, time, price: parseFloat(price.toFixed(currentPrice < 1 ? 6 : 2)), predicted: true });
+      }
+
+      const result = {
+        asset,
+        timeframe,
+        direction,
+        confidence,
+        currentPrice,
+        targetPrice,
+        reasoning: prediction.reasoning || "",
+        forecastPoints: points,
+      };
+
+      forecastCache.set(cacheKey, { data: result, timestamp: Date.now() });
+      res.json(result);
+    } catch (error: any) {
+      console.error("Forecast error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/ai/fear-greed", async (_req, res) => {
     try {
       const data = await getFearGreedForDepth();
