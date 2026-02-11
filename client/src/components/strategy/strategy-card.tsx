@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Flame } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
+import { generateStrategyChartData, calcStrategyReturn, calcStrategyWinDisplay, getReturnColor } from "@/lib/formulas";
 import type { Strategy } from "@shared/schema";
+import { useMemo } from "react";
 
 interface StrategyCardProps {
   strategy: Strategy;
@@ -12,12 +14,11 @@ interface StrategyCardProps {
 
 export function StrategyCard({ strategy, index }: StrategyCardProps) {
   const returnVal = Number(strategy.monthlyReturn) || 0;
-  const isPositive = returnVal >= 0;
-  const color = isPositive ? "hsl(142, 72%, 45%)" : "hsl(0, 72%, 55%)";
-
-  const chartData = Array.from({ length: 20 }, (_, i) => ({
-    v: 50 + Math.sin((i + index * 7) / 3) * 20 + Math.random() * 10 + (i > 12 ? i * 2 : 0),
-  }));
+  const winRate = Number(strategy.winRate || 0);
+  const { formatted, isPositive } = calcStrategyReturn(returnVal);
+  const color = getReturnColor(isPositive);
+  const winDisplay = calcStrategyWinDisplay(winRate);
+  const chartData = useMemo(() => generateStrategyChartData(index), [index]);
 
   return (
     <Card className="border-border bg-card hover-elevate" data-testid={`strategy-card-${strategy.id}`}>
@@ -32,11 +33,9 @@ export function StrategyCard({ strategy, index }: StrategyCardProps) {
         </div>
         <div className="text-[10px] text-muted-foreground mb-1">ACTIVE ({strategy.leverage})</div>
         <div className={`text-xl font-bold mb-1 ${isPositive ? "text-green-400" : "text-red-400"}`}>
-          {isPositive ? "+" : ""}{returnVal.toFixed(2)}%
+          {formatted}
         </div>
-        <div className="text-[10px] text-muted-foreground mb-2">
-          {Number(strategy.winRate || 0).toFixed(2)}% ({(Number(strategy.winRate || 0) / 10).toFixed(2)})
-        </div>
+        <div className="text-[10px] text-muted-foreground mb-2">{winDisplay}</div>
         <div className="h-10 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>

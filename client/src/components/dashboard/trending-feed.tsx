@@ -1,14 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Activity } from "lucide-react";
-
-const trendingItems = [
-  { text: "BTC Trade +5.80%", type: "gain" as const },
-  { text: "ETH Trade -1.76%", type: "loss" as const },
-  { text: "GPT-5 completed SOL +17.92%", type: "gain" as const },
-  { text: "BNB Trade -4.76%", type: "loss" as const },
-  { text: "Claude completed BTC +3.21%", type: "gain" as const },
-  { text: "SOL Strategy +8.44%", type: "gain" as const },
-];
+import { TRENDING_ITEMS } from "@/lib/data";
 
 export function TrendingFeed() {
   return (
@@ -18,7 +10,7 @@ export function TrendingFeed() {
         Trending
       </h3>
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-        {trendingItems.map((item, i) => (
+        {TRENDING_ITEMS.map((item, i) => (
           <Badge
             key={i}
             variant="secondary"

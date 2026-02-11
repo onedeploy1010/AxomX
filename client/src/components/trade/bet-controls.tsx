@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { BET_DEFAULTS } from "@/lib/data";
 
 interface BetControlsProps {
   amount: number;
@@ -16,7 +17,7 @@ export function BetControls({ amount, onAmountChange, duration }: BetControlsPro
             <Button
               size="icon"
               variant="secondary"
-              onClick={() => onAmountChange(Math.max(1, amount - 5))}
+              onClick={() => onAmountChange(Math.max(BET_DEFAULTS.minAmount, amount - BET_DEFAULTS.step))}
               data-testid="button-decrease-bet"
             >
               <Minus className="h-4 w-4" />
@@ -28,7 +29,7 @@ export function BetControls({ amount, onAmountChange, duration }: BetControlsPro
             <Button
               size="icon"
               variant="secondary"
-              onClick={() => onAmountChange(amount + 5)}
+              onClick={() => onAmountChange(amount + BET_DEFAULTS.step)}
               data-testid="button-increase-bet"
             >
               <Plus className="h-4 w-4" />
@@ -47,11 +48,11 @@ export function BetControls({ amount, onAmountChange, duration }: BetControlsPro
         <div className="flex gap-3">
           <Button className="flex-1 bg-red-500 text-white font-bold border-none" data-testid="button-bear">
             Bear
-            <span className="ml-1 text-xs opacity-80">84%</span>
+            <span className="ml-1 text-xs opacity-80">{BET_DEFAULTS.payoutPercent}%</span>
           </Button>
           <Button className="flex-1 bg-green-500 text-white font-bold border-none" data-testid="button-bull">
             Bull
-            <span className="ml-1 text-xs opacity-80">84%</span>
+            <span className="ml-1 text-xs opacity-80">{BET_DEFAULTS.payoutPercent}%</span>
           </Button>
         </div>
       </div>

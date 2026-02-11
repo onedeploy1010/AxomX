@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { PREDICTION_GRID_CONFIG } from "@/lib/data";
+import { generatePredictionCells } from "@/lib/formulas";
 
 interface PredictionGridProps {
   wins: number;
@@ -8,10 +10,11 @@ interface PredictionGridProps {
 export function PredictionGrid({ wins, losses }: PredictionGridProps) {
   const cells = useMemo(
     () =>
-      Array.from({ length: 54 }, () => ({
-        direction: Math.random() > 0.5 ? ("up" as const) : ("down" as const),
-        hit: Math.random() > 0.6,
-      })),
+      generatePredictionCells(
+        PREDICTION_GRID_CONFIG.totalCells,
+        PREDICTION_GRID_CONFIG.directionThreshold,
+        PREDICTION_GRID_CONFIG.hitThreshold,
+      ),
     []
   );
 

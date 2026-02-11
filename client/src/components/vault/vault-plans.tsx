@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { VAULT_PLANS } from "@/lib/constants";
+import { VAULT_PLANS } from "@/lib/data";
+import { formatDailyRate } from "@/lib/formulas";
 
 export function VaultPlans() {
   return (
@@ -10,7 +11,7 @@ export function VaultPlans() {
           <Card key={key} className="border-border bg-card hover-elevate" data-testid={`vault-plan-${key}`}>
             <CardContent className="p-3 text-center">
               <div className="text-sm font-bold text-primary mb-1">{plan.label}</div>
-              <div className="text-xs text-muted-foreground mb-1">Daily: {(plan.dailyRate * 100).toFixed(1)}%</div>
+              <div className="text-xs text-muted-foreground mb-1">Daily: {formatDailyRate(plan.dailyRate)}</div>
               <div className="text-xs font-medium text-green-400">{plan.apr} APR</div>
             </CardContent>
           </Card>

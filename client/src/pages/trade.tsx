@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { usePriceChart } from "@/hooks/use-crypto-price";
 import { ASSET_IDS } from "@/lib/constants";
+import { TRADE_ASSETS, BET_DEFAULTS, TRADE_STATS, TRADE_SOURCE } from "@/lib/data";
 import { PriceChart } from "@/components/dashboard/price-chart";
 import { PredictionGrid } from "@/components/trade/prediction-grid";
 import { BetControls } from "@/components/trade/bet-controls";
@@ -14,7 +15,7 @@ import type { PredictionMarket } from "@shared/schema";
 
 export default function Trade() {
   const [selectedAsset, setSelectedAsset] = useState("BTC");
-  const [betAmount, setBetAmount] = useState(10);
+  const [betAmount, setBetAmount] = useState(BET_DEFAULTS.defaultAmount);
   const [mode, setMode] = useState<"grid" | "market">("grid");
   const coinId = ASSET_IDS[selectedAsset] || "bitcoin";
 
@@ -29,14 +30,13 @@ export default function Trade() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="BTC">BTC</SelectItem>
-            <SelectItem value="ETH">ETH</SelectItem>
-            <SelectItem value="SOL">SOL</SelectItem>
-            <SelectItem value="BNB">BNB</SelectItem>
+            {TRADE_ASSETS.map((a) => (
+              <SelectItem key={a} value={a}>{a}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Source: Binance</span>
+          <span className="text-xs text-muted-foreground">Source: {TRADE_SOURCE}</span>
           <div className="flex rounded-md border border-border overflow-visible">
             <button
               onClick={() => setMode("grid")}
@@ -59,11 +59,11 @@ export default function Trade() {
       {mode === "grid" ? (
         <div className="px-4 space-y-3">
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-green-400">Wins: 24</span>
-            <span className="text-red-400">Losses: 23</span>
-            <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">Streaks: 5x</Badge>
+            <span className="text-green-400">Wins: {TRADE_STATS.wins}</span>
+            <span className="text-red-400">Losses: {TRADE_STATS.losses}</span>
+            <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">Streaks: {TRADE_STATS.streaks}x</Badge>
           </div>
-          <PredictionGrid wins={24} losses={23} />
+          <PredictionGrid wins={TRADE_STATS.wins} losses={TRADE_STATS.losses} />
         </div>
       ) : (
         <div className="px-4 space-y-3">
@@ -83,7 +83,7 @@ export default function Trade() {
         <StatsPanel />
       </div>
 
-      <BetControls amount={betAmount} onAmountChange={setBetAmount} duration="1min" />
+      <BetControls amount={betAmount} onAmountChange={setBetAmount} duration={BET_DEFAULTS.defaultDuration} />
     </div>
   );
 }

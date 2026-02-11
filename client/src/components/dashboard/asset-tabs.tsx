@@ -1,6 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const assets = ["BTC", "ETH", "BNB", "DOGE", "SOL"] as const;
+import { DASHBOARD_ASSETS } from "@/lib/data";
 
 interface AssetTabsProps {
   selected: string;
@@ -11,7 +10,7 @@ export function AssetTabs({ selected, onChange }: AssetTabsProps) {
   return (
     <Tabs value={selected} onValueChange={onChange}>
       <TabsList className="w-full bg-card border border-border">
-        {assets.map((asset) => (
+        {DASHBOARD_ASSETS.map((asset) => (
           <TabsTrigger
             key={asset}
             value={asset}

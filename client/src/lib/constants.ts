@@ -1,9 +1,3 @@
-export const VAULT_PLANS = {
-  "5_DAYS": { days: 5, dailyRate: 0.005, label: "5 Days", apr: "36.5%" },
-  "15_DAYS": { days: 15, dailyRate: 0.007, label: "15 Days", apr: "51.1%" },
-  "45_DAYS": { days: 45, dailyRate: 0.009, label: "45 Days", apr: "65.7%" },
-} as const;
-
 export const SUPPORTED_ASSETS = ["bitcoin", "ethereum", "binancecoin", "dogecoin", "solana"] as const;
 export const ASSET_SYMBOLS: Record<string, string> = {
   bitcoin: "BTC",

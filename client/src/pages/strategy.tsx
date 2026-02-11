@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import type { Strategy, PredictionMarket } from "@shared/schema";
+import { STRATEGY_FILTERS, PREDICTION_TIMEFRAMES } from "@/lib/data";
 import { StrategyHeader } from "@/components/strategy/strategy-header";
 import { StrategyCard } from "@/components/strategy/strategy-card";
 import { HedgeSection } from "@/components/strategy/hedge-section";
@@ -26,7 +27,7 @@ export default function StrategyPage() {
 
           <TabsContent value="strategies" className="mt-3">
             <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
-              {["All", "Trending", "Quantitative", "Completed"].map((filter) => (
+              {STRATEGY_FILTERS.map((filter) => (
                 <Badge
                   key={filter}
                   variant={filter === "All" ? "default" : "secondary"}
@@ -57,7 +58,7 @@ export default function StrategyPage() {
 
           <TabsContent value="predictions" className="mt-3">
             <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
-              {["All", "15min", "1H", "4H"].map((tf) => (
+              {PREDICTION_TIMEFRAMES.map((tf) => (
                 <Badge
                   key={tf}
                   variant={tf === "All" ? "default" : "secondary"}
