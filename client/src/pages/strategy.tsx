@@ -12,7 +12,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatCompact, formatUSD } from "@/lib/constants";
 import {
   Crown, Zap, Shield, CheckCircle2, TrendingUp, TrendingDown,
-  Minus, Clock, Brain, Info, RefreshCw, Wallet,
+  Minus, Clock, Brain, Info, RefreshCw, Wallet, ChevronLeft, ChevronRight,
+  Search, RotateCcw, Send,
 } from "lucide-react";
 import type { Strategy, StrategySubscription, Profile, HedgePosition, InsurancePurchase, AiPrediction } from "@shared/schema";
 import { StrategyHeader } from "@/components/strategy/strategy-header";
@@ -43,6 +44,11 @@ export default function StrategyPage() {
   const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [capitalAmount, setCapitalAmount] = useState("");
   const [hedgeAmount, setHedgeAmount] = useState("300");
+  const [investmentOpen, setInvestmentOpen] = useState(false);
+  const [investmentStrategy, setInvestmentStrategy] = useState<Strategy | null>(null);
+  const [investmentExchange, setInvestmentExchange] = useState("Aster");
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [copyFilterType, setCopyFilterType] = useState("all");
 
   const { data: strategies = [], isLoading } = useQuery<Strategy[]>({
     queryKey: ["/api/strategies"],
@@ -167,6 +173,26 @@ export default function StrategyPage() {
   const totalPayout = hedgePositions.reduce((sum, h) => sum + Number(h.purchaseAmount || 0), 0);
   const totalPnl = hedgePositions.reduce((sum, h) => sum + Number(h.currentPnl || 0), 0);
 
+  const handleInvestmentClick = (strategy: Strategy) => {
+    setInvestmentStrategy(strategy);
+    setInvestmentOpen(true);
+  };
+
+  const getCalendarDays = () => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days: { day: number; pnl: number }[] = [];
+    for (let i = 0; i < firstDay; i++) days.push({ day: 0, pnl: 0 });
+    for (let d = 1; d <= daysInMonth; d++) days.push({ day: d, pnl: 0 });
+    return days;
+  };
+
+  const calendarDays = getCalendarDays();
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const calendarLabel = `${monthNames[calendarMonth.getMonth()]} ${calendarMonth.getFullYear()}`;
+
   const getStrategyName = (strategyId: string) => {
     const s = strategies.find((st) => st.id === strategyId);
     return s?.name || "Unknown Strategy";
@@ -209,7 +235,7 @@ export default function StrategyPage() {
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   {strategies.map((s, i) => (
-                    <StrategyCard key={s.id} strategy={s} index={i} onSubscribe={handleSubscribeClick} />
+                    <StrategyCard key={s.id} strategy={s} index={i} onSubscribe={handleSubscribeClick} onInvestment={handleInvestmentClick} />
                   ))}
                 </div>
               )}
@@ -602,6 +628,185 @@ export default function StrategyPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={investmentOpen} onOpenChange={setInvestmentOpen}>
+        <DialogContent className="bg-card border-border max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-bold" data-testid="text-investment-dialog-title">
+              {investmentStrategy?.name || "Investment"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Manage API connections, view P&L, and track copy trading performance.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2" data-testid="investment-exchange-tabs">
+              {EXCHANGES.map((ex) => (
+                <Badge
+                  key={ex.name}
+                  variant={investmentExchange === ex.name ? "default" : "outline"}
+                  className={`text-[10px] cursor-pointer ${investmentExchange === ex.name ? "" : ""}`}
+                  onClick={() => setInvestmentExchange(ex.name)}
+                  data-testid={`badge-inv-exchange-${ex.tag}`}
+                >
+                  {ex.tag}
+                </Badge>
+              ))}
+              <Badge variant="outline" className="text-[10px] cursor-pointer" data-testid="badge-inv-exchange-more">
+                More
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-[10px] text-muted-foreground">Position Amount</div>
+                <div className="text-sm font-bold" data-testid="text-inv-position">0.00</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-muted-foreground">P&L</div>
+                <div className="text-sm font-bold" data-testid="text-inv-pnl">
+                  0.00 <span className="text-emerald-400 text-[10px]">(0.00%)</span>
+                </div>
+              </div>
+            </div>
+
+            <Card className="border-border bg-background">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div className="text-[10px] text-muted-foreground">Total Assets</div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground">All</span>
+                      <RefreshCw className="h-3 w-3 text-muted-foreground cursor-pointer" />
+                    </div>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold mt-1" data-testid="text-inv-total-assets">$0</div>
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
+                    <span>Unrealized P&L</span>
+                    <span className="font-medium text-foreground">$0.00</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
+                    <span>Completed Trades</span>
+                    <span className="font-medium text-foreground">--</span>
+                  </div>
+                  <div className="border-t border-border/50 pt-1 mt-1">
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
+                      <span>Perpetual</span>
+                      <span className="font-medium text-foreground">$0</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
+                      <span>Spot</span>
+                      <span className="font-medium text-foreground">--</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                <Button size="icon" variant="ghost" onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))} data-testid="button-cal-prev">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-xs font-bold" data-testid="text-cal-label">{calendarLabel}</span>
+                <Button size="icon" variant="ghost" onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))} data-testid="button-cal-next">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-7 gap-0.5 text-center">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                  <div key={d} className="text-[9px] text-muted-foreground font-medium py-1">{d}</div>
+                ))}
+                {calendarDays.map((cell, idx) => (
+                  <div
+                    key={idx}
+                    className={`rounded-sm py-1.5 text-center ${cell.day === 0 ? "" : "bg-muted/30 border border-border/30"}`}
+                    data-testid={cell.day > 0 ? `cal-day-${cell.day}` : undefined}
+                  >
+                    {cell.day > 0 && (
+                      <>
+                        <div className="text-[10px] font-medium">{cell.day}</div>
+                        <div className="text-[9px] text-muted-foreground">{cell.pnl.toFixed(2)}</div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <Button variant="outline" className="text-xs" data-testid="button-inv-deposit">
+                <Wallet className="h-3.5 w-3.5 mr-1" />
+                Deposit
+              </Button>
+              <Button variant="outline" className="text-xs" data-testid="button-inv-bind-api">
+                <Shield className="h-3.5 w-3.5 mr-1" />
+                Bind API
+              </Button>
+              <Button variant="outline" className="text-xs" data-testid="button-inv-bind-telegram">
+                <Send className="h-3.5 w-3.5 mr-1" />
+                Bind TG
+              </Button>
+            </div>
+
+            <Card className="border-border bg-background">
+              <CardContent className="p-3">
+                <h4 className="text-xs font-bold mb-3" data-testid="text-copy-records-title">Copy Trading Records</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-lg font-bold" data-testid="text-cumulative-return">0%</div>
+                    <div className="text-[10px] text-muted-foreground">Cumulative Return</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold" data-testid="text-total-profit">0</div>
+                    <div className="text-[10px] text-muted-foreground">Total Profit</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-emerald-400" data-testid="text-win-count">0</div>
+                    <div className="text-[10px] text-muted-foreground">Win Count</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-red-400" data-testid="text-loss-count">0</div>
+                    <div className="text-[10px] text-muted-foreground">Loss Count</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-background">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <Badge
+                    variant={copyFilterType === "all" ? "default" : "outline"}
+                    className="text-[10px] cursor-pointer"
+                    onClick={() => setCopyFilterType("all")}
+                    data-testid="badge-filter-all"
+                  >
+                    All Strategy Types
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-2 flex-wrap">
+                  <Clock className="h-3 w-3" />
+                  <span>Select Start Date - Select End Date</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="text-xs" data-testid="button-filter-search">
+                    <Search className="h-3 w-3 mr-1" />
+                    Search
+                  </Button>
+                  <Button size="sm" variant="outline" className="text-xs" data-testid="button-filter-reset">
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    Reset
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={subscribeOpen} onOpenChange={setSubscribeOpen}>
         <DialogContent className="bg-card border-border">
