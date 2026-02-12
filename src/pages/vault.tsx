@@ -72,7 +72,16 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
               <span className="font-medium">{tx.token}</span>
               <span className="text-neon-value">${Number(tx.amount).toFixed(2)}</span>
               <span className="text-muted-foreground truncate">
-                {tx.txHash ? shortenAddress(tx.txHash) : "-"}
+                {tx.txHash ? (
+                  <a
+                    href={`https://sepolia.basescan.org/tx/${tx.txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary/80 hover:text-primary"
+                  >
+                    {shortenAddress(tx.txHash)}
+                  </a>
+                ) : "-"}
               </span>
               <Badge
                 className={`text-[11px] w-fit no-default-hover-elevate no-default-active-elevate ${

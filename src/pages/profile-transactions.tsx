@@ -4,7 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { formatCompact } from "@/lib/constants";
-import { ArrowLeft, Calendar, WalletCards } from "lucide-react";
+import { ArrowLeft, Calendar, WalletCards, ExternalLink } from "lucide-react";
+import { shortenAddress } from "@/lib/constants";
+import { BASE_CHAIN } from "@/lib/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { getTransactions } from "@/lib/api";
@@ -66,31 +68,61 @@ export default function ProfileTransactionsPage() {
           </Card>
         ) : (
           <div className="space-y-2">
-            {transactions.map((tx) => (
-              <Card key={tx.id} className="border-border bg-card" data-testid={`transaction-card-${tx.id}`}>
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
-                      <Badge
-                        className={`text-[11px] shrink-0 no-default-hover-elevate no-default-active-elevate ${TX_TYPE_COLORS[tx.type] || "bg-muted text-muted-foreground"}`}
-                        data-testid={`badge-tx-type-${tx.id}`}
-                      >
-                        {tx.type}
-                      </Badge>
-                      <div className="min-w-0">
+            {transactions.map((tx) => {
+              const explorerUrl = tx.txHash
+                ? `https://sepolia.basescan.org/tx/${tx.txHash}`
+                : null;
+              return (
+                <Card key={tx.id} className="border-border bg-card" data-testid={`transaction-card-${tx.id}`}>
+                  <CardContent className="p-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                        <Badge
+                          className={`text-[11px] shrink-0 no-default-hover-elevate no-default-active-elevate ${TX_TYPE_COLORS[tx.type] || "bg-muted text-muted-foreground"}`}
+                          data-testid={`badge-tx-type-${tx.id}`}
+                        >
+                          {tx.type}
+                        </Badge>
                         <div className="text-xs font-bold text-neon-value" data-testid={`text-tx-amount-${tx.id}`}>
                           {formatCompact(Number(tx.amount))} {tx.token}
                         </div>
+                        <Badge
+                          className={`text-[11px] shrink-0 no-default-hover-elevate no-default-active-elevate ${
+                            tx.status === "CONFIRMED"
+                              ? "bg-primary/15 text-primary"
+                              : "bg-yellow-500/15 text-yellow-400"
+                          }`}
+                        >
+                          {tx.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1 text-[12px] text-muted-foreground shrink-0">
+                        <Calendar className="h-3 w-3" />
+                        {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : "--"}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[12px] text-muted-foreground shrink-0">
-                      <Calendar className="h-3 w-3" />
-                      {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : "--"}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    {tx.txHash && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] text-muted-foreground">Tx:</span>
+                        {explorerUrl ? (
+                          <a
+                            href={explorerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[12px] font-mono text-primary/80 hover:text-primary flex items-center gap-1"
+                          >
+                            {shortenAddress(tx.txHash)}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <span className="text-[12px] font-mono text-muted-foreground">{shortenAddress(tx.txHash)}</span>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
