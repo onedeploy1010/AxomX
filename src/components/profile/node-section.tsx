@@ -9,7 +9,7 @@ import { getProfile, getNodeMembership, purchaseNode } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
-import { PAYMENT_CONTRACT_ADDRESS } from "@/lib/contracts";
+import { NODE_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, Zap, Server, CheckCircle2, Loader2 } from "lucide-react";
 import type { NodeMembership, Profile } from "@shared/types";
@@ -39,12 +39,15 @@ export function NodeSection() {
 
   const purchaseMutation = useMutation({
     mutationFn: async (nodeType: string) => {
-      const plan = NODE_PLANS[nodeType as keyof typeof NODE_PLANS];
+      // Step 1: On-chain USDC payment (if node contract is deployed)
       let txHash: string | undefined;
-      if (PAYMENT_CONTRACT_ADDRESS) {
-        txHash = await payment.pay(plan.price, `NODE_${nodeType}`);
+      if (NODE_CONTRACT_ADDRESS) {
+        txHash = await payment.payNodePurchase(nodeType);
       }
-      return purchaseNode(walletAddr, nodeType, txHash);
+      // Step 2: Record to database
+      const result = await purchaseNode(walletAddr, nodeType, txHash);
+      payment.markSuccess();
+      return result;
     },
     onSuccess: () => {
       toast({ title: t("profile.nodePurchased"), description: t("profile.nodePurchasedDesc") });
@@ -54,7 +57,11 @@ export function NodeSection() {
       payment.reset();
     },
     onError: (err: Error) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      const failedTxHash = payment.txHash;
+      const desc = failedTxHash
+        ? `${err.message}\n\nOn-chain tx: ${failedTxHash}\nPlease contact support.`
+        : err.message;
+      toast({ title: "Error", description: desc, variant: "destructive" });
       payment.reset();
     },
   });

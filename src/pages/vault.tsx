@@ -18,7 +18,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VAULT_PLANS } from "@/lib/data";
-import { PAYMENT_CONTRACT_ADDRESS } from "@/lib/contracts";
+import { VAULT_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { formatUSD, shortenAddress } from "@/lib/constants";
 import type { VaultPosition, Transaction } from "@shared/types";
 import { useTranslation } from "react-i18next";
@@ -135,11 +135,16 @@ export default function Vault() {
 
   const depositMutation = useMutation({
     mutationFn: async (data: { walletAddress: string; planType: string; amount: number }) => {
+      // Step 1: On-chain USDC payment (if vault contract is deployed)
       let txHash: string | undefined;
-      if (PAYMENT_CONTRACT_ADDRESS) {
-        txHash = await payment.pay(data.amount, `VAULT_${data.planType}`);
+      if (VAULT_CONTRACT_ADDRESS) {
+        txHash = await payment.payVaultDeposit(data.amount, data.planType);
       }
-      return vaultDeposit(data.walletAddress, data.planType, data.amount, txHash);
+      // Step 2: Record to database (callback with txHash)
+      const result = await vaultDeposit(data.walletAddress, data.planType, data.amount, txHash);
+      // Step 3: Mark as fully complete
+      payment.markSuccess();
+      return result;
     },
     onSuccess: () => {
       toast({ title: t("vault.depositSuccess"), description: t("vault.depositSuccessDesc") });
@@ -151,7 +156,12 @@ export default function Vault() {
       payment.reset();
     },
     onError: (err: Error) => {
-      toast({ title: t("vault.depositFailed"), description: err.message, variant: "destructive" });
+      // If on-chain succeeded but DB failed, show txHash so user can recover
+      const failedTxHash = payment.txHash;
+      const desc = failedTxHash
+        ? `${err.message}\n\nOn-chain tx: ${failedTxHash}\nPlease contact support with this txHash.`
+        : err.message;
+      toast({ title: t("vault.depositFailed"), description: desc, variant: "destructive" });
       payment.reset();
     },
   });

@@ -10,7 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, subscribeVip } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
-import { PAYMENT_CONTRACT_ADDRESS } from "@/lib/contracts";
+import { VIP_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { VIP_PLANS } from "@/lib/data";
 import type { Profile } from "@shared/types";
 import { NodeSection } from "@/components/profile/node-section";
@@ -42,12 +42,15 @@ export default function ProfilePage() {
 
   const vipMutation = useMutation({
     mutationFn: async () => {
-      const plan = VIP_PLANS.monthly;
+      // Step 1: On-chain USDC payment (if VIP contract is deployed)
       let txHash: string | undefined;
-      if (PAYMENT_CONTRACT_ADDRESS) {
-        txHash = await payment.pay(plan.price, "VIP_MONTHLY");
+      if (VIP_CONTRACT_ADDRESS) {
+        txHash = await payment.payVIPSubscribe("monthly");
       }
-      return subscribeVip(walletAddr, txHash, "monthly");
+      // Step 2: Record to database
+      const result = await subscribeVip(walletAddr, txHash, "monthly");
+      payment.markSuccess();
+      return result;
     },
     onSuccess: () => {
       toast({ title: t("strategy.vipActivated"), description: t("strategy.vipActivatedDesc") });
@@ -55,7 +58,11 @@ export default function ProfilePage() {
       payment.reset();
     },
     onError: (err: Error) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      const failedTxHash = payment.txHash;
+      const desc = failedTxHash
+        ? `${err.message}\n\nOn-chain tx: ${failedTxHash}\nPlease contact support.`
+        : err.message;
+      toast({ title: "Error", description: desc, variant: "destructive" });
       payment.reset();
     },
   });
