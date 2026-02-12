@@ -338,7 +338,12 @@ export async function fetchExchangeDepth(symbol: string) {
   const priceChange = parseFloat(ticker.priceChangePercent || "0");
 
   // Simulate multi-exchange data with realistic variance from Binance real data
-  const exchangeNames = ["Binance", "OKX", "Bybit", "Bitget", "Kraken", "Coinbase", "Gate", "MEXC"];
+  const exchangeNames = [
+    "Binance", "OKX", "Bybit", "Bitget", "Kraken",
+    "Coinbase", "Gate", "MEXC", "CoinEx", "LBank",
+    "Hyperliquid", "Bitmex", "Crypto.com", "Bitunix",
+    "KuCoin", "Huobi",
+  ];
   const exchanges = exchangeNames.map((name, i) => {
     // Use a deterministic seed per symbol+exchange for consistent data
     const seed = (symbol.charCodeAt(0) * 31 + i * 17) % 100;
