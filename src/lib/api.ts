@@ -1,5 +1,18 @@
 import { supabase } from "./supabase";
 
+// Convert snake_case DB rows to camelCase for frontend
+function toCamel(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map(toCamel);
+  if (typeof obj !== "object") return obj;
+  const out: any = {};
+  for (const key of Object.keys(obj)) {
+    const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    out[camelKey] = obj[key];
+  }
+  return out;
+}
+
 // Helper: proxy external API calls through Supabase Edge Function to avoid CORS
 async function proxyFetch(url: string): Promise<any> {
   const { data, error } = await supabase.functions.invoke("api-proxy", {
@@ -20,7 +33,7 @@ export async function getProfile(walletAddress: string) {
     .eq("wallet_address", walletAddress)
     .single();
   if (error && error.code !== "PGRST116") throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function getStrategies() {
@@ -29,7 +42,7 @@ export async function getStrategies() {
     .select("*")
     .order("created_at");
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getAiPredictions() {
@@ -38,7 +51,7 @@ export async function getAiPredictions() {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getTradeBets(walletAddress: string) {
@@ -50,7 +63,7 @@ export async function getTradeBets(walletAddress: string) {
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getVaultPositions(walletAddress: string) {
@@ -62,7 +75,7 @@ export async function getVaultPositions(walletAddress: string) {
     .eq("user_id", profile.id)
     .order("start_date", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getTransactions(walletAddress: string, type?: string) {
@@ -76,7 +89,7 @@ export async function getTransactions(walletAddress: string, type?: string) {
   if (type) query = query.eq("type", type);
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getSubscriptions(walletAddress: string) {
@@ -88,7 +101,7 @@ export async function getSubscriptions(walletAddress: string) {
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getHedgePositions(walletAddress: string) {
@@ -100,7 +113,7 @@ export async function getHedgePositions(walletAddress: string) {
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getHedgePurchases(walletAddress: string) {
@@ -112,7 +125,7 @@ export async function getHedgePurchases(walletAddress: string) {
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getPredictionBets(walletAddress: string) {
@@ -124,7 +137,7 @@ export async function getPredictionBets(walletAddress: string) {
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return toCamel(data ?? []);
 }
 
 export async function getNodeMembership(walletAddress: string) {
@@ -138,7 +151,7 @@ export async function getNodeMembership(walletAddress: string) {
     .limit(1)
     .single();
   if (error && error.code !== "PGRST116") throw error;
-  return data;
+  return toCamel(data);
 }
 
 // ─────────────────────────────────────────────
@@ -151,7 +164,7 @@ export async function authWallet(walletAddress: string, refCode?: string) {
     ref_code: refCode || null,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function vaultDeposit(walletAddress: string, planType: string, amount: number, txHash?: string) {
@@ -162,7 +175,7 @@ export async function vaultDeposit(walletAddress: string, planType: string, amou
     tx_hash: txHash || null,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function vaultWithdraw(walletAddress: string, position_id: string) {
@@ -171,7 +184,7 @@ export async function vaultWithdraw(walletAddress: string, position_id: string) 
     pos_id: position_id,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function placeTradeBet(
@@ -209,7 +222,7 @@ export async function subscribeStrategy(walletAddress: string, strategyId: strin
     capital: amount,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function purchaseHedge(walletAddress: string, amount: number) {
@@ -218,7 +231,7 @@ export async function purchaseHedge(walletAddress: string, amount: number) {
     hedge_amount: amount,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function subscribeVip(walletAddress: string, txHash?: string, planLabel?: string) {
@@ -228,7 +241,7 @@ export async function subscribeVip(walletAddress: string, txHash?: string, planL
     plan_label: planLabel || "monthly",
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function purchaseNode(walletAddress: string, nodeType: string, txHash?: string) {
@@ -238,7 +251,7 @@ export async function purchaseNode(walletAddress: string, nodeType: string, txHa
     tx_hash: txHash || null,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function placePredictionBet(
@@ -260,25 +273,25 @@ export async function placePredictionBet(
     amount_param: amount,
   });
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function getVaultOverview() {
   const { data, error } = await supabase.rpc("get_vault_overview");
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function getStrategyOverview() {
   const { data, error } = await supabase.rpc("get_strategy_overview");
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function getInsurancePool() {
   const { data, error } = await supabase.rpc("get_insurance_pool");
   if (error) throw error;
-  return data;
+  return toCamel(data);
 }
 
 export async function getReferralTree(walletAddress: string) {

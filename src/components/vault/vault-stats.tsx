@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 interface VaultOverviewResponse {
   tvl: string;
   holders: number;
-  totalPositions: number;
+  activePositions: number;
 }
 
 export function VaultStats() {
@@ -76,7 +76,7 @@ export function VaultStats() {
           <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
             <Lock className="h-3 w-3" /> {t("vault.activePositions")}
           </div>
-          <div className="text-lg font-bold" data-testid="text-positions">{overview.totalPositions}</div>
+          <div className="text-lg font-bold" data-testid="text-positions">{overview.activePositions}</div>
         </CardContent>
       </Card>
     </div>
