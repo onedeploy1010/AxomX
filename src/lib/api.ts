@@ -154,6 +154,26 @@ export async function getNodeMembership(walletAddress: string) {
   return toCamel(data);
 }
 
+export async function getNodeMemberships(walletAddress: string) {
+  const profile = await getProfile(walletAddress);
+  if (!profile) return [];
+  const { data, error } = await supabase
+    .from("node_memberships")
+    .select("*")
+    .eq("user_id", profile.id)
+    .order("start_date", { ascending: false });
+  if (error) throw error;
+  return toCamel(data ?? []);
+}
+
+export async function getNodeOverview(walletAddress: string) {
+  const { data, error } = await supabase.rpc("get_node_overview", {
+    addr: walletAddress,
+  });
+  if (error) throw error;
+  return toCamel(data);
+}
+
 // ─────────────────────────────────────────────
 // B) Supabase RPC functions (business logic)
 // ─────────────────────────────────────────────
@@ -244,11 +264,20 @@ export async function subscribeVip(walletAddress: string, txHash?: string, planL
   return toCamel(data);
 }
 
-export async function purchaseNode(walletAddress: string, nodeType: string, txHash?: string) {
+export async function purchaseNode(walletAddress: string, nodeType: string, txHash?: string, paymentMode?: string) {
   const { data, error } = await supabase.rpc("purchase_node", {
     addr: walletAddress,
     node_type_param: nodeType,
     tx_hash: txHash || null,
+    payment_mode_param: paymentMode || "FULL",
+  });
+  if (error) throw error;
+  return toCamel(data);
+}
+
+export async function checkNodeMilestones(walletAddress: string) {
+  const { data, error } = await supabase.rpc("check_node_milestones", {
+    addr: walletAddress,
   });
   if (error) throw error;
   return toCamel(data);

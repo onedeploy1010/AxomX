@@ -28,17 +28,36 @@ export const VAULT_PLANS = {
   "45_DAYS": { days: 45, dailyRate: 0.009, label: "45 Days", apr: "65.7%", minAmount: 50, platformFee: 0.10 },
 } as const;
 
+export const EARLY_BIRD_DEPOSIT_RATE = 0.10;
+
 export const NODE_PLANS = {
   MINI: {
     price: 1000, label: "Mini Node", durationDays: 90, fixedReturn: 0.10,
-    rankUnlock: "V4", weightMultiplier: 1.0,
+    rankUnlock: "V4", weightMultiplier: 1.0, revenuePoolShare: 0,
     referralBonus: "5%", features: ["basicStrategies", "communityAccess"],
   },
   MAX: {
     price: 6000, label: "Max Node", durationDays: 120, fixedReturn: 0.10,
-    rankUnlock: "V6", weightMultiplier: 1.5,
+    rankUnlock: "V6", weightMultiplier: 1.5, revenuePoolShare: 0.50,
     referralBonus: "10%", features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"],
   },
+} as const;
+
+export const NODE_MILESTONES = {
+  MINI: [
+    { rank: "V1", days: 10 },
+    { rank: "V2", days: 30 },
+    { rank: "V3", days: 60 },
+    { rank: "V4", days: 90 },
+  ],
+  MAX: [
+    { rank: "V1", days: 20 },
+    { rank: "V2", days: 40 },
+    { rank: "V3", days: 60 },
+    { rank: "V4", days: 80 },
+    { rank: "V5", days: 100 },
+    { rank: "V6", days: 120 },
+  ],
 } as const;
 
 export const RANKS = [

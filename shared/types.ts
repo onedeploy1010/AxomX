@@ -75,6 +75,42 @@ export interface NodeMembership {
   startDate: string | null;
   endDate: string | null;
   status: string;
+  paymentMode: string;
+  depositAmount: string;
+  milestoneStage: number;
+  totalMilestones: number;
+  earningsCapacity: string;
+  milestones?: NodeMilestone[];
+}
+
+export interface NodeMilestone {
+  id: string;
+  membershipId: string;
+  milestoneIndex: number;
+  requiredRank: string;
+  deadlineDays: number;
+  deadlineAt: string;
+  achievedAt: string | null;
+  status: string;
+  createdAt: string | null;
+}
+
+export interface NodeRewardsSummary {
+  fixedYield: string;
+  poolDividend: string;
+  teamCommission: string;
+  totalEarnings: string;
+}
+
+export interface NodePoolInfo {
+  balance: string;
+  updatedAt: string | null;
+}
+
+export interface NodeOverview {
+  nodes: NodeMembership[];
+  rewards: NodeRewardsSummary;
+  pool: NodePoolInfo;
 }
 
 export interface Transaction {

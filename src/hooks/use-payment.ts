@@ -132,12 +132,12 @@ export function usePayment() {
 
   // ── Node purchase ──
   const payNodePurchase = useCallback(
-    async (nodeType: string): Promise<string> => {
+    async (nodeType: string, paymentMode: string = "FULL"): Promise<string> => {
       if (!NODE_CONTRACT_ADDRESS) throw new Error("Node contract not configured");
       if (!client) throw new Error("Thirdweb client not ready");
-      // Price is enforced on-chain by the contract
       const prices: Record<string, number> = { MINI: 1000, MAX: 6000 };
-      const amountUsd = prices[nodeType] || 0;
+      const fullPrice = prices[nodeType] || 0;
+      const amountUsd = paymentMode === "EARLY_BIRD" ? fullPrice * 0.10 : fullPrice;
       return _executePayment(NODE_CONTRACT_ADDRESS, amountUsd, () =>
         prepareContractCall({
           contract: getNodeContract(client),
