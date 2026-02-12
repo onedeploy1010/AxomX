@@ -113,7 +113,7 @@ function FearGreedChart({ data, coinSymbol }: { data: { date: string; fgi: numbe
           <YAxis yAxisId="fgi" orientation="left" tick={{ fontSize: 8, fill: "rgba(245,158,11,0.6)" }} domain={[0, 100]} />
           <Tooltip contentStyle={{ backgroundColor: "hsl(160,20%,8%)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", fontSize: "11px" }} formatter={(value: number, name: string) => name === "btcPrice" ? [formatPrice(value), t("dashboard.priceLabel", { symbol: coinSymbol })] : [value, t("dashboard.sentimentIndex")]} />
           {hasPrice && <Line yAxisId="price" type="monotone" dataKey="btcPrice" stroke="rgba(255,255,255,0.8)" strokeWidth={1.5} dot={false} />}
-          <Area yAxisId="fgi" type="monotone" dataKey="fgi" stroke="#f59e0b" fill="rgba(245,158,11,0.15)" strokeWidth={1.5} />
+          <Area yAxisId="fgi" type="monotone" dataKey="fgi" stroke="#f59e0b" fill="rgba(245,158,11,0.15)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

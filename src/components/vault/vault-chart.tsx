@@ -69,7 +69,7 @@ export function VaultChart() {
                 <stop offset="95%" stopColor="hsl(174, 72%, 46%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <Area type="monotone" dataKey="value" stroke="hsl(174, 72%, 46%)" strokeWidth={2} fill="url(#vaultGrad)" />
+            <Area type="monotone" dataKey="value" stroke="hsl(174, 72%, 46%)" strokeWidth={2} fill="url(#vaultGrad)" dot={false} isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

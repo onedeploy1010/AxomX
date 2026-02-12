@@ -52,8 +52,8 @@ export default function Dashboard() {
         exchanges: depth.exchanges.map(e => ({ name: e.name, buy: e.buyPercent, sell: e.sellPercent })),
         aggregatedBuy: depth.buyPercent,
         aggregatedSell: depth.sellPercent,
-        fearGreedIndex: 50,
-        fearGreedLabel: "Neutral",
+        fearGreedIndex: depth.fearGreedIndex,
+        fearGreedLabel: depth.fearGreedLabel,
         longShortRatio: depth.buyPercent / (depth.sellPercent || 1),
         timestamp: Date.now(),
       };

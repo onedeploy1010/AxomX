@@ -1,4 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+
+async function proxyFetch(url: string): Promise<any> {
+  const { data, error } = await supabase.functions.invoke("api-proxy", {
+    body: { url },
+  });
+  if (error) throw error;
+  return data;
+}
 
 export interface CryptoPrice {
   id: string;
@@ -43,11 +52,9 @@ export function useCryptoPrices() {
   return useQuery<CryptoPrice[]>({
     queryKey: ["crypto-prices"],
     queryFn: async () => {
-      const res = await fetch(
+      return proxyFetch(
         "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin,dogecoin,solana&order=market_cap_desc&sparkline=false&price_change_percentage=24h"
       );
-      if (!res.ok) throw new Error("Failed to fetch prices");
-      return res.json();
     },
     refetchInterval: 30000,
     staleTime: 15000,
@@ -58,11 +65,9 @@ export function usePriceChart(coinId: string, days: number = 1) {
   return useQuery<ChartDataPoint[]>({
     queryKey: ["price-chart", coinId, days],
     queryFn: async () => {
-      const res = await fetch(
+      const data = await proxyFetch(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`
       );
-      if (!res.ok) throw new Error("Failed to fetch chart");
-      const data = await res.json();
       return data.prices.map(([timestamp, price]: [number, number]) => ({
         timestamp,
         time: new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
