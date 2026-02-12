@@ -3,7 +3,7 @@ import { baseSepolia } from "thirdweb/chains";
 import type { ThirdwebClient } from "thirdweb";
 
 // USDC on Base Sepolia testnet (6 decimals)
-export const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+export const USDC_ADDRESS = "0x4dd80edd423658408B99950f85Bc3c98BcFcDfac";
 export const USDC_DECIMALS = 6;
 
 export const BASE_CHAIN = baseSepolia;
