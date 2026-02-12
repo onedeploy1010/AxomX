@@ -1,12 +1,12 @@
 import { getContract } from "thirdweb";
-import { base } from "thirdweb/chains";
+import { baseSepolia } from "thirdweb/chains";
 import type { ThirdwebClient } from "thirdweb";
 
-// USDC on Base mainnet (6 decimals)
-export const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+// USDC on Base Sepolia testnet (6 decimals)
+export const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 export const USDC_DECIMALS = 6;
 
-export const BASE_CHAIN = base;
+export const BASE_CHAIN = baseSepolia;
 
 // ── Contract addresses (set via env after deploying each contract) ──
 export const VAULT_CONTRACT_ADDRESS = import.meta.env.VITE_VAULT_CONTRACT_ADDRESS || "";
