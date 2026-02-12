@@ -49,6 +49,7 @@ export interface StrategySubscription {
   executionMode: string;
   allocatedCapital: string;
   maxDrawdown: string | null;
+  currentPnl: string | null;
   status: string;
   createdAt: string | null;
 }

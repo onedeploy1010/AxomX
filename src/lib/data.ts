@@ -28,6 +28,29 @@ export const VAULT_PLANS = {
   "45_DAYS": { days: 45, dailyRate: 0.009, label: "45 Days", apr: "65.7%" },
 } as const;
 
+export const NODE_PLANS = {
+  MINI: { price: 1000, label: "Mini Node", referralBonus: "5%", features: ["basicStrategies", "communityAccess"] },
+  MAX: { price: 6000, label: "Max Node", referralBonus: "10%", features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"] },
+} as const;
+
+export const HEDGE_CONFIG = {
+  minAmount: 100,
+  defaultAmount: "300",
+} as const;
+
+export const VIP_PLANS = {
+  monthly: { price: 69, label: "monthly", period: "1 month" },
+  yearly: { price: 899, label: "yearly", period: "1 year" },
+} as const;
+
+export const EXCHANGES = [
+  { name: "Aster", tag: "Aster" },
+  { name: "Hyperliquid", tag: "Hyperliquid" },
+  { name: "Binance", tag: "Binance" },
+  { name: "OKX", tag: "OKX" },
+  { name: "Bybit", tag: "Bybit" },
+] as const;
+
 export const SETTINGS_ITEMS = [
   { key: "leaderboard", label: "Leaderboard" },
   { key: "contact-us", label: "Contact Us" },

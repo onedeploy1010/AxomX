@@ -36,13 +36,7 @@ const TABS: { id: TabId; labelKey: string }[] = [
   { id: "predictions", labelKey: "strategy.predictions" },
 ];
 
-const EXCHANGES = [
-  { name: "Aster", tag: "Aster" },
-  { name: "Hyperliquid", tag: "Hyperliquid" },
-  { name: "Binance", tag: "Binance" },
-  { name: "OKX", tag: "OKX" },
-  { name: "Bybit", tag: "Bybit" },
-];
+import { EXCHANGES, HEDGE_CONFIG } from "@/lib/data";
 
 export default function StrategyPage() {
   const { t } = useTranslation();
@@ -53,7 +47,7 @@ export default function StrategyPage() {
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [capitalAmount, setCapitalAmount] = useState("");
-  const [hedgeAmount, setHedgeAmount] = useState("300");
+  const [hedgeAmount, setHedgeAmount] = useState<string>(HEDGE_CONFIG.defaultAmount);
   const [investmentOpen, setInvestmentOpen] = useState(false);
   const [investmentExchange, setInvestmentExchange] = useState("Aster");
   const [calendarMonth, setCalendarMonth] = useState(new Date());
@@ -216,7 +210,7 @@ export default function StrategyPage() {
       queryClient.invalidateQueries({ queryKey: ["hedge-positions", walletAddr] });
       queryClient.invalidateQueries({ queryKey: ["hedge-purchases", walletAddr] });
       queryClient.invalidateQueries({ queryKey: ["insurance-pool"] });
-      setHedgeAmount("300");
+      setHedgeAmount(HEDGE_CONFIG.defaultAmount);
     },
     onError: (err: Error) => {
       toast({ title: t("common.error"), description: err.message, variant: "destructive" });
@@ -266,7 +260,7 @@ export default function StrategyPage() {
       toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
       return;
     }
-    if (!hedgeAmount || Number(hedgeAmount) < 100) {
+    if (!hedgeAmount || Number(hedgeAmount) < HEDGE_CONFIG.minAmount) {
       toast({ title: t("strategy.invalidAmount"), description: t("strategy.hedgeMinError"), variant: "destructive" });
       return;
     }
@@ -484,7 +478,7 @@ export default function StrategyPage() {
                 <div className="flex gap-2 mb-3">
                   <Input
                     type="number"
-                    placeholder="300"
+                    placeholder={HEDGE_CONFIG.defaultAmount}
                     value={hedgeAmount}
                     onChange={(e) => setHedgeAmount(e.target.value)}
                     className="flex-1"
@@ -588,12 +582,20 @@ export default function StrategyPage() {
                 <div className="grid grid-cols-2 gap-4 mb-3">
                   <div>
                     <div className="text-[10px] text-muted-foreground">{t("strategy.positionAmount")}</div>
-                    <div className="text-sm font-bold" data-testid="text-position-amount">0.00</div>
+                    <div className="text-sm font-bold" data-testid="text-position-amount">
+                      {formatUSD(subscriptions.reduce((s, sub) => s + Number(sub.allocatedCapital || 0), 0))}
+                    </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-muted-foreground">{t("vault.pnl")}</div>
                     <div className="text-sm font-bold" data-testid="text-position-pnl">
-                      0.00 <span className="text-emerald-400 text-[10px]">(0.00%)</span>
+                      {formatUSD(subscriptions.reduce((s, sub) => s + Number(sub.currentPnl || 0), 0))}
+                      {(() => {
+                        const totalCap = subscriptions.reduce((s, sub) => s + Number(sub.allocatedCapital || 0), 0);
+                        const totalPnlVal = subscriptions.reduce((s, sub) => s + Number(sub.currentPnl || 0), 0);
+                        const pct = totalCap > 0 ? (totalPnlVal / totalCap * 100) : 0;
+                        return <span className={`text-[10px] ml-1 ${pct >= 0 ? "text-emerald-400" : "text-red-400"}`}>({pct >= 0 ? "+" : ""}{pct.toFixed(2)}%)</span>;
+                      })()}
                     </div>
                   </div>
                 </div>

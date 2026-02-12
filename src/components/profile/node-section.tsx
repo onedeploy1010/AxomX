@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, Zap, Server, CheckCircle2 } from "lucide-react";
 import type { NodeMembership, Profile } from "@shared/types";
+import { NODE_PLANS } from "@/lib/data";
 import { useTranslation } from "react-i18next";
 
 export function NodeSection() {
@@ -119,7 +120,7 @@ export function NodeSection() {
                     <Shield className="h-5 w-5 text-primary shrink-0" />
                     <span className="text-sm font-bold">{t("profile.miniNode")}</span>
                   </div>
-                  <span className="text-xl font-bold text-primary">$500</span>
+                  <span className="text-xl font-bold text-primary">${NODE_PLANS.MINI.price.toLocaleString()}</span>
                 </div>
                 <div className="space-y-1.5 mb-3">
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -154,7 +155,7 @@ export function NodeSection() {
                     <span className="text-sm font-bold">{t("profile.maxNode")}</span>
                     <Badge className="text-[9px] bg-primary/20 text-primary no-default-hover-elevate no-default-active-elevate">{t("profile.popular")}</Badge>
                   </div>
-                  <span className="text-xl font-bold text-primary">$1,000</span>
+                  <span className="text-xl font-bold text-primary">${NODE_PLANS.MAX.price.toLocaleString()}</span>
                 </div>
                 <div className="space-y-1.5 mb-3">
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
