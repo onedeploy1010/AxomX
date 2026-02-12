@@ -352,7 +352,8 @@
     "connectToViewReferral": "Connect wallet to view referral data",
     "noTeamMembers": "No team members yet. Share your referral code!",
     "connectToViewTransactions": "Connect wallet to view transactions",
-    "noTransactions": "No transactions yet"
+    "noTransactions": "No transactions yet",
+    "offChain": "Off-chain"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

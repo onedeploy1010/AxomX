@@ -4,9 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { formatCompact } from "@/lib/constants";
-import { ArrowLeft, Calendar, WalletCards, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, WalletCards, ExternalLink, Link } from "lucide-react";
 import { shortenAddress } from "@/lib/constants";
-import { BASE_CHAIN } from "@/lib/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { getTransactions } from "@/lib/api";
@@ -74,7 +73,7 @@ export default function ProfileTransactionsPage() {
                 : null;
               return (
                 <Card key={tx.id} className="border-border bg-card" data-testid={`transaction-card-${tx.id}`}>
-                  <CardContent className="p-3 space-y-1.5">
+                  <CardContent className="p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
                         <Badge
@@ -101,12 +100,14 @@ export default function ProfileTransactionsPage() {
                         {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : "--"}
                       </div>
                     </div>
-                    {tx.txHash && (
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[12px] text-muted-foreground">Tx:</span>
-                        {explorerUrl ? (
+                        <Badge variant="outline" className="text-[11px] border-blue-500/30 text-blue-400 no-default-hover-elevate no-default-active-elevate">
+                          <Link className="h-2.5 w-2.5 mr-0.5" />Base Sepolia
+                        </Badge>
+                        {tx.txHash ? (
                           <a
-                            href={explorerUrl}
+                            href={explorerUrl!}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-[12px] font-mono text-primary/80 hover:text-primary flex items-center gap-1"
@@ -115,10 +116,10 @@ export default function ProfileTransactionsPage() {
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         ) : (
-                          <span className="text-[12px] font-mono text-muted-foreground">{shortenAddress(tx.txHash)}</span>
+                          <span className="text-[12px] text-muted-foreground">{t("profile.offChain")}</span>
                         )}
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
               );

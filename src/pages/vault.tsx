@@ -58,19 +58,20 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
     <Card className="border-border bg-card">
       <CardContent className="p-4">
         <div className="overflow-x-auto">
-        <div className="grid grid-cols-5 text-[12px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
-          <span>{t("common.token")}</span><span>{t("common.amount")}</span><span>{t("common.txid")}</span><span>{t("common.status")}</span><span>{t("common.date")}</span>
+        <div className="grid grid-cols-6 text-[12px] text-muted-foreground mb-2 font-medium gap-1 min-w-[400px]">
+          <span>{t("common.token")}</span><span>{t("common.amount")}</span><span>Chain</span><span>{t("common.txid")}</span><span>{t("common.status")}</span><span>{t("common.date")}</span>
         </div>
         <div className="space-y-1">
           {txs.map((tx, idx) => (
             <div
               key={tx.id}
-              className="grid grid-cols-5 text-xs py-2 border-b border-border/30 last:border-0 gap-1 min-w-[340px]"
+              className="grid grid-cols-6 text-xs py-2 border-b border-border/30 last:border-0 gap-1 min-w-[400px]"
               style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.05}s both` }}
               data-testid={`row-tx-${tx.id}`}
             >
               <span className="font-medium">{tx.token}</span>
               <span className="text-neon-value">${Number(tx.amount).toFixed(2)}</span>
+              <span className="text-blue-400 text-[11px]">Base</span>
               <span className="text-muted-foreground truncate">
                 {tx.txHash ? (
                   <a

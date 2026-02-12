@@ -352,7 +352,8 @@
     "connectToViewReferral": "连接钱包查看推荐数据",
     "noTeamMembers": "暂无团队成员。分享您的推荐码！",
     "connectToViewTransactions": "连接钱包查看交易记录",
-    "noTransactions": "暂无交易记录"
+    "noTransactions": "暂无交易记录",
+    "offChain": "链下"
   },
   "market": {
     "marketAnalysis": "市场分析",
