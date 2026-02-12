@@ -983,7 +983,7 @@ export default function StrategyPage() {
       </div>
 
       <Dialog open={investmentOpen} onOpenChange={setInvestmentOpen}>
-        <DialogContent className="bg-card border-border max-w-sm">
+        <DialogContent className="bg-card border-border max-w-sm overflow-hidden">
           <DialogHeader>
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center" style={{ boxShadow: "0 0 12px rgba(16,185,129,0.3)" }}>
@@ -1000,7 +1000,7 @@ export default function StrategyPage() {
             </div>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto max-h-[calc(85vh-6rem)] pr-1">
             <div className="flex flex-wrap gap-1.5" data-testid="investment-exchange-tabs">
               {EXCHANGES.map((ex) => (
                 <Badge
