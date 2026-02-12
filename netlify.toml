@@ -1,16 +1,9 @@
 [build]
-  base = "/"
   command = "npx vite build"
-  publish = "dist/public"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/api/:splat"
-  status = 404
-  force = true
 
 [[redirects]]
   from = "/*"
