@@ -34,9 +34,27 @@ const wallets = [
 function WalletSync() {
   const account = useActiveAccount();
 
+  // Extract ref code from URL on mount (before wallet connects)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRef = urlParams.get("ref");
+    if (urlRef) {
+      sessionStorage.setItem("axomx_ref_code", urlRef);
+      urlParams.delete("ref");
+      const newUrl = urlParams.toString()
+        ? `${window.location.pathname}?${urlParams.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, []);
+
+  // Auth wallet with ref code when wallet connects
   useEffect(() => {
     if (account?.address) {
-      authWallet(account.address).catch(console.error);
+      const refCode = sessionStorage.getItem("axomx_ref_code");
+      authWallet(account.address, refCode || undefined)
+        .then(() => { if (refCode) sessionStorage.removeItem("axomx_ref_code"); })
+        .catch(console.error);
     }
   }, [account?.address]);
 
