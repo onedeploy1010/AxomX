@@ -4,11 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
-import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, Shield, ChevronRight, Bell, Settings, History, GitBranch } from "lucide-react";
+import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, Shield, ChevronRight, Bell, Settings, History, GitBranch, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, subscribeVip } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
+import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
+import { PAYMENT_CONTRACT_ADDRESS } from "@/lib/contracts";
+import { VIP_PLANS } from "@/lib/data";
 import type { Profile } from "@shared/types";
 import { NodeSection } from "@/components/profile/node-section";
 import { useLocation } from "wouter";
@@ -35,16 +38,25 @@ export default function ProfilePage() {
     enabled: isConnected,
   });
 
+  const payment = usePayment();
+
   const vipMutation = useMutation({
     mutationFn: async () => {
-      return subscribeVip(walletAddr);
+      const plan = VIP_PLANS.monthly;
+      let txHash: string | undefined;
+      if (PAYMENT_CONTRACT_ADDRESS) {
+        txHash = await payment.pay(plan.price, "VIP_MONTHLY");
+      }
+      return subscribeVip(walletAddr, txHash, "monthly");
     },
     onSuccess: () => {
       toast({ title: t("strategy.vipActivated"), description: t("strategy.vipActivatedDesc") });
       queryClient.invalidateQueries({ queryKey: ["profile", walletAddr] });
+      payment.reset();
     },
     onError: (err: Error) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+      payment.reset();
     },
   });
 
@@ -211,7 +223,11 @@ export default function ProfilePage() {
                   disabled={vipMutation.isPending}
                   data-testid="button-subscribe-vip"
                 >
-                  {vipMutation.isPending ? t("common.processing") : t("profile.subscribeVip")}
+                  {vipMutation.isPending ? (
+                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {getPaymentStatusLabel(payment.status) || t("common.processing")}</>
+                  ) : (
+                    <>{t("profile.subscribeVip")} (${VIP_PLANS.monthly.price})</>
+                  )}
                 </Button>
               )}
               {!isConnected && (

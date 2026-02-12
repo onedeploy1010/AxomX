@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Lock, ArrowDownToLine, ArrowUpFromLine, Sparkles, AlertCircle } from "lucide-react";
+import { Lock, ArrowDownToLine, ArrowUpFromLine, Sparkles, AlertCircle, Loader2 } from "lucide-react";
 import { VaultChart } from "@/components/vault/vault-chart";
 import { VaultStats } from "@/components/vault/vault-stats";
 import { VaultPlans } from "@/components/vault/vault-plans";
@@ -16,7 +16,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getVaultPositions, getTransactions, vaultDeposit, vaultWithdraw } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VAULT_PLANS } from "@/lib/data";
+import { PAYMENT_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { formatUSD, shortenAddress } from "@/lib/constants";
 import type { VaultPosition, Transaction } from "@shared/types";
 import { useTranslation } from "react-i18next";
@@ -129,9 +131,15 @@ export default function Vault() {
     return { totalPrincipal: principal, totalYield: yieldSum };
   }, [activePositions]);
 
+  const payment = usePayment();
+
   const depositMutation = useMutation({
-    mutationFn: async (data: { walletAddress: string; planType: string; amount: number; txHash: string }) => {
-      return vaultDeposit(data.walletAddress, data.planType, data.amount);
+    mutationFn: async (data: { walletAddress: string; planType: string; amount: number }) => {
+      let txHash: string | undefined;
+      if (PAYMENT_CONTRACT_ADDRESS) {
+        txHash = await payment.pay(data.amount, `VAULT_${data.planType}`);
+      }
+      return vaultDeposit(data.walletAddress, data.planType, data.amount, txHash);
     },
     onSuccess: () => {
       toast({ title: t("vault.depositSuccess"), description: t("vault.depositSuccessDesc") });
@@ -140,9 +148,11 @@ export default function Vault() {
       queryClient.invalidateQueries({ queryKey: ["transactions", walletAddress] });
       setDepositOpen(false);
       setDepositAmount("");
+      payment.reset();
     },
     onError: (err: Error) => {
       toast({ title: t("vault.depositFailed"), description: err.message, variant: "destructive" });
+      payment.reset();
     },
   });
 
@@ -168,12 +178,12 @@ export default function Vault() {
 
   const handleDeposit = () => {
     const amount = parseFloat(depositAmount);
-    if (!walletAddress || !selectedPlan || isNaN(amount) || amount <= 0) {
-      toast({ title: t("vault.invalidInput"), description: t("vault.invalidInputDesc"), variant: "destructive" });
+    const minAmount = VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.minAmount || 50;
+    if (!walletAddress || !selectedPlan || isNaN(amount) || amount < minAmount) {
+      toast({ title: t("vault.invalidInput"), description: `Minimum deposit is $${minAmount} USDC`, variant: "destructive" });
       return;
     }
-    const txHash = `0x${Date.now().toString(16)}${Math.random().toString(16).slice(2, 10)}`;
-    depositMutation.mutate({ walletAddress, planType: selectedPlan, amount, txHash });
+    depositMutation.mutate({ walletAddress, planType: selectedPlan, amount });
   };
 
   const handleWithdraw = (positionId: string) => {
@@ -426,13 +436,19 @@ export default function Vault() {
             )}
           </div>
           <DialogFooter>
+            {payment.status !== "idle" && payment.status !== "success" && (
+              <div className="w-full flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>{getPaymentStatusLabel(payment.status)}</span>
+              </div>
+            )}
             <Button
               className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
               onClick={handleDeposit}
               disabled={depositMutation.isPending || !walletAddress}
               data-testid="button-confirm-deposit"
             >
-              {depositMutation.isPending ? t("common.processing") : !walletAddress ? t("common.connectWalletFirst") : t("vault.confirmDeposit")}
+              {depositMutation.isPending ? getPaymentStatusLabel(payment.status) || t("common.processing") : !walletAddress ? t("common.connectWalletFirst") : t("vault.confirmDeposit")}
             </Button>
           </DialogFooter>
         </DialogContent>

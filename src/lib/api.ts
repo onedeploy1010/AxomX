@@ -154,11 +154,12 @@ export async function authWallet(walletAddress: string, refCode?: string) {
   return data;
 }
 
-export async function vaultDeposit(walletAddress: string, planType: string, amount: number) {
+export async function vaultDeposit(walletAddress: string, planType: string, amount: number, txHash?: string) {
   const { data, error } = await supabase.rpc("vault_deposit", {
     addr: walletAddress,
     plan_type: planType,
     deposit_amount: amount,
+    tx_hash: txHash || null,
   });
   if (error) throw error;
   return data;
@@ -220,18 +221,21 @@ export async function purchaseHedge(walletAddress: string, amount: number) {
   return data;
 }
 
-export async function subscribeVip(walletAddress: string) {
+export async function subscribeVip(walletAddress: string, txHash?: string, planLabel?: string) {
   const { data, error } = await supabase.rpc("subscribe_vip", {
     addr: walletAddress,
+    tx_hash: txHash || null,
+    plan_label: planLabel || "monthly",
   });
   if (error) throw error;
   return data;
 }
 
-export async function purchaseNode(walletAddress: string, nodeType: string) {
+export async function purchaseNode(walletAddress: string, nodeType: string, txHash?: string) {
   const { data, error } = await supabase.rpc("purchase_node", {
     addr: walletAddress,
     node_type_param: nodeType,
+    tx_hash: txHash || null,
   });
   if (error) throw error;
   return data;

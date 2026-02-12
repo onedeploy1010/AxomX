@@ -8,8 +8,10 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, getNodeMembership, purchaseNode } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
+import { PAYMENT_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, Zap, Server, CheckCircle2 } from "lucide-react";
+import { Shield, Zap, Server, CheckCircle2, Loader2 } from "lucide-react";
 import type { NodeMembership, Profile } from "@shared/types";
 import { NODE_PLANS } from "@/lib/data";
 import { useTranslation } from "react-i18next";
@@ -33,18 +35,27 @@ export function NodeSection() {
     enabled: !!walletAddr,
   });
 
+  const payment = usePayment();
+
   const purchaseMutation = useMutation({
     mutationFn: async (nodeType: string) => {
-      return purchaseNode(walletAddr, nodeType);
+      const plan = NODE_PLANS[nodeType as keyof typeof NODE_PLANS];
+      let txHash: string | undefined;
+      if (PAYMENT_CONTRACT_ADDRESS) {
+        txHash = await payment.pay(plan.price, `NODE_${nodeType}`);
+      }
+      return purchaseNode(walletAddr, nodeType, txHash);
     },
     onSuccess: () => {
       toast({ title: t("profile.nodePurchased"), description: t("profile.nodePurchasedDesc") });
       queryClient.invalidateQueries({ queryKey: ["node-membership", walletAddr] });
       queryClient.invalidateQueries({ queryKey: ["profile", walletAddr] });
       setDialogOpen(false);
+      payment.reset();
     },
     onError: (err: Error) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+      payment.reset();
     },
   });
 
@@ -142,7 +153,9 @@ export function NodeSection() {
                   disabled={purchaseMutation.isPending}
                   data-testid="button-buy-mini"
                 >
-                  {purchaseMutation.isPending ? t("common.processing") : t("profile.purchaseMini")}
+                  {purchaseMutation.isPending ? (
+                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {getPaymentStatusLabel(payment.status) || t("common.processing")}</>
+                  ) : t("profile.purchaseMini")}
                 </Button>
               </CardContent>
             </Card>
@@ -181,7 +194,9 @@ export function NodeSection() {
                   disabled={purchaseMutation.isPending}
                   data-testid="button-buy-max"
                 >
-                  {purchaseMutation.isPending ? t("common.processing") : t("profile.purchaseMax")}
+                  {purchaseMutation.isPending ? (
+                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {getPaymentStatusLabel(payment.status) || t("common.processing")}</>
+                  ) : t("profile.purchaseMax")}
                 </Button>
               </CardContent>
             </Card>

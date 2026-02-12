@@ -23,14 +23,40 @@ export const PREDICTION_GRID_CONFIG = {
 };
 
 export const VAULT_PLANS = {
-  "5_DAYS": { days: 5, dailyRate: 0.005, label: "5 Days", apr: "36.5%" },
-  "15_DAYS": { days: 15, dailyRate: 0.007, label: "15 Days", apr: "51.1%" },
-  "45_DAYS": { days: 45, dailyRate: 0.009, label: "45 Days", apr: "65.7%" },
+  "5_DAYS": { days: 5, dailyRate: 0.005, label: "5 Days", apr: "36.5%", minAmount: 50, platformFee: 0.10 },
+  "15_DAYS": { days: 15, dailyRate: 0.007, label: "15 Days", apr: "51.1%", minAmount: 50, platformFee: 0.10 },
+  "45_DAYS": { days: 45, dailyRate: 0.009, label: "45 Days", apr: "65.7%", minAmount: 50, platformFee: 0.10 },
 } as const;
 
 export const NODE_PLANS = {
-  MINI: { price: 1000, label: "Mini Node", referralBonus: "5%", features: ["basicStrategies", "communityAccess"] },
-  MAX: { price: 6000, label: "Max Node", referralBonus: "10%", features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"] },
+  MINI: {
+    price: 1000, label: "Mini Node", durationDays: 90, fixedReturn: 0.10,
+    rankUnlock: "V4", weightMultiplier: 1.0,
+    referralBonus: "5%", features: ["basicStrategies", "communityAccess"],
+  },
+  MAX: {
+    price: 6000, label: "Max Node", durationDays: 120, fixedReturn: 0.10,
+    rankUnlock: "V6", weightMultiplier: 1.5,
+    referralBonus: "10%", features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"],
+  },
+} as const;
+
+export const RANKS = [
+  { level: "V1", commission: 0.06 },
+  { level: "V2", commission: 0.10 },
+  { level: "V3", commission: 0.15 },
+  { level: "V4", commission: 0.20 },
+  { level: "V5", commission: 0.25 },
+  { level: "V6", commission: 0.30 },
+  { level: "V7", commission: 0.50 },
+] as const;
+
+export const REVENUE_DISTRIBUTION = {
+  nodePool: 0.50,
+  buybackPool: 0.20,
+  insurancePool: 0.10,
+  treasuryPool: 0.10,
+  operations: 0.10,
 } as const;
 
 export const HEDGE_CONFIG = {
