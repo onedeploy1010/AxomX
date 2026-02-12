@@ -75,7 +75,7 @@ export default function Trade() {
   const tfLabel = timeframe === "1M" ? t("trade.signal1min") : timeframe === "5M" ? t("trade.signal5min") : timeframe === "30M" ? t("trade.signal30min") : t("trade.signal4h");
 
   return (
-    <div className="space-y-3 pb-52">
+    <div className="space-y-3 pb-72">
       <div className="flex items-center justify-between gap-2 px-4 pt-3 flex-wrap" style={{ animation: "fadeSlideIn 0.3s ease-out" }}>
         <Select value={selectedAsset} onValueChange={setSelectedAsset}>
           <SelectTrigger className="w-24 border-border bg-card text-sm" data-testid="select-asset">
