@@ -48,7 +48,7 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
               </span>
               {fearGreedLabel && (
                 <Badge
-                  className={`text-[10px] ${labelColor} no-default-hover-elevate no-default-active-elevate`}
+                  className={`text-[12px] ${labelColor} no-default-hover-elevate no-default-active-elevate`}
                   data-testid="badge-fear-greed-label"
                 >
                   {fearGreedLabel}

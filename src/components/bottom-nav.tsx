@@ -40,7 +40,7 @@ export function BottomNav() {
                 data-testid={`nav-${tab.path === "/" ? "home" : tab.path.slice(1)}`}
               >
                 <tab.icon className={`h-5 w-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]" : ""}`} />
-                <span className="text-[10px] font-medium">{label}</span>
+                <span className="text-[12px] font-medium">{label}</span>
               </Button>
             </Link>
           );

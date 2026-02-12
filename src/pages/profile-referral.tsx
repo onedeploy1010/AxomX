@@ -127,21 +127,21 @@ export default function ProfileReferralPage() {
             <CardContent className="p-3 text-center">
               <Users className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold text-neon-value" data-testid="text-team-size">{isConnected ? (teamData?.teamSize || 0) : "--"}</div>
-              <div className="text-[10px] text-muted-foreground">{t("profile.teamSize")}</div>
+              <div className="text-[12px] text-muted-foreground">{t("profile.teamSize")}</div>
             </CardContent>
           </Card>
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <UserPlus className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold text-neon-value" data-testid="text-direct-count">{isConnected ? (teamData?.directCount || 0) : "--"}</div>
-              <div className="text-[10px] text-muted-foreground">{t("profile.direct")}</div>
+              <div className="text-[12px] text-muted-foreground">{t("profile.direct")}</div>
             </CardContent>
           </Card>
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <ArrowDownToLine className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold text-neon-value" data-testid="text-team-deposits">{isConnected ? formatCompact(totalTeamDeposits) : "--"}</div>
-              <div className="text-[10px] text-muted-foreground">{t("profile.deposits")}</div>
+              <div className="text-[12px] text-muted-foreground">{t("profile.deposits")}</div>
             </CardContent>
           </Card>
         </div>
@@ -178,10 +178,10 @@ export default function ProfileReferralPage() {
                       {shortenAddress(ref.walletAddress)}
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-[9px] no-default-hover-elevate no-default-active-elevate shrink-0">
+                  <Badge variant="secondary" className="text-[11px] no-default-hover-elevate no-default-active-elevate shrink-0">
                     {ref.rank}
                   </Badge>
-                  <Badge variant="secondary" className="text-[9px] no-default-hover-elevate no-default-active-elevate shrink-0">
+                  <Badge variant="secondary" className="text-[11px] no-default-hover-elevate no-default-active-elevate shrink-0">
                     {ref.nodeType}
                   </Badge>
                 </div>
@@ -194,11 +194,11 @@ export default function ProfileReferralPage() {
                       >
                         <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-mono truncate" data-testid={`text-subref-wallet-${sub.id}`}>
+                          <div className="text-[12px] font-mono truncate" data-testid={`text-subref-wallet-${sub.id}`}>
                             {shortenAddress(sub.walletAddress)}
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-[8px] no-default-hover-elevate no-default-active-elevate shrink-0">
+                        <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0">
                           {sub.rank}
                         </Badge>
                       </div>

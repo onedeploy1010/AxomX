@@ -31,7 +31,7 @@ export function AssetsOverview() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1">{t("profile.netAssets")}</div>
+              <div className="text-[12px] text-muted-foreground mb-1">{t("profile.netAssets")}</div>
               {isLoading ? (
                 <Skeleton className="h-8 w-24" />
               ) : (
@@ -47,7 +47,7 @@ export function AssetsOverview() {
       <div className="grid grid-cols-3 gap-3">
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
               <ArrowDownToLine className="h-3 w-3" /> {t("profile.deposited")}
             </div>
             {isLoading ? (
@@ -59,7 +59,7 @@ export function AssetsOverview() {
         </Card>
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
               <ArrowUpFromLine className="h-3 w-3" /> {t("profile.withdrawn")}
             </div>
             {isLoading ? (
@@ -71,7 +71,7 @@ export function AssetsOverview() {
         </Card>
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
               <Users className="h-3 w-3" /> {t("profile.referral")}
             </div>
             {isLoading ? (

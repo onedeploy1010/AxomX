@@ -34,7 +34,7 @@ export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps
       {strategy.isVipOnly && (
         <div className="absolute inset-0 z-10 rounded-md bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
           <Lock className="h-6 w-6 text-primary" />
-          <Badge className="bg-primary/20 text-primary text-[10px] no-default-hover-elevate no-default-active-elevate">
+          <Badge className="bg-primary/20 text-primary text-[12px] no-default-hover-elevate no-default-active-elevate">
             {t("strategy.vipOnly")}
           </Badge>
         </div>
@@ -44,22 +44,22 @@ export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps
           <h4 className="text-xs font-semibold leading-tight line-clamp-2 flex-1">{strategy.name}</h4>
           <div className="flex gap-1 shrink-0">
             {strategy.isHot && (
-              <Badge className="bg-red-500/15 text-red-400 text-[9px] no-default-hover-elevate no-default-active-elevate">
+              <Badge className="bg-red-500/15 text-red-400 text-[11px] no-default-hover-elevate no-default-active-elevate">
                 <Flame className="h-2.5 w-2.5 mr-0.5" />{t("strategy.hot")}
               </Badge>
             )}
           </div>
         </div>
         {strategy.description && (
-          <p className="text-[10px] text-muted-foreground line-clamp-2 mb-1">{strategy.description}</p>
+          <p className="text-[12px] text-muted-foreground line-clamp-2 mb-1">{strategy.description}</p>
         )}
-        <div className="text-[10px] text-muted-foreground mb-1">
+        <div className="text-[12px] text-muted-foreground mb-1">
           {strategy.leverage} | AUM: {formatCompact(aum)}
         </div>
         <div className={`text-xl font-bold mb-1 ${isPositive ? "text-neon-value" : "text-red-400"}`}>
           {formatted}
         </div>
-        <div className="text-[10px] text-muted-foreground mb-2">Win: {winDisplay}</div>
+        <div className="text-[12px] text-muted-foreground mb-2">Win: {winDisplay}</div>
         <div className="h-10 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>

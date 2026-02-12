@@ -102,8 +102,8 @@ function FearGreedChart({ data, coinSymbol }: { data: { date: string; fgi: numbe
   return (
     <div className="mt-4" data-testid="fear-greed-chart">
       <div className="flex items-center gap-3 mb-2 flex-wrap">
-        {hasPrice && <div className="flex items-center gap-1"><div className="w-3 h-[2px] bg-white/80" /><span className="text-[10px] text-muted-foreground">{t("dashboard.priceLabel", { symbol: coinSymbol })}</span></div>}
-        <div className="flex items-center gap-1"><div className="w-3 h-[2px] bg-amber-500" /><span className="text-[10px] text-muted-foreground">{t("dashboard.sentimentIndex")}</span></div>
+        {hasPrice && <div className="flex items-center gap-1"><div className="w-3 h-[2px] bg-white/80" /><span className="text-[12px] text-muted-foreground">{t("dashboard.priceLabel", { symbol: coinSymbol })}</span></div>}
+        <div className="flex items-center gap-1"><div className="w-3 h-[2px] bg-amber-500" /><span className="text-[12px] text-muted-foreground">{t("dashboard.sentimentIndex")}</span></div>
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <ComposedChart data={sampled} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
@@ -149,7 +149,7 @@ function PriceCalendar({ data }: { data: CalendarData | undefined }) {
         <Button size="icon" variant="ghost" onClick={() => setMonthOffset(o => Math.min(o + 1, 0))} disabled={monthOffset >= 0} data-testid="button-next-month"><ChevronRight className="h-4 w-4" /></Button>
       </div>
       <div className="grid grid-cols-7 gap-[2px] mb-1">
-        {WEEKDAYS.map((wd) => (<div key={wd} className="text-center text-[10px] text-muted-foreground font-medium py-1">{wd}</div>))}
+        {WEEKDAYS.map((wd) => (<div key={wd} className="text-center text-[12px] text-muted-foreground font-medium py-1">{wd}</div>))}
       </div>
       <div className="grid grid-cols-7 gap-[2px]">
         {cells.map((cell, i) => {
@@ -164,8 +164,8 @@ function PriceCalendar({ data }: { data: CalendarData | undefined }) {
           }
           return (
             <div key={`day-${cell.day}`} className={`h-12 rounded-[3px] flex flex-col items-center justify-center ${bgClass}`} data-testid={`calendar-day-${cell.day}`}>
-              <span className="text-[10px] text-muted-foreground">{cell.day}</span>
-              {hasData && <span className={`text-[10px] font-bold ${textColor}`}>{change > 0 ? "+" : ""}{change.toFixed(2)}%</span>}
+              <span className="text-[12px] text-muted-foreground">{cell.day}</span>
+              {hasData && <span className={`text-[12px] font-bold ${textColor}`}>{change > 0 ? "+" : ""}{change.toFixed(2)}%</span>}
             </div>
           );
         })}
@@ -239,7 +239,7 @@ export default function MarketPage() {
       <div className="px-4" style={{ animation: "fadeSlideIn 0.6s ease-out" }}>
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <h2 className="text-sm font-bold">{t("market.fearGreedIndex", { coin: selectedCoinTab })}</h2>
-          <Badge className="bg-muted/30 text-muted-foreground text-[9px] no-default-hover-elevate no-default-active-elevate">
+          <Badge className="bg-muted/30 text-muted-foreground text-[11px] no-default-hover-elevate no-default-active-elevate">
             {selectedCoinTab === "BTC" ? t("market.marketIndex") : t("market.priceBased")}
           </Badge>
         </div>
@@ -278,9 +278,9 @@ export default function MarketPage() {
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <h2 className="text-sm font-bold">{t("market.sentiment", { coin: selectedCoinTab })}</h2>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-muted-foreground">{t("market.netInflow")}</span>
+            <span className="text-[12px] text-muted-foreground">{t("market.netInflow")}</span>
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-emerald-400">{t("market.realTime")}</span>
+            <span className="text-[12px] text-emerald-400">{t("market.realTime")}</span>
           </div>
         </div>
         {sentLoading ? (
@@ -312,7 +312,7 @@ export default function MarketPage() {
                           <div className={`text-xs font-medium ${selectedCoin.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                             {selectedCoin.change24h >= 0 ? "+" : ""}{selectedCoin.change24h.toFixed(2)}%
                           </div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                          <div className="text-[12px] text-muted-foreground mt-0.5">
                             {t("common.price")}: {selectedCoinTab === "DOGE" ? `$${selectedCoin.price.toFixed(5)}` : formatUSD(selectedCoin.price)}
                           </div>
                         </div>
@@ -323,7 +323,7 @@ export default function MarketPage() {
               })()}
               {otherCoins.length > 0 && (
                 <div className="space-y-1.5 mt-3">
-                  <div className="text-[10px] text-muted-foreground uppercase font-medium">{t("market.otherCoins")}</div>
+                  <div className="text-[12px] text-muted-foreground uppercase font-medium">{t("market.otherCoins")}</div>
                   {otherCoins.map((coin) => {
                     const isInflow = coin.netFlow >= 0;
                     return (
@@ -332,7 +332,7 @@ export default function MarketPage() {
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div className="flex items-center gap-2 min-w-0 flex-wrap">
                               <div className="relative h-6 w-6 rounded-full shrink-0 flex items-center justify-center">
-                                {coin.image ? <img src={coin.image} alt={coin.name} className="h-6 w-6 rounded-full" /> : <div className="h-6 w-6 rounded-full bg-card flex items-center justify-center text-[9px] font-bold">{coin.symbol}</div>}
+                                {coin.image ? <img src={coin.image} alt={coin.name} className="h-6 w-6 rounded-full" /> : <div className="h-6 w-6 rounded-full bg-card flex items-center justify-center text-[11px] font-bold">{coin.symbol}</div>}
                               </div>
                               <span className="text-xs font-medium">{coin.symbol}</span>
                             </div>
@@ -340,7 +340,7 @@ export default function MarketPage() {
                               <span className={`text-xs font-bold ${isInflow ? "text-emerald-400" : "text-red-400"}`} data-testid={`text-netflow-${coin.symbol}`}>
                                 {isInflow ? "" : "-"}${formatCompact(Math.abs(coin.netFlow))}
                               </span>
-                              <span className={`text-[10px] font-medium ${coin.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                              <span className={`text-[12px] font-medium ${coin.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                                 {coin.change24h >= 0 ? "+" : ""}{coin.change24h.toFixed(1)}%
                               </span>
                             </div>
@@ -388,15 +388,15 @@ export default function MarketPage() {
                         <div className="flex items-center gap-2 min-w-0">
                           <div className="w-14 shrink-0">
                             <div className="text-xs font-bold">{item.pair}</div>
-                            <div className="text-[10px] text-muted-foreground truncate">{item.exchange}</div>
+                            <div className="text-[12px] text-muted-foreground truncate">{item.exchange}</div>
                           </div>
-                          <Badge className={`text-[9px] no-default-hover-elevate no-default-active-elevate ${isPositive ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}`}>
+                          <Badge className={`text-[11px] no-default-hover-elevate no-default-active-elevate ${isPositive ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}`}>
                             {isPositive ? "+" : ""}{item.priceChange24h.toFixed(2)}%
                           </Badge>
                         </div>
                         <div className="text-right">
                           <div className="text-xs font-bold" data-testid={`text-oi-value-${item.symbol}-${item.exchange}`}>${formatCompact(item.openInterestValue)}</div>
-                          <div className="text-[10px] text-muted-foreground">{item.openInterest.toLocaleString()} {t("market.contracts")}</div>
+                          <div className="text-[12px] text-muted-foreground">{item.openInterest.toLocaleString()} {t("market.contracts")}</div>
                         </div>
                       </div>
                     );
@@ -429,7 +429,7 @@ export default function MarketPage() {
         ) : selectedCoinExchanges ? (
           <Card className="border-border bg-card">
             <CardContent className="p-0">
-              <div className="flex items-center justify-between gap-1 p-3 border-b border-border text-[10px] text-muted-foreground uppercase font-medium">
+              <div className="flex items-center justify-between gap-1 p-3 border-b border-border text-[12px] text-muted-foreground uppercase font-medium">
                 <span className="w-20 shrink-0">{t("market.exchange")}</span>
                 <span className="flex-1 text-center">{t("market.spotPrice")}</span>
                 <span className="w-14 text-right shrink-0">{t("market.change24h")}</span>
@@ -440,12 +440,12 @@ export default function MarketPage() {
                   <div key={row.exchange} className={`flex items-center justify-between gap-1 px-3 py-2 ${idx < selectedCoinExchanges.exchanges.length - 1 ? "border-b border-border/50" : ""}`} data-testid={`exchange-price-${row.exchange}-${row.symbol}`}>
                     <div className="w-20 shrink-0 flex items-center gap-1.5">
                       <div className="h-4 w-4 rounded-full bg-card/80 border border-border flex items-center justify-center shrink-0">
-                        <span className="text-[6px] font-bold">{row.exchange.substring(0, 2)}</span>
+                        <span className="text-[8px] font-bold">{row.exchange.substring(0, 2)}</span>
                       </div>
-                      <span className="text-[11px] font-medium truncate">{row.exchange}</span>
+                      <span className="text-[13px] font-medium truncate">{row.exchange}</span>
                     </div>
                     <span className="flex-1 text-center text-xs font-bold tabular-nums">{selectedCoinTab === "DOGE" ? `$${row.price.toFixed(5)}` : formatUSD(row.price)}</span>
-                    <span className={`w-14 text-right text-[11px] font-medium shrink-0 ${isPos ? "text-emerald-400" : "text-red-400"}`}>
+                    <span className={`w-14 text-right text-[13px] font-medium shrink-0 ${isPos ? "text-emerald-400" : "text-red-400"}`}>
                       {isPos ? "+" : ""}{row.change24h.toFixed(2)}%
                     </span>
                   </div>

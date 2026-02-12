@@ -72,7 +72,7 @@ export default function ProfileTransactionsPage() {
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
                       <Badge
-                        className={`text-[9px] shrink-0 no-default-hover-elevate no-default-active-elevate ${TX_TYPE_COLORS[tx.type] || "bg-muted text-muted-foreground"}`}
+                        className={`text-[11px] shrink-0 no-default-hover-elevate no-default-active-elevate ${TX_TYPE_COLORS[tx.type] || "bg-muted text-muted-foreground"}`}
                         data-testid={`badge-tx-type-${tx.id}`}
                       >
                         {tx.type}
@@ -83,7 +83,7 @@ export default function ProfileTransactionsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0">
+                    <div className="flex items-center gap-1 text-[12px] text-muted-foreground shrink-0">
                       <Calendar className="h-3 w-3" />
                       {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : "--"}
                     </div>

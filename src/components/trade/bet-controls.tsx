@@ -47,7 +47,7 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
             </Button>
             <div className="flex items-baseline gap-1 min-w-[50px] justify-center">
               <span className="text-lg font-bold" data-testid="text-bet-amount">${amount}</span>
-              <span className="text-[9px] text-muted-foreground">{t("trade.stake")}</span>
+              <span className="text-[11px] text-muted-foreground">{t("trade.stake")}</span>
             </div>
             <Button
               size="icon"
@@ -70,7 +70,7 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
             </Button>
             <div className="text-center min-w-[42px]">
               <span className="text-lg font-bold" data-testid="text-duration">{duration}</span>
-              <div className="text-[9px] text-muted-foreground">{t("trade.duration")}</div>
+              <div className="text-[11px] text-muted-foreground">{t("trade.duration")}</div>
             </div>
             <Button
               size="icon"

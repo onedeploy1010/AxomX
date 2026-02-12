@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS revenue_pools (
 -- Node reward ledger
 CREATE TABLE IF NOT EXISTS node_rewards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id) NOT NULL,
+  user_id VARCHAR REFERENCES profiles(id) NOT NULL,
   reward_type TEXT NOT NULL,  -- 'FIXED_YIELD', 'POOL_DIVIDEND', 'TEAM_COMMISSION'
   amount NUMERIC NOT NULL,
   details JSONB,
@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS node_rewards (
 -- Vault reward ledger
 CREATE TABLE IF NOT EXISTS vault_rewards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id) NOT NULL,
-  position_id UUID REFERENCES vault_positions(id) NOT NULL,
+  user_id VARCHAR REFERENCES profiles(id) NOT NULL,
+  position_id VARCHAR REFERENCES vault_positions(id) NOT NULL,
   reward_type TEXT NOT NULL,  -- 'DAILY_YIELD', 'PLATFORM_FEE'
   amount NUMERIC NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()

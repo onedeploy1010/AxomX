@@ -84,7 +84,7 @@ export default function ProfileNotificationsPage() {
             </Button>
             <h1 className="text-lg font-bold">{t("notifications.title")}</h1>
             {unreadCount > 0 && (
-              <Badge className="bg-primary/20 text-primary text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-unread-count">
+              <Badge className="bg-primary/20 text-primary text-[12px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-unread-count">
                 {unreadCount}
               </Badge>
             )}
@@ -132,7 +132,7 @@ export default function ProfileNotificationsPage() {
                           <span className={`text-sm font-medium ${!notif.read ? "text-foreground" : "text-muted-foreground"}`}>
                             {notif.title}
                           </span>
-                          <span className="text-[10px] text-muted-foreground shrink-0">{notif.time}</span>
+                          <span className="text-[12px] text-muted-foreground shrink-0">{notif.time}</span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{notif.message}</p>
                       </div>

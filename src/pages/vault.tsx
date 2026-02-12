@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,7 +58,7 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
     <Card className="border-border bg-card">
       <CardContent className="p-4">
         <div className="overflow-x-auto">
-        <div className="grid grid-cols-5 text-[10px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
+        <div className="grid grid-cols-5 text-[12px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
           <span>{t("common.token")}</span><span>{t("common.amount")}</span><span>{t("common.txid")}</span><span>{t("common.status")}</span><span>{t("common.date")}</span>
         </div>
         <div className="space-y-1">
@@ -75,7 +75,7 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
                 {tx.txHash ? shortenAddress(tx.txHash) : "-"}
               </span>
               <Badge
-                className={`text-[9px] w-fit no-default-hover-elevate no-default-active-elevate ${
+                className={`text-[11px] w-fit no-default-hover-elevate no-default-active-elevate ${
                   tx.status === "CONFIRMED"
                     ? "bg-primary/15 text-primary"
                     : "bg-yellow-500/15 text-yellow-400"
@@ -207,7 +207,7 @@ export default function Vault() {
   };
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-6 pb-28">
       <style>{`
         @keyframes fadeSlideIn {
           from { opacity: 0; transform: translateY(8px); }
@@ -227,14 +227,14 @@ export default function Vault() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-4 mb-3 flex-wrap">
               <div>
-                <div className="text-[10px] text-muted-foreground">{t("vault.yourPosition")}</div>
-                <div className="text-xl font-bold" data-testid="text-my-position">
+                <div className="text-[12px] text-muted-foreground">{t("vault.yourPosition")}</div>
+                <div className="text-2xl font-bold" data-testid="text-my-position">
                   {walletAddress ? formatUSD(totalPrincipal) : "$0.00"}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground">{t("vault.accumulatedYield")}</div>
-                <div className="text-xl font-bold text-neon-value" data-testid="text-my-yield">
+                <div className="text-[12px] text-muted-foreground">{t("vault.accumulatedYield")}</div>
+                <div className="text-2xl font-bold text-neon-value" data-testid="text-my-yield">
                   {walletAddress ? formatUSD(totalYield) : "$0.00"}
                 </div>
               </div>
@@ -256,11 +256,11 @@ export default function Vault() {
       </div>
 
       <div className="px-4">
-        <h3 className="text-sm font-bold mb-3">{t("vault.positions")}</h3>
+        <h3 className="text-base font-bold mb-3">{t("vault.positions")}</h3>
         <Card className="border-border bg-card">
           <CardContent className="p-4">
             <div className="overflow-x-auto">
-            <div className="grid grid-cols-5 text-[10px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
+            <div className="grid grid-cols-5 text-[12px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
               <span>{t("common.amount")}</span>
               <span>{t("vault.start")}</span>
               <span>{t("vault.lock")}</span>
@@ -288,7 +288,7 @@ export default function Vault() {
                   return (
                     <div
                       key={pos.id}
-                      className="grid grid-cols-5 items-center text-xs py-2 border-b border-border/30 last:border-0 gap-1 min-w-[340px]"
+                      className="grid grid-cols-5 items-center text-xs py-3 border-b border-border/30 last:border-0 gap-1 min-w-[340px]"
                       style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.08}s both` }}
                       data-testid={`row-position-${pos.id}`}
                     >
@@ -311,7 +311,7 @@ export default function Vault() {
                             {t("common.withdraw")}
                           </Button>
                         ) : (
-                          <Badge className="text-[9px] bg-muted/50 text-muted-foreground no-default-hover-elevate no-default-active-elevate">
+                          <Badge className="text-[11px] bg-muted/50 text-muted-foreground no-default-hover-elevate no-default-active-elevate">
                             {pos.status}
                           </Badge>
                         )}
@@ -393,6 +393,9 @@ export default function Vault() {
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">{t("vault.depositToVault")}</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              {t("vault.selectPlan")}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
@@ -468,6 +471,9 @@ export default function Vault() {
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">{t("vault.redeemFromVault")}</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              {t("vault.selectPosition")}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {!walletAddress ? (
@@ -520,7 +526,7 @@ export default function Vault() {
                         <span className="font-medium">${total.toFixed(2)}</span>
                       </div>
                       {isEarly && (
-                        <div className="text-yellow-400 text-[10px] mt-1">
+                        <div className="text-yellow-400 text-[12px] mt-1">
                           {t("vault.earlyWithdrawal")}
                         </div>
                       )}

@@ -87,7 +87,7 @@ export default function ProfileSettingsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium">{t("settings.language")}</div>
-                <div className="text-[10px] text-muted-foreground">{t("settings.languageDesc")}</div>
+                <div className="text-[12px] text-muted-foreground">{t("settings.languageDesc")}</div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <span className="text-xs text-muted-foreground">{currentLangObj.native}</span>
@@ -105,7 +105,7 @@ export default function ProfileSettingsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium">{t("settings.pushNotifications")}</div>
-                <div className="text-[10px] text-muted-foreground">{t("settings.pushNotificationsDesc")}</div>
+                <div className="text-[12px] text-muted-foreground">{t("settings.pushNotificationsDesc")}</div>
               </div>
               <div
                 className={`relative h-6 w-11 rounded-full transition-colors ${
@@ -130,7 +130,7 @@ export default function ProfileSettingsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium">{t("settings.soundEffects", "Sound Effects")}</div>
-                <div className="text-[10px] text-muted-foreground">{t("settings.soundEffectsDesc", "Enable or disable app sound effects")}</div>
+                <div className="text-[12px] text-muted-foreground">{t("settings.soundEffectsDesc", "Enable or disable app sound effects")}</div>
               </div>
               <div
                 className={`relative h-6 w-11 rounded-full transition-colors ${
@@ -160,7 +160,7 @@ export default function ProfileSettingsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium">{t("settings.securityCenter")}</div>
-                <div className="text-[10px] text-muted-foreground">{t("settings.securityCenterDesc")}</div>
+                <div className="text-[12px] text-muted-foreground">{t("settings.securityCenterDesc")}</div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </button>
@@ -168,7 +168,7 @@ export default function ProfileSettingsPage() {
         </Card>
 
         <div className="pt-4 text-center">
-          <span className="text-[10px] text-muted-foreground">{t("settings.version")}</span>
+          <span className="text-[12px] text-muted-foreground">{t("settings.version")}</span>
         </div>
       </div>
 
@@ -192,7 +192,7 @@ export default function ProfileSettingsPage() {
               >
                 <div>
                   <div className="text-sm font-medium">{lang.native}</div>
-                  <div className="text-[10px] text-muted-foreground">{lang.name}</div>
+                  <div className="text-[12px] text-muted-foreground">{lang.name}</div>
                 </div>
                 {currentLang === lang.code && (
                   <Check className="h-4 w-4 text-primary shrink-0" />

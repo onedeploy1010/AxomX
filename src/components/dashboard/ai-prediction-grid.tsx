@@ -56,7 +56,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
             )}
           </div>
-          <Badge variant="outline" className="text-[9px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate">
+          <Badge variant="outline" className="text-[11px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate">
             <Sparkles className="h-3 w-3 mr-1" />
             GPT-4o
           </Badge>
@@ -112,7 +112,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
                   >
                     {prediction.prediction}
                   </div>
-                  <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <div className="text-[12px] text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {selectedTf} {t("dashboard.timeframe")}
                   </div>
@@ -128,7 +128,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-background/50 rounded-md p-2.5 border border-border/30">
-                <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.targetPrice")}</div>
+                <div className="text-[12px] text-muted-foreground mb-0.5">{t("dashboard.targetPrice")}</div>
                 <div className={`text-sm font-bold ${isBullish ? "text-emerald-400" : isBearish ? "text-red-400" : "text-foreground"}`}
                   data-testid="text-prediction-target"
                 >
@@ -136,7 +136,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
                 </div>
               </div>
               <div className="bg-background/50 rounded-md p-2.5 border border-border/30">
-                <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.expectedChange")}</div>
+                <div className="text-[12px] text-muted-foreground mb-0.5">{t("dashboard.expectedChange")}</div>
                 <div className={`text-sm font-bold ${parseFloat(priceDiff) >= 0 ? "text-emerald-400" : "text-red-400"}`}
                   data-testid="text-prediction-change"
                 >
@@ -146,13 +146,13 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
             </div>
 
             <div className="bg-background/30 rounded-md p-2.5 border border-border/20">
-              <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.aiAnalysis")}</div>
+              <div className="text-[12px] text-muted-foreground mb-0.5">{t("dashboard.aiAnalysis")}</div>
               <p className="text-xs text-foreground/80" data-testid="text-prediction-reasoning">
                 {prediction.reasoning}
               </p>
             </div>
 
-            <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground flex-wrap">
+            <div className="flex items-center justify-between gap-2 text-[12px] text-muted-foreground flex-wrap">
               <span>{t("dashboard.fearGreed")}: {prediction.fearGreedIndex} ({prediction.fearGreedLabel})</span>
               <span>{t("dashboard.sourceOpenAI")}</span>
             </div>

@@ -126,7 +126,7 @@ export function PriceChart({
             key={tf.key}
             variant={selectedTimeframe === tf.key ? "default" : "ghost"}
             size="sm"
-            className={`text-[10px] ${selectedTimeframe === tf.key ? "font-bold" : "text-muted-foreground"}`}
+            className={`text-[12px] ${selectedTimeframe === tf.key ? "font-bold" : "text-muted-foreground"}`}
             onClick={() => onTimeframeChange(tf.key)}
             data-testid={`button-tf-${tf.key}`}
           >
@@ -135,7 +135,7 @@ export function PriceChart({
         ))}
         {forecast && (
           <Badge
-            className={`ml-auto text-[9px] shrink-0 ${directionColor} no-default-hover-elevate no-default-active-elevate`}
+            className={`ml-auto text-[11px] shrink-0 ${directionColor} no-default-hover-elevate no-default-active-elevate`}
             data-testid="badge-forecast-direction"
           >
             <Sparkles className="mr-1 h-2.5 w-2.5" />
@@ -143,7 +143,7 @@ export function PriceChart({
           </Badge>
         )}
         {forecastLoading && !forecast && (
-          <Badge className="ml-auto text-[9px] shrink-0 bg-muted/30 text-muted-foreground no-default-hover-elevate no-default-active-elevate animate-pulse">
+          <Badge className="ml-auto text-[11px] shrink-0 bg-muted/30 text-muted-foreground no-default-hover-elevate no-default-active-elevate animate-pulse">
             <Sparkles className="mr-1 h-2.5 w-2.5" />
             {t("common.loading")}
           </Badge>
@@ -166,7 +166,7 @@ export function PriceChart({
               data-testid="forecast-target-label"
             >
               <div
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold border"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[12px] font-bold border"
                 style={{
                   backgroundColor: direction === "BULLISH" ? "rgba(34,197,94,0.15)" : direction === "BEARISH" ? "rgba(239,68,68,0.15)" : "rgba(234,179,8,0.15)",
                   borderColor: direction === "BULLISH" ? "rgba(34,197,94,0.3)" : direction === "BEARISH" ? "rgba(239,68,68,0.3)" : "rgba(234,179,8,0.3)",
@@ -271,7 +271,7 @@ export function PriceChart({
 
       {forecast?.reasoning && (
         <div className="mt-1.5 px-1" data-testid="text-forecast-reasoning">
-          <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">
+          <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-2">
             <Sparkles className="inline h-2.5 w-2.5 mr-1 text-amber-400" />
             {forecast.reasoning}
           </p>

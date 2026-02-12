@@ -68,7 +68,7 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
         <div className="grid grid-cols-4 gap-2 text-center">
           <div>
             <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-total-bets">{totalAnim}</div>
-            <div className="text-[10px] text-muted-foreground">{t("trade.totalBets")}</div>
+            <div className="text-[12px] text-muted-foreground">{t("trade.totalBets")}</div>
           </div>
           <div>
             <div className="text-base font-bold tabular-nums" data-testid="text-win-loss">
@@ -76,15 +76,15 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
               <span className="text-muted-foreground">/</span>
               <span className="text-red-400">{lossesAnim}</span>
             </div>
-            <div className="text-[10px] text-muted-foreground">{t("trade.wl")}</div>
+            <div className="text-[12px] text-muted-foreground">{t("trade.wl")}</div>
           </div>
           <div>
             <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-win-rate">{winRate}%</div>
-            <div className="text-[10px] text-muted-foreground">{t("trade.winRate")}</div>
+            <div className="text-[12px] text-muted-foreground">{t("trade.winRate")}</div>
           </div>
           <div>
             <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-total-staked">${staked.toFixed(0)}</div>
-            <div className="text-[10px] text-muted-foreground">{t("trade.staked")}</div>
+            <div className="text-[12px] text-muted-foreground">{t("trade.staked")}</div>
           </div>
         </div>
       </CardContent>

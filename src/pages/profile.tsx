@@ -80,7 +80,7 @@ export default function ProfilePage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <div className="text-[10px] text-muted-foreground mb-1">{t("profile.netAssets")}</div>
+                <div className="text-[12px] text-muted-foreground mb-1">{t("profile.netAssets")}</div>
                 {!isConnected ? (
                   <div className="text-2xl font-bold text-muted-foreground" data-testid="text-net-assets">--</div>
                 ) : profileLoading ? (
@@ -97,8 +97,8 @@ export default function ProfilePage() {
         </Card>
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-border bg-card/50">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
                 <ArrowDownToLine className="h-3 w-3" /> {t("profile.deposited")}
               </div>
               {!isConnected ? (
@@ -111,8 +111,8 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
           <Card className="border-border bg-card/50">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
                 <ArrowUpFromLine className="h-3 w-3" /> {t("profile.withdrawn")}
               </div>
               {!isConnected ? (
@@ -125,8 +125,8 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
           <Card className="border-border bg-card/50">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
                 <Users className="h-3 w-3" /> {t("profile.referral")}
               </div>
               {!isConnected ? (
@@ -186,14 +186,14 @@ export default function ProfilePage() {
             </div>
             {isConnected && profile && (
               <div className="mt-2 flex items-center gap-2 flex-wrap">
-                <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-rank">
+                <Badge variant="secondary" className="text-[12px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-rank">
                   {t("common.rank")}: {profile.rank}
                 </Badge>
-                <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-node-type">
+                <Badge variant="secondary" className="text-[12px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-node-type">
                   {t("common.node")}: {profile.nodeType}
                 </Badge>
                 {profile.isVip && (
-                  <Badge className="bg-primary/20 text-primary text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-vip">
+                  <Badge className="bg-primary/20 text-primary text-[12px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-vip">
                     VIP
                   </Badge>
                 )}
@@ -201,10 +201,10 @@ export default function ProfilePage() {
             )}
             {!isConnected && (
               <div className="mt-2 flex items-center gap-2 flex-wrap">
-                <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
+                <Badge variant="secondary" className="text-[12px] no-default-hover-elevate no-default-active-elevate">
                   {t("common.rank")}: --
                 </Badge>
-                <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
+                <Badge variant="secondary" className="text-[12px] no-default-hover-elevate no-default-active-elevate">
                   {t("common.node")}: --
                 </Badge>
               </div>
@@ -238,7 +238,7 @@ export default function ProfilePage() {
                 </Button>
               )}
               {!isConnected && (
-                <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
+                <Badge variant="secondary" className="text-[12px] no-default-hover-elevate no-default-active-elevate">
                   {t("common.connectToUnlock")}
                 </Badge>
               )}
@@ -263,7 +263,7 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <div className="text-sm font-bold">{t("profile.becomeNodeOperator")}</div>
-                    <div className="text-[10px] text-muted-foreground">{t("profile.connectToViewNodePlans")}</div>
+                    <div className="text-[12px] text-muted-foreground">{t("profile.connectToViewNodePlans")}</div>
                   </div>
                 </div>
               </CardContent>
@@ -290,7 +290,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium">{t(item.labelKey)}</div>
-                  <div className="text-[10px] text-muted-foreground">{t(item.descKey)}</div>
+                  <div className="text-[12px] text-muted-foreground">{t(item.descKey)}</div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </button>

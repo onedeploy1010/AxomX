@@ -27,7 +27,7 @@ export function VaultStats() {
 
   if (isLoading || !overview) {
     return (
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-20 rounded-md" />
         ))}
@@ -43,37 +43,37 @@ export function VaultStats() {
       : `$${tvlNum.toFixed(2)}`;
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-4">
       <Card className="border-border bg-card">
-        <CardContent className="p-3">
-          <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+        <CardContent className="p-4">
+          <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
             <Layers className="h-3 w-3" /> {t("vault.tvl")}
           </div>
           <div className="text-lg font-bold" data-testid="text-tvl">{tvlFormatted}</div>
         </CardContent>
       </Card>
       <Card className="border-border bg-card">
-        <CardContent className="p-3">
-          <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+        <CardContent className="p-4">
+          <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
             <Clock className="h-3 w-3" /> {t("vault.maxApr")}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-neon-value" data-testid="text-max-apr">{maxApr}%</span>
-            <Badge className="text-[10px] bg-primary/15 text-primary no-default-hover-elevate no-default-active-elevate">APR</Badge>
+            <Badge className="text-[12px] bg-primary/15 text-primary no-default-hover-elevate no-default-active-elevate">APR</Badge>
           </div>
         </CardContent>
       </Card>
       <Card className="border-border bg-card">
-        <CardContent className="p-3">
-          <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+        <CardContent className="p-4">
+          <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
             <Users className="h-3 w-3" /> {t("vault.holders")}
           </div>
           <div className="text-lg font-bold" data-testid="text-holders">{overview.holders}</div>
         </CardContent>
       </Card>
       <Card className="border-border bg-card">
-        <CardContent className="p-3">
-          <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+        <CardContent className="p-4">
+          <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
             <Lock className="h-3 w-3" /> {t("vault.activePositions")}
           </div>
           <div className="text-lg font-bold" data-testid="text-positions">{overview.totalPositions}</div>

@@ -82,6 +82,15 @@ export default {
           offline: "rgb(156 163 175)",
         },
       },
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.125rem" }],    // 12px → 13px
+        sm: ["0.9375rem", { lineHeight: "1.375rem" }],    // 14px → 15px
+        base: ["1.0625rem", { lineHeight: "1.625rem" }],  // 16px → 17px
+        lg: ["1.25rem", { lineHeight: "1.75rem" }],        // 18px → 20px
+        xl: ["1.375rem", { lineHeight: "1.875rem" }],      // 20px → 22px
+        "2xl": ["1.625rem", { lineHeight: "2.125rem" }],  // 24px → 26px
+        "3xl": ["2.125rem", { lineHeight: "2.5rem" }],    // 30px → 34px
+      },
       fontFamily: {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],

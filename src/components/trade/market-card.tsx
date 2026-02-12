@@ -14,7 +14,7 @@ function AssetIcon({ asset }: { asset: string }) {
     default:
       return (
         <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center mt-0.5 shrink-0">
-          <span className="text-[10px] font-bold text-primary">{asset[0]}</span>
+          <span className="text-[12px] font-bold text-primary">{asset[0]}</span>
         </div>
       );
   }
@@ -45,10 +45,10 @@ export function MarketCard({ market }: MarketCardProps) {
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-neon-value">{market.yesOdds}%</span>
-                  <Button size="sm" className="h-6 text-[10px] bg-primary/20 text-primary">
+                  <Button size="sm" className="h-6 text-[12px] bg-primary/20 text-primary">
                     {t("common.yes")}
                   </Button>
-                  <Button size="sm" className="h-6 text-[10px] bg-red-500/20 text-red-400">
+                  <Button size="sm" className="h-6 text-[12px] bg-red-500/20 text-red-400">
                     {t("common.no")}
                   </Button>
                 </div>
@@ -60,17 +60,17 @@ export function MarketCard({ market }: MarketCardProps) {
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-red-400">{market.noOdds}%</span>
-                    <Button size="sm" className="h-6 text-[10px] bg-primary/20 text-primary">
+                    <Button size="sm" className="h-6 text-[12px] bg-primary/20 text-primary">
                       {t("common.yes")}
                     </Button>
-                    <Button size="sm" className="h-6 text-[10px] bg-red-500/20 text-red-400">
+                    <Button size="sm" className="h-6 text-[12px] bg-red-500/20 text-red-400">
                       {t("common.no")}
                     </Button>
                   </div>
                 </div>
               )}
             </div>
-            <Badge variant="secondary" className="mt-2 text-[10px] no-default-hover-elevate no-default-active-elevate">
+            <Badge variant="secondary" className="mt-2 text-[12px] no-default-hover-elevate no-default-active-elevate">
               {market.asset}
             </Badge>
           </div>

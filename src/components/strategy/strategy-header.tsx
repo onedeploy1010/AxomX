@@ -38,7 +38,7 @@ export function StrategyHeader() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1">{t("strategy.totalAum")}</div>
+              <div className="text-[12px] text-muted-foreground mb-1">{t("strategy.totalAum")}</div>
               <div className="text-2xl font-bold" data-testid="text-total-aum">{overview.totalAum}</div>
             </div>
             <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -50,7 +50,7 @@ export function StrategyHeader() {
       <div className="grid grid-cols-2 gap-3 mt-3">
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
               <Target className="h-3 w-3" /> {t("strategy.avgWinRate")}
             </div>
             <div className="text-xl font-bold text-neon-value" data-testid="text-win-rate">{overview.avgWinRate}</div>
@@ -58,7 +58,7 @@ export function StrategyHeader() {
         </Card>
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground mb-1">
               <BarChart3 className="h-3 w-3" /> {t("strategy.avgMonthlyReturn")}
             </div>
             <div className="text-xl font-bold text-neon-value" data-testid="text-avg-return">{overview.avgReturn}</div>

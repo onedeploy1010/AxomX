@@ -88,9 +88,9 @@ export default function Trade() {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1 text-[12px] text-muted-foreground">
           {t("common.data")}:
-          <Badge variant="outline" className="text-[9px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate px-1.5 py-0">
+          <Badge variant="outline" className="text-[11px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate px-1.5 py-0">
             Binance
           </Badge>
         </div>
@@ -139,7 +139,7 @@ export default function Trade() {
       <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.05s both" }}>
         <div className="flex items-center gap-2 mb-1.5">
           <Radio className="h-3 w-3 text-primary animate-pulse" />
-          <span className="text-[10px] text-primary/80 font-medium">{tfLabel}</span>
+          <span className="text-[12px] text-primary/80 font-medium">{tfLabel}</span>
         </div>
         <PredictionGrid bets={bets} gridType={gridView} timeframe={timeframe} />
       </div>
@@ -166,7 +166,7 @@ export default function Trade() {
               {t("trade.leaderboard")}
             </Button>
           </div>
-          <span className="text-[10px] text-muted-foreground">{t("trade.sourcePolymarket")}</span>
+          <span className="text-[12px] text-muted-foreground">{t("trade.sourcePolymarket")}</span>
         </div>
 
         {infoTab === "market" ? (
@@ -177,10 +177,10 @@ export default function Trade() {
                   <span className="text-xl font-bold text-neon-value" data-testid="text-current-price">
                     {formatUSD(currentPrice)}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">{selectedAsset}/USD</span>
+                  <span className="text-[12px] text-muted-foreground">{selectedAsset}/USD</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 text-[10px] text-primary/70">
+              <div className="flex items-center gap-1 text-[12px] text-primary/70">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                 {t("trade.live1s")}
               </div>
@@ -229,7 +229,7 @@ export default function Trade() {
                       <span className="text-sm font-medium">{bet.asset}</span>
                       <Badge
                         variant="outline"
-                        className={`text-[10px] no-default-hover-elevate no-default-active-elevate ${
+                        className={`text-[12px] no-default-hover-elevate no-default-active-elevate ${
                           bet.direction === "up" || bet.direction === "bull"
                             ? "text-primary border-primary/30"
                             : "text-red-400 border-red-400/30"
@@ -243,7 +243,7 @@ export default function Trade() {
                       {bet.result && (
                         <Badge
                           variant="secondary"
-                          className={`text-[10px] no-default-hover-elevate no-default-active-elevate ${
+                          className={`text-[12px] no-default-hover-elevate no-default-active-elevate ${
                             bet.result === "WIN" ? "text-neon-value" : "text-red-400"
                           }`}
                         >

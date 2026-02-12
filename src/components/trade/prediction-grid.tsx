@@ -59,7 +59,7 @@ function BigRoadGrid({ cells, cols, rows, visibleCount }: { cells: GridCell[]; c
           {Array.from({ length: rows }, (_, r) => (
             <div
               key={r}
-              className="flex items-center justify-center text-[9px] text-muted-foreground font-mono"
+              className="flex items-center justify-center text-[11px] text-muted-foreground font-mono"
               style={{ height: 32, width: 16 }}
               data-testid={`row-label-${r + 1}`}
             >
@@ -128,7 +128,7 @@ function BigRoadGrid({ cells, cols, rows, visibleCount }: { cells: GridCell[]; c
         {Array.from({ length: cols }, (_, c) => (
           <div
             key={c}
-            className="flex-1 text-center text-[9px] text-muted-foreground font-mono"
+            className="flex-1 text-center text-[11px] text-muted-foreground font-mono"
             data-testid={`col-label-${c + 1}`}
           >
             {c + 1}
@@ -147,7 +147,7 @@ function SmallRoadGrid({ cells, cols, rows, visibleCount }: { cells: GridCell[];
           {Array.from({ length: rows }, (_, r) => (
             <div
               key={r}
-              className="flex items-center justify-center text-[9px] text-muted-foreground font-mono"
+              className="flex items-center justify-center text-[11px] text-muted-foreground font-mono"
               style={{ height: 24, width: 16 }}
               data-testid={`row-label-${r + 1}`}
             >
@@ -214,7 +214,7 @@ function SmallRoadGrid({ cells, cols, rows, visibleCount }: { cells: GridCell[];
         {Array.from({ length: cols }, (_, c) => (
           <div
             key={c}
-            className="flex-1 text-center text-[9px] text-muted-foreground font-mono"
+            className="flex-1 text-center text-[11px] text-muted-foreground font-mono"
             data-testid={`col-label-${c + 1}`}
           >
             {c + 1}
@@ -259,7 +259,7 @@ export function PredictionGrid({ bets, gridType, timeframe }: PredictionGridProp
 
   return (
     <div data-testid={`prediction-grid-${gridType}`}>
-      <div className="flex items-center gap-3 mb-2 text-[11px] flex-wrap">
+      <div className="flex items-center gap-3 mb-2 text-[13px] flex-wrap">
         <span className="text-emerald-400 font-bold" data-testid="text-bull-count">{t("trade.bull")}: {ups}</span>
         <span className="text-red-400 font-bold" data-testid="text-bear-count">{t("trade.bear")}: {downs}</span>
         <span className="flex items-center gap-1 text-muted-foreground">

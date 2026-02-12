@@ -73,7 +73,7 @@ export function NodeSection() {
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
         <h3 className="text-sm font-bold">{t("profile.nodeMembership")}</h3>
         {currentNode !== "NONE" && (
-          <Badge className="text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-current-node">
+          <Badge className="text-[12px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-current-node">
             {currentNode} {t("common.node")}
           </Badge>
         )}
@@ -90,7 +90,7 @@ export function NodeSection() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-bold">{currentNode} {t("common.node")}</div>
-                <div className="text-[10px] text-muted-foreground">
+                <div className="text-[12px] text-muted-foreground">
                   {t("profile.activeNodeStatus", { status: membership.status, price: Number(membership.price).toFixed(0) })}
                 </div>
               </div>
@@ -107,7 +107,7 @@ export function NodeSection() {
                 </div>
                 <div>
                   <div className="text-sm font-bold">{t("profile.becomeNodeOperator")}</div>
-                  <div className="text-[10px] text-muted-foreground">{t("profile.unlockReferralBonuses")}</div>
+                  <div className="text-[12px] text-muted-foreground">{t("profile.unlockReferralBonuses")}</div>
                 </div>
               </div>
               <Button
@@ -141,15 +141,15 @@ export function NodeSection() {
                   <span className="text-xl font-bold text-primary">${NODE_PLANS.MINI.price.toLocaleString()}</span>
                 </div>
                 <div className="space-y-1.5 mb-3">
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.referralBonus5")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.basicStrategies")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.communityAccess")}</span>
                   </div>
@@ -173,24 +173,24 @@ export function NodeSection() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Server className="h-5 w-5 text-primary shrink-0" />
                     <span className="text-sm font-bold">{t("profile.maxNode")}</span>
-                    <Badge className="text-[9px] bg-primary/20 text-primary no-default-hover-elevate no-default-active-elevate">{t("profile.popular")}</Badge>
+                    <Badge className="text-[11px] bg-primary/20 text-primary no-default-hover-elevate no-default-active-elevate">{t("profile.popular")}</Badge>
                   </div>
                   <span className="text-xl font-bold text-primary">${NODE_PLANS.MAX.price.toLocaleString()}</span>
                 </div>
                 <div className="space-y-1.5 mb-3">
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.referralBonus10")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.allStrategiesUnlocked")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.prioritySupport")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                     <span>{t("profile.higherVaultYields")}</span>
                   </div>
