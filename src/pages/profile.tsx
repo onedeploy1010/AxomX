@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
-import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, Shield, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server } from "lucide-react";
+import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, subscribeVip } from "@/lib/api";
@@ -13,7 +13,7 @@ import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VIP_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { VIP_PLANS } from "@/lib/data";
 import type { Profile } from "@shared/types";
-import { NodeSection } from "@/components/profile/node-section";
+
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 
@@ -248,32 +248,7 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-      <div className="px-4">
-        {isConnected ? (
-          <NodeSection />
-        ) : (
-          <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.2s both" }}>
-            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-              <h3 className="text-sm font-bold">{t("profile.nodeMembership")}</h3>
-            </div>
-            <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <Shield className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold">{t("profile.becomeNodeOperator")}</div>
-                    <div className="text-[12px] text-muted-foreground">{t("profile.connectToViewNodePlans")}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
-
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.25s both" }}>
+      <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.2s both" }}>
         <h3 className="text-sm font-bold mb-3">{t("profile.menu")}</h3>
         <Card className="border-border bg-card">
           <CardContent className="p-0">
