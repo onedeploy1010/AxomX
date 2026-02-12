@@ -77,7 +77,7 @@ export default function Dashboard() {
   const depthSell = exchangeData ? String(exchangeData.aggregatedSell) : (orderBook?.sellPercent || "50.0");
 
   return (
-    <div className="space-y-4 pb-20" data-testid="page-dashboard">
+    <div className="space-y-4 pb-24" data-testid="page-dashboard">
       <div
         className="gradient-green-dark rounded-b-2xl p-4 pt-2"
         style={{ animation: "fadeSlideIn 0.5s ease-out" }}

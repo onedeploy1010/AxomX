@@ -207,7 +207,7 @@ export default function Vault() {
   };
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6 pb-40">
       <style>{`
         @keyframes fadeSlideIn {
           from { opacity: 0; transform: translateY(8px); }

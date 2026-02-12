@@ -62,7 +62,7 @@ export default function ProfileSettingsPage() {
   const currentLangObj = LANGUAGES.find((l) => l.code === currentLang) || LANGUAGES[0];
 
   return (
-    <div className="space-y-4 pb-20" data-testid="page-profile-settings">
+    <div className="space-y-4 pb-24" data-testid="page-profile-settings">
       <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile">

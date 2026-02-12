@@ -202,7 +202,7 @@ export default function MarketPage() {
   const selectedCoinExchanges = exchangePrices?.find(c => c.symbol === selectedCoinTab);
 
   return (
-    <div className="space-y-4 pb-20" data-testid="page-market">
+    <div className="space-y-4 pb-24" data-testid="page-market">
       {/* Header + Coin Tabs + Calendar */}
       <div className="gradient-green-dark rounded-b-2xl p-4 pt-2" style={{ animation: "fadeSlideIn 0.5s ease-out" }}>
         <div className="flex items-center gap-2 mb-3 flex-wrap">

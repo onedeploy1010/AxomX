@@ -75,7 +75,7 @@ export default function ProfileNotificationsPage() {
   };
 
   return (
-    <div className="space-y-4 pb-20" data-testid="page-profile-notifications">
+    <div className="space-y-4 pb-24" data-testid="page-profile-notifications">
       <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">

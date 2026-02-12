@@ -73,7 +73,7 @@ export default function ProfilePage() {
   const referralEarnings = Number(profile?.referralEarnings || 0);
 
   return (
-    <div className="space-y-4 pb-20" data-testid="page-profile">
+    <div className="space-y-4 pb-24" data-testid="page-profile">
       <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
         <h2 className="text-lg font-bold mb-3" data-testid="text-profile-title">{t("profile.assetsOverview")}</h2>
         <Card className="border-border bg-card/50 glow-green-sm mb-3">
