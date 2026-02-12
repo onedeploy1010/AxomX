@@ -8,6 +8,7 @@ import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { useThirdwebClient } from "@/hooks/use-thirdweb";
 import { BottomNav } from "@/components/bottom-nav";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import Dashboard from "@/pages/dashboard";
 import Trade from "@/pages/trade";
@@ -45,6 +46,7 @@ function WalletSync() {
 
 function Header() {
   const { client, isLoading } = useThirdwebClient();
+  const { t } = useTranslation();
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-background/90 backdrop-blur-xl">
@@ -63,7 +65,7 @@ function Header() {
           client={client}
           wallets={wallets}
           connectButton={{
-            label: "Connect",
+            label: t("common.connect"),
             style: {
               background: "linear-gradient(135deg, hsl(174, 72%, 46%), hsl(170, 60%, 36%))",
               color: "#ffffff",

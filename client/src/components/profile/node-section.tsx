@@ -10,8 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, Zap, Server, CheckCircle2 } from "lucide-react";
 import type { NodeMembership, Profile } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export function NodeSection() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const { toast } = useToast();
   const walletAddr = account?.address || "";
@@ -33,7 +35,7 @@ export function NodeSection() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Node Purchased", description: "Your node membership is now active" });
+      toast({ title: t("profile.nodePurchased"), description: t("profile.nodePurchasedDesc") });
       queryClient.invalidateQueries({ queryKey: ["/api/node", walletAddr] });
       queryClient.invalidateQueries({ queryKey: ["/api/profile", walletAddr] });
       setDialogOpen(false);
@@ -48,10 +50,10 @@ export function NodeSection() {
   return (
     <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.2s both" }}>
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-        <h3 className="text-sm font-bold">Node Membership</h3>
+        <h3 className="text-sm font-bold">{t("profile.nodeMembership")}</h3>
         {currentNode !== "NONE" && (
           <Badge className="text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-current-node">
-            {currentNode} Node
+            {currentNode} {t("common.node")}
           </Badge>
         )}
       </div>
@@ -66,9 +68,9 @@ export function NodeSection() {
                 <Server className="h-5 w-5 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-bold">{currentNode} Node</div>
+                <div className="text-sm font-bold">{currentNode} {t("common.node")}</div>
                 <div className="text-[10px] text-muted-foreground">
-                  Status: {membership.status} | Price: ${Number(membership.price).toFixed(0)}
+                  {t("profile.activeNodeStatus", { status: membership.status, price: Number(membership.price).toFixed(0) })}
                 </div>
               </div>
             </div>
@@ -83,8 +85,8 @@ export function NodeSection() {
                   <Shield className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold">Become a Node Operator</div>
-                  <div className="text-[10px] text-muted-foreground">Unlock referral bonuses & premium strategies</div>
+                  <div className="text-sm font-bold">{t("profile.becomeNodeOperator")}</div>
+                  <div className="text-[10px] text-muted-foreground">{t("profile.unlockReferralBonuses")}</div>
                 </div>
               </div>
               <Button
@@ -92,7 +94,7 @@ export function NodeSection() {
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-open-node-dialog"
               >
-                <Zap className="mr-1 h-3 w-3" /> View Plans
+                <Zap className="mr-1 h-3 w-3" /> {t("profile.viewPlans")}
               </Button>
             </div>
           </CardContent>
@@ -102,9 +104,9 @@ export function NodeSection() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Node Membership</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{t("profile.nodeDialog")}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Choose a node tier to unlock exclusive benefits
+              {t("profile.nodeDialogDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
@@ -113,22 +115,22 @@ export function NodeSection() {
                 <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Shield className="h-5 w-5 text-primary shrink-0" />
-                    <span className="text-sm font-bold">MINI Node</span>
+                    <span className="text-sm font-bold">{t("profile.miniNode")}</span>
                   </div>
                   <span className="text-xl font-bold text-primary">$500</span>
                 </div>
                 <div className="space-y-1.5 mb-3">
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>5% referral bonus</span>
+                    <span>{t("profile.referralBonus5")}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>Basic strategies</span>
+                    <span>{t("profile.basicStrategies")}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>Community access</span>
+                    <span>{t("profile.communityAccess")}</span>
                   </div>
                 </div>
                 <Button
@@ -137,7 +139,7 @@ export function NodeSection() {
                   disabled={purchaseMutation.isPending}
                   data-testid="button-buy-mini"
                 >
-                  {purchaseMutation.isPending ? "Processing..." : "Purchase MINI"}
+                  {purchaseMutation.isPending ? t("common.processing") : t("profile.purchaseMini")}
                 </Button>
               </CardContent>
             </Card>
@@ -147,27 +149,27 @@ export function NodeSection() {
                 <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Server className="h-5 w-5 text-primary shrink-0" />
-                    <span className="text-sm font-bold">MAX Node</span>
-                    <Badge className="text-[9px] bg-primary/20 text-primary no-default-hover-elevate no-default-active-elevate">Popular</Badge>
+                    <span className="text-sm font-bold">{t("profile.maxNode")}</span>
+                    <Badge className="text-[9px] bg-primary/20 text-primary no-default-hover-elevate no-default-active-elevate">{t("profile.popular")}</Badge>
                   </div>
                   <span className="text-xl font-bold text-primary">$1,000</span>
                 </div>
                 <div className="space-y-1.5 mb-3">
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>10% referral bonus</span>
+                    <span>{t("profile.referralBonus10")}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>All strategies unlocked</span>
+                    <span>{t("profile.allStrategiesUnlocked")}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>Priority support</span>
+                    <span>{t("profile.prioritySupport")}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                    <span>Higher vault yields</span>
+                    <span>{t("profile.higherVaultYields")}</span>
                   </div>
                 </div>
                 <Button
@@ -176,7 +178,7 @@ export function NodeSection() {
                   disabled={purchaseMutation.isPending}
                   data-testid="button-buy-max"
                 >
-                  {purchaseMutation.isPending ? "Processing..." : "Purchase MAX"}
+                  {purchaseMutation.isPending ? t("common.processing") : t("profile.purchaseMax")}
                 </Button>
               </CardContent>
             </Card>

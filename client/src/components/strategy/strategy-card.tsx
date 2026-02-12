@@ -7,6 +7,7 @@ import { generateStrategyChartData, calcStrategyReturn, calcStrategyWinDisplay, 
 import type { Strategy } from "@shared/schema";
 import { useMemo } from "react";
 import { formatCompact } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 interface StrategyCardProps {
   strategy: Strategy;
@@ -15,6 +16,7 @@ interface StrategyCardProps {
 }
 
 export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps) {
+  const { t } = useTranslation();
   const returnVal = Number(strategy.monthlyReturn) || 0;
   const winRate = Number(strategy.winRate || 0);
   const { formatted, isPositive } = calcStrategyReturn(returnVal);
@@ -33,7 +35,7 @@ export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps
         <div className="absolute inset-0 z-10 rounded-md bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
           <Lock className="h-6 w-6 text-primary" />
           <Badge className="bg-primary/20 text-primary text-[10px] no-default-hover-elevate no-default-active-elevate">
-            VIP Only
+            {t("strategy.vipOnly")}
           </Badge>
         </div>
       )}
@@ -43,7 +45,7 @@ export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps
           <div className="flex gap-1 shrink-0">
             {strategy.isHot && (
               <Badge className="bg-red-500/15 text-red-400 text-[9px] no-default-hover-elevate no-default-active-elevate">
-                <Flame className="h-2.5 w-2.5 mr-0.5" />Hot
+                <Flame className="h-2.5 w-2.5 mr-0.5" />{t("strategy.hot")}
               </Badge>
             )}
           </div>
@@ -78,7 +80,7 @@ export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps
           data-testid={`button-subscribe-${strategy.id}`}
           onClick={() => onSubscribe(strategy)}
         >
-          Subscribe
+          {t("common.subscribe")}
         </Button>
       </CardContent>
     </Card>

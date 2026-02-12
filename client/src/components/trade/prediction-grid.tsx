@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { TradeBet } from "@shared/schema";
 
 interface GridCell {
@@ -225,6 +226,7 @@ function SmallRoadGrid({ cells, cols, rows, visibleCount }: { cells: GridCell[];
 }
 
 export function PredictionGrid({ bets, gridType, timeframe }: PredictionGridProps) {
+  const { t } = useTranslation();
   const [visibleCount, setVisibleCount] = useState(0);
   const cells = useMemo(
     () => generateCells(bets || [], gridType, timeframe),
@@ -258,17 +260,17 @@ export function PredictionGrid({ bets, gridType, timeframe }: PredictionGridProp
   return (
     <div data-testid={`prediction-grid-${gridType}`}>
       <div className="flex items-center gap-3 mb-2 text-[11px] flex-wrap">
-        <span className="text-emerald-400 font-bold" data-testid="text-bull-count">Bull: {ups}</span>
-        <span className="text-red-400 font-bold" data-testid="text-bear-count">Bear: {downs}</span>
+        <span className="text-emerald-400 font-bold" data-testid="text-bull-count">{t("trade.bull")}: {ups}</span>
+        <span className="text-red-400 font-bold" data-testid="text-bear-count">{t("trade.bear")}: {downs}</span>
         <span className="flex items-center gap-1 text-muted-foreground">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
-          Diff {pctDiff}%
+          {t("trade.diff")} {pctDiff}%
         </span>
         <span className="text-muted-foreground flex items-center gap-1">
           <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
             <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
-          Reversal
+          {t("trade.reversal")}
         </span>
       </div>
 

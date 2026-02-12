@@ -10,8 +10,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import type { VaultPosition } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export function VaultChart() {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<VaultChartPeriod>("ALL");
   const chartData = useMemo(() => generateVaultChartData(period), [period]);
   const account = useActiveAccount();
@@ -44,8 +46,8 @@ export function VaultChart() {
 
   return (
     <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl">
-      <h2 className="text-lg font-bold mb-1" data-testid="text-vault-title">Vault</h2>
-      <div className="text-xs text-muted-foreground mb-2">P&L</div>
+      <h2 className="text-lg font-bold mb-1" data-testid="text-vault-title">{t("vault.title")}</h2>
+      <div className="text-xs text-muted-foreground mb-2">{t("vault.pnl")}</div>
       <div className="flex items-baseline gap-3 flex-wrap mb-1">
         <span className="text-3xl font-bold tracking-tight" data-testid="text-vault-total">
           {formatUSD(totalValue)}

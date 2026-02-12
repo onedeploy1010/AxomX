@@ -1,17 +1,19 @@
 import { useLocation, Link } from "wouter";
 import { Home, BarChart3, Vault, Brain, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const tabs = [
-  { path: "/", icon: Home, label: "Home" },
-  { path: "/trade", icon: BarChart3, label: "Trade" },
-  { path: "/vault", icon: Vault, label: "Vault" },
-  { path: "/strategy", icon: Brain, label: "Strategy" },
-  { path: "/profile", icon: User, label: "Profile" },
+  { path: "/", icon: Home, labelKey: "nav.home" },
+  { path: "/trade", icon: BarChart3, labelKey: "nav.trade" },
+  { path: "/vault", icon: Vault, labelKey: "nav.vault" },
+  { path: "/strategy", icon: Brain, labelKey: "nav.strategy" },
+  { path: "/profile", icon: User, labelKey: "nav.profile" },
 ];
 
 export function BottomNav() {
   const [location] = useLocation();
+  const { t } = useTranslation();
 
   return (
     <nav
@@ -24,6 +26,7 @@ export function BottomNav() {
             tab.path === "/"
               ? location === "/"
               : location.startsWith(tab.path);
+          const label = t(tab.labelKey);
           return (
             <Link key={tab.path} href={tab.path}>
               <Button
@@ -34,10 +37,10 @@ export function BottomNav() {
                     ? "text-primary"
                     : "text-muted-foreground"
                 }`}
-                data-testid={`nav-${tab.label.toLowerCase()}`}
+                data-testid={`nav-${tab.path === "/" ? "home" : tab.path.slice(1)}`}
               >
                 <tab.icon className={`h-5 w-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]" : ""}`} />
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                <span className="text-[10px] font-medium">{label}</span>
               </Button>
             </Link>
           );

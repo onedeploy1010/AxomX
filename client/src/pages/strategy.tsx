@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +23,10 @@ import { StrategyCard } from "@/components/strategy/strategy-card";
 
 type TabId = "strategies" | "hedge" | "predictions";
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: "strategies", label: "Strategy List" },
-  { id: "hedge", label: "Hedge Protection" },
-  { id: "predictions", label: "Predictions" },
+const TABS: { id: TabId; labelKey: string }[] = [
+  { id: "strategies", labelKey: "strategy.strategyList" },
+  { id: "hedge", labelKey: "strategy.hedgeProtection" },
+  { id: "predictions", labelKey: "strategy.predictions" },
 ];
 
 const EXCHANGES = [
@@ -37,6 +38,7 @@ const EXCHANGES = [
 ];
 
 export default function StrategyPage() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const { toast } = useToast();
   const walletAddr = account?.address || "";
@@ -155,16 +157,16 @@ export default function StrategyPage() {
       setBetDialogOpen(false);
       setBetAmount("");
       setBetChoice("");
-      toast({ title: "Bet Placed", description: "Your prediction bet has been placed successfully" });
+      toast({ title: t("strategy.betPlacedTitle"), description: t("strategy.betPlacedDesc") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message || "Failed to place bet", variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message || "Failed to place bet", variant: "destructive" });
     },
   });
 
   const openBetDialog = (id: string, question: string, type: string, choices: { label: string; odds: number; color: string }[]) => {
     if (!walletAddr) {
-      toast({ title: "Connect Wallet", description: "Please connect your wallet to place bets", variant: "destructive" });
+      toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
       return;
     }
     setBetMarket({ id, question, type, choices });
@@ -179,14 +181,14 @@ export default function StrategyPage() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Subscribed", description: "Strategy subscription activated" });
+      toast({ title: t("strategy.subscribed"), description: t("strategy.subscriptionActivated") });
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions", walletAddr] });
       setSubscribeOpen(false);
       setCapitalAmount("");
       setSelectedStrategy(null);
     },
     onError: (err: Error) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -196,14 +198,14 @@ export default function StrategyPage() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Success", description: "Hedge protection purchased" });
+      toast({ title: t("strategy.hedgeSuccess"), description: t("strategy.hedgeSuccessDesc") });
       queryClient.invalidateQueries({ queryKey: ["/api/hedge/positions", walletAddr] });
       queryClient.invalidateQueries({ queryKey: ["/api/hedge/purchases", walletAddr] });
       queryClient.invalidateQueries({ queryKey: ["/api/hedge/insurance-pool"] });
       setHedgeAmount("300");
     },
     onError: (err: Error) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -213,21 +215,21 @@ export default function StrategyPage() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "VIP Activated", description: "Welcome to VIP membership" });
+      toast({ title: t("strategy.vipActivated"), description: t("strategy.vipActivatedDesc") });
       queryClient.invalidateQueries({ queryKey: ["/api/profile", walletAddr] });
     },
     onError: (err: Error) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
     },
   });
 
   const handleSubscribeClick = (strategy: Strategy) => {
     if (!walletAddr) {
-      toast({ title: "Connect Wallet", description: "Please connect your wallet first", variant: "destructive" });
+      toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
       return;
     }
     if (strategy.isVipOnly && !profile?.isVip) {
-      toast({ title: "VIP Required", description: "This strategy requires VIP membership", variant: "destructive" });
+      toast({ title: t("strategy.vipRequired"), description: t("strategy.vipRequiredDesc"), variant: "destructive" });
       return;
     }
     setSelectedStrategy(strategy);
@@ -236,7 +238,7 @@ export default function StrategyPage() {
 
   const handleConfirmSubscribe = () => {
     if (!selectedStrategy || !capitalAmount || Number(capitalAmount) <= 0) {
-      toast({ title: "Invalid Amount", description: "Please enter a valid capital amount", variant: "destructive" });
+      toast({ title: t("strategy.invalidAmount"), description: t("strategy.invalidCapitalDesc"), variant: "destructive" });
       return;
     }
     subscribeMutation.mutate({
@@ -248,11 +250,11 @@ export default function StrategyPage() {
 
   const handleHedgePurchase = () => {
     if (!walletAddr) {
-      toast({ title: "Connect Wallet", description: "Please connect your wallet first", variant: "destructive" });
+      toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
       return;
     }
     if (!hedgeAmount || Number(hedgeAmount) < 100) {
-      toast({ title: "Invalid Amount", description: "Minimum 100 USDT required", variant: "destructive" });
+      toast({ title: t("strategy.invalidAmount"), description: t("strategy.hedgeMinError"), variant: "destructive" });
       return;
     }
     hedgeMutation.mutate({ walletAddress: walletAddr, amount: Number(hedgeAmount) });
@@ -297,7 +299,7 @@ export default function StrategyPage() {
           data-testid="button-investment-panel"
         >
           <Wallet className="h-4 w-4 mr-2" />
-          Investment
+          {t("strategy.investment")}
           <ChevronRight className="h-4 w-4 ml-auto" />
         </Button>
 
@@ -313,7 +315,7 @@ export default function StrategyPage() {
               onClick={() => setActiveTab(tab.id)}
               data-testid={`tab-${tab.id}`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -323,7 +325,7 @@ export default function StrategyPage() {
         {activeTab === "strategies" && (
           <>
             <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.1s both" }}>
-              <h3 className="text-sm font-bold mb-3" data-testid="text-strategies-list-title">All Strategies</h3>
+              <h3 className="text-sm font-bold mb-3" data-testid="text-strategies-list-title">{t("strategy.allStrategies")}</h3>
               {isLoading ? (
                 <div className="grid grid-cols-2 gap-3">
                   {[1, 2, 3, 4].map((i) => (
@@ -341,7 +343,7 @@ export default function StrategyPage() {
 
             {walletAddr && subscriptions.length > 0 && (
               <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.2s both" }}>
-                <h3 className="text-sm font-bold mb-3" data-testid="text-subscriptions-title">My Subscriptions</h3>
+                <h3 className="text-sm font-bold mb-3" data-testid="text-subscriptions-title">{t("strategy.mySubscriptions")}</h3>
                 <div className="space-y-2">
                   {subscriptions.map((sub) => (
                     <Card key={sub.id} className="border-border bg-card" data-testid={`subscription-card-${sub.id}`}>
@@ -350,7 +352,7 @@ export default function StrategyPage() {
                           <div className="flex-1 min-w-0">
                             <div className="text-xs font-semibold truncate">{getStrategyName(sub.strategyId)}</div>
                             <div className="text-[10px] text-muted-foreground mt-0.5">
-                              Capital: {formatCompact(Number(sub.allocatedCapital))}
+                              {t("strategy.capital")}: {formatCompact(Number(sub.allocatedCapital))}
                             </div>
                           </div>
                           <Badge
@@ -374,16 +376,16 @@ export default function StrategyPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Crown className="h-5 w-5 text-primary" />
-                      <h3 className="text-sm font-bold">Upgrade to VIP</h3>
+                      <h3 className="text-sm font-bold">{t("strategy.upgradeToVip")}</h3>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      Unlock exclusive strategies and premium features with VIP membership.
+                      {t("strategy.vipDesc")}
                     </p>
                     <div className="space-y-2 mb-4">
-                      {["Access VIP-only strategies", "Higher leverage options", "Priority support and insights", "Enhanced referral rewards"].map((t) => (
-                        <div key={t} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {[t("strategy.vipBenefit1"), t("strategy.vipBenefit2"), t("strategy.vipBenefit3"), t("strategy.vipBenefit4")].map((benefit) => (
+                        <div key={benefit} className="flex items-center gap-2 text-xs text-muted-foreground">
                           <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                          <span>{t}</span>
+                          <span>{benefit}</span>
                         </div>
                       ))}
                     </div>
@@ -394,7 +396,7 @@ export default function StrategyPage() {
                       data-testid="button-upgrade-vip"
                     >
                       <Zap className="mr-1 h-4 w-4" />
-                      {vipMutation.isPending ? "Processing..." : "Upgrade to VIP - $99/mo"}
+                      {vipMutation.isPending ? t("common.processing") : t("strategy.upgradeVipPrice")}
                     </Button>
                   </CardContent>
                 </Card>
@@ -408,7 +410,7 @@ export default function StrategyPage() {
             <Card className="border-border bg-card" data-testid="card-my-hedge">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
-                  <h3 className="text-sm font-bold">My Hedge Protection</h3>
+                  <h3 className="text-sm font-bold">{t("strategy.myHedgeProtection")}</h3>
                   <Button size="icon" variant="ghost" data-testid="button-hedge-info">
                     <Info className="h-4 w-4" />
                   </Button>
@@ -418,14 +420,14 @@ export default function StrategyPage() {
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div>
-                        <div className="text-[10px] text-muted-foreground">Premium Paid: {formatUSD(totalPremium)} USDT</div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">(Premium + Payout)</div>
+                        <div className="text-[10px] text-muted-foreground">{t("strategy.premiumPaid", { amount: formatUSD(totalPremium) })}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t("strategy.premiumPlusPayout")}</div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-2 flex-wrap">
-                      <div className="text-xs font-bold">Payout Balance: {formatUSD(totalPayout)} USDT</div>
+                      <div className="text-xs font-bold">{t("strategy.payoutBalance", { amount: formatUSD(totalPayout) })}</div>
                       <Button size="sm" variant="secondary" data-testid="button-withdraw-payout" disabled={totalPayout <= 0}>
-                        Withdraw
+                        {t("common.withdraw")}
                       </Button>
                     </div>
                   </CardContent>
@@ -435,7 +437,7 @@ export default function StrategyPage() {
                   <Card className="border-border bg-background">
                     <CardContent className="p-3">
                       <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-                        <Shield className="h-3 w-3" /> Current P&L
+                        <Shield className="h-3 w-3" /> {t("strategy.currentPnl")}
                       </div>
                       <div className={`text-lg font-bold ${totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}
                         style={{ textShadow: totalPnl >= 0 ? "0 0 6px rgba(16,185,129,0.4)" : "0 0 6px rgba(239,68,68,0.4)" }}
@@ -448,7 +450,7 @@ export default function StrategyPage() {
                   <Card className="border-border bg-background">
                     <CardContent className="p-3">
                       <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-                        <Wallet className="h-3 w-3" /> Purchase Amount
+                        <Wallet className="h-3 w-3" /> {t("strategy.purchaseAmount")}
                       </div>
                       <div className="text-lg font-bold" data-testid="text-hedge-purchase-total">
                         {formatUSD(totalPremium)} USDT
@@ -461,10 +463,10 @@ export default function StrategyPage() {
 
             <Card className="border-border bg-card" data-testid="card-purchase-hedge">
               <CardContent className="p-4">
-                <h3 className="text-sm font-bold mb-3">Purchase Hedge Protection</h3>
+                <h3 className="text-sm font-bold mb-3">{t("strategy.purchaseHedge")}</h3>
                 <div className="flex items-center justify-between gap-2 mb-2 text-xs text-muted-foreground flex-wrap">
-                  <span>Investment Amount (USDT)</span>
-                  <span>Min: 100 USDT</span>
+                  <span>{t("strategy.investmentAmount")}</span>
+                  <span>{t("strategy.minUsdt")}</span>
                 </div>
                 <div className="flex gap-2 mb-3">
                   <Input
@@ -483,20 +485,20 @@ export default function StrategyPage() {
                   disabled={hedgeMutation.isPending}
                   data-testid="button-confirm-hedge"
                 >
-                  {hedgeMutation.isPending ? "Processing..." : "Confirm Purchase"}
+                  {hedgeMutation.isPending ? t("common.processing") : t("strategy.confirmPurchase")}
                 </Button>
               </CardContent>
             </Card>
 
             <Card className="border-border bg-card" data-testid="card-insurance-pool">
               <CardContent className="p-4">
-                <h3 className="text-sm font-bold mb-3">Insurance Pool Overview</h3>
+                <h3 className="text-sm font-bold mb-3">{t("strategy.insurancePool")}</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Coverage", value: insurancePool?.poolSize || "--", color: "text-emerald-400" },
-                    { label: "Claims", value: insurancePool?.totalPolicies?.toString() || "--", color: "text-emerald-400" },
-                    { label: "Paid Out", value: insurancePool?.totalPaid || "--", color: "text-emerald-400" },
-                    { label: "Payout Rate", value: insurancePool?.payoutRate || "--", color: "text-emerald-400" },
+                    { label: t("strategy.coverage"), value: insurancePool?.poolSize || "--", color: "text-emerald-400" },
+                    { label: t("strategy.claims"), value: insurancePool?.totalPolicies?.toString() || "--", color: "text-emerald-400" },
+                    { label: t("strategy.paidOut"), value: insurancePool?.totalPaid || "--", color: "text-emerald-400" },
+                    { label: t("strategy.payoutRate"), value: insurancePool?.payoutRate || "--", color: "text-emerald-400" },
                   ].map((item) => (
                     <Card key={item.label} className="border-border bg-background">
                       <CardContent className="p-3 text-center">
@@ -517,36 +519,38 @@ export default function StrategyPage() {
               <CardContent className="p-4">
                 <div className="flex gap-0 mb-3">
                   <Badge className="text-[10px] bg-primary text-white no-default-hover-elevate no-default-active-elevate">
-                    Purchase Records
+                    {t("strategy.purchaseRecords")}
                   </Badge>
                   <Badge variant="secondary" className="text-[10px] ml-1 no-default-hover-elevate no-default-active-elevate">
-                    Payout Records
+                    {t("strategy.payoutRecords")}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-[10px] text-muted-foreground font-medium mb-2 px-1">
-                  <span>Amount</span>
-                  <span>Date</span>
-                  <span>Status</span>
-                  <span>Type</span>
+                <div className="overflow-x-auto">
+                <div className="grid grid-cols-4 gap-2 text-[10px] text-muted-foreground font-medium mb-2 px-1 min-w-[280px]">
+                  <span>{t("common.amount")}</span>
+                  <span>{t("common.date")}</span>
+                  <span>{t("common.status")}</span>
+                  <span>{t("common.type")}</span>
                 </div>
                 {purchases.length === 0 ? (
                   <div className="text-center py-4 text-xs text-muted-foreground" data-testid="text-no-records">
-                    No records yet
+                    {t("strategy.noRecordsYet")}
                   </div>
                 ) : (
                   <div className="space-y-1">
                     {purchases.slice(0, 10).map((p) => (
-                      <div key={p.id} className="grid grid-cols-4 gap-2 text-[10px] px-1 py-1.5 rounded-md bg-background/30" data-testid={`record-${p.id}`}>
+                      <div key={p.id} className="grid grid-cols-4 gap-2 text-[10px] px-1 py-1.5 rounded-md bg-background/30 min-w-[280px]" data-testid={`record-${p.id}`}>
                         <span className="font-medium">{Number(p.amount).toFixed(2)}</span>
                         <span className="text-muted-foreground">{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "--"}</span>
                         <Badge variant="secondary" className="text-[8px] no-default-hover-elevate no-default-active-elevate w-fit">
                           {p.status}
                         </Badge>
-                        <span className="text-muted-foreground">Hedge</span>
+                        <span className="text-muted-foreground">{t("strategy.hedge")}</span>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </CardContent>
             </Card>
 
@@ -564,17 +568,17 @@ export default function StrategyPage() {
                     </Badge>
                   ))}
                   <Badge variant="outline" className="text-[10px] cursor-pointer" data-testid="badge-exchange-more">
-                    More
+                    {t("common.more")}
                   </Badge>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-3">
                   <div>
-                    <div className="text-[10px] text-muted-foreground">Position Amount</div>
+                    <div className="text-[10px] text-muted-foreground">{t("strategy.positionAmount")}</div>
                     <div className="text-sm font-bold" data-testid="text-position-amount">0.00</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-muted-foreground">P&L</div>
+                    <div className="text-[10px] text-muted-foreground">{t("vault.pnl")}</div>
                     <div className="text-sm font-bold" data-testid="text-position-pnl">
                       0.00 <span className="text-emerald-400 text-[10px]">(0.00%)</span>
                     </div>
@@ -587,9 +591,9 @@ export default function StrategyPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div>
-                    <div className="text-[10px] text-muted-foreground">Total Assets</div>
+                    <div className="text-[10px] text-muted-foreground">{t("strategy.totalAssets")}</div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-muted-foreground">All</span>
+                      <span className="text-xs text-muted-foreground">{t("common.all")}</span>
                       <RefreshCw className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </div>
@@ -606,9 +610,9 @@ export default function StrategyPage() {
           <div className="space-y-3" style={{ animation: "fadeSlideIn 0.3s ease-out" }}>
             <div className="flex gap-0 bg-card border border-border rounded-md overflow-hidden" data-testid="prediction-sub-tabs">
               {[
-                { id: "polymarket" as const, label: "Polymarket", icon: Globe },
-                { id: "news" as const, label: "News", icon: Newspaper },
-                { id: "ai" as const, label: "AI Predict", icon: Brain },
+                { id: "polymarket" as const, label: t("strategy.polymarket"), icon: Globe },
+                { id: "news" as const, label: t("strategy.news"), icon: Newspaper },
+                { id: "ai" as const, label: t("strategy.aiPredict"), icon: Brain },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -680,7 +684,7 @@ export default function StrategyPage() {
                               ])}
                               data-testid={`button-bet-yes-${market.id}`}
                             >
-                              <div className="text-[10px] text-emerald-400 font-medium">Yes</div>
+                              <div className="text-[10px] text-emerald-400 font-medium">{t("common.yes")}</div>
                               <div className="text-sm font-bold text-emerald-400">{yesPercent}%</div>
                               <div className="text-[9px] text-muted-foreground">{yesOdds}x</div>
                             </button>
@@ -692,7 +696,7 @@ export default function StrategyPage() {
                               ])}
                               data-testid={`button-bet-no-${market.id}`}
                             >
-                              <div className="text-[10px] text-red-400 font-medium">No</div>
+                              <div className="text-[10px] text-red-400 font-medium">{t("common.no")}</div>
                               <div className="text-sm font-bold text-red-400">{noPercent}%</div>
                               <div className="text-[9px] text-muted-foreground">{noOdds}x</div>
                             </button>
@@ -703,11 +707,11 @@ export default function StrategyPage() {
                               <span className="flex items-center gap-0.5">
                                 <BarChart3 className="h-2.5 w-2.5" /> {vol}
                               </span>
-                              {endStr && <span>Ends {endStr}</span>}
+                              {endStr && <span>{t("strategy.ends", { date: endStr })}</span>}
                             </div>
                             {hasBet && (
                               <Badge className="text-[8px] bg-emerald-500/15 text-emerald-400 no-default-hover-elevate no-default-active-elevate">
-                                <Trophy className="h-2 w-2 mr-0.5" /> Bet Placed
+                                <Trophy className="h-2 w-2 mr-0.5" /> {t("strategy.betPlaced")}
                               </Badge>
                             )}
                           </div>
@@ -719,7 +723,7 @@ export default function StrategyPage() {
                   <Card className="border-border bg-card">
                     <CardContent className="p-6 text-center">
                       <Globe className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">No Polymarket data available. Markets will refresh automatically.</p>
+                      <p className="text-xs text-muted-foreground">{t("strategy.noPolymarketData")}</p>
                     </CardContent>
                   </Card>
                 )}
@@ -786,7 +790,7 @@ export default function StrategyPage() {
                             >
                               <div className="flex items-center justify-center gap-1">
                                 <TrendingUp className="h-3 w-3 text-emerald-400" />
-                                <span className="text-[10px] font-bold text-emerald-400">Bullish</span>
+                                <span className="text-[10px] font-bold text-emerald-400">{t("trade.bullish")}</span>
                               </div>
                               <div className="text-[9px] text-muted-foreground">{bullOdds}x</div>
                             </button>
@@ -800,7 +804,7 @@ export default function StrategyPage() {
                             >
                               <div className="flex items-center justify-center gap-1">
                                 <TrendingDown className="h-3 w-3 text-red-400" />
-                                <span className="text-[10px] font-bold text-red-400">Bearish</span>
+                                <span className="text-[10px] font-bold text-red-400">{t("trade.bearish")}</span>
                               </div>
                               <div className="text-[9px] text-muted-foreground">{bearOdds}x</div>
                             </button>
@@ -809,7 +813,7 @@ export default function StrategyPage() {
                           {hasBet && (
                             <div className="flex justify-end">
                               <Badge className="text-[8px] bg-emerald-500/15 text-emerald-400 no-default-hover-elevate no-default-active-elevate">
-                                <Trophy className="h-2 w-2 mr-0.5" /> Bet Placed
+                                <Trophy className="h-2 w-2 mr-0.5" /> {t("strategy.betPlaced")}
                               </Badge>
                             </div>
                           )}
@@ -821,7 +825,7 @@ export default function StrategyPage() {
                   <Card className="border-border bg-card">
                     <CardContent className="p-6 text-center">
                       <Newspaper className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">No news predictions available. News analysis refreshes every 10 minutes.</p>
+                      <p className="text-xs text-muted-foreground">{t("strategy.noNewsPredictions")}</p>
                     </CardContent>
                   </Card>
                 )}
@@ -895,17 +899,17 @@ export default function StrategyPage() {
 
                           <div className="grid grid-cols-3 gap-2 mb-2">
                             <div>
-                              <div className="text-[9px] text-muted-foreground">Current</div>
+                              <div className="text-[9px] text-muted-foreground">{t("strategy.current")}</div>
                               <div className="text-[11px] font-bold tabular-nums">{current > 0 ? formatUSD(current) : "--"}</div>
                             </div>
                             <div>
-                              <div className="text-[9px] text-muted-foreground">Target</div>
+                              <div className="text-[9px] text-muted-foreground">{t("dashboard.target")}</div>
                               <div className={`text-[11px] font-bold tabular-nums ${isBullish ? "text-emerald-400" : isBearish ? "text-red-400" : ""}`}>
                                 {target > 0 ? formatUSD(target) : "--"}
                               </div>
                             </div>
                             <div>
-                              <div className="text-[9px] text-muted-foreground">Change</div>
+                              <div className="text-[9px] text-muted-foreground">{t("strategy.change")}</div>
                               <div className={`text-[11px] font-bold tabular-nums ${pctChange >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                                 {pctChange >= 0 ? "+" : ""}{pctChange.toFixed(2)}%
                               </div>
@@ -916,7 +920,7 @@ export default function StrategyPage() {
                             <div className="mb-2 bg-background/30 rounded-md p-2 border border-border/20">
                               <div className="flex items-center gap-1 mb-0.5">
                                 <Sparkles className="h-2.5 w-2.5 text-primary" />
-                                <span className="text-[9px] text-muted-foreground">AI Analysis</span>
+                                <span className="text-[9px] text-muted-foreground">{t("dashboard.aiAnalysis")}</span>
                               </div>
                               <p className="text-[10px] text-foreground/70">{pred.reasoning}</p>
                             </div>
@@ -933,7 +937,7 @@ export default function StrategyPage() {
                             >
                               <div className="flex items-center justify-center gap-1">
                                 <TrendingUp className="h-3 w-3 text-emerald-400" />
-                                <span className="text-[10px] font-bold text-emerald-400">Bull</span>
+                                <span className="text-[10px] font-bold text-emerald-400">{t("trade.bull")}</span>
                               </div>
                               <div className="text-[9px] text-muted-foreground">{bullOdds}x</div>
                             </button>
@@ -947,7 +951,7 @@ export default function StrategyPage() {
                             >
                               <div className="flex items-center justify-center gap-1">
                                 <TrendingDown className="h-3 w-3 text-red-400" />
-                                <span className="text-[10px] font-bold text-red-400">Bear</span>
+                                <span className="text-[10px] font-bold text-red-400">{t("trade.bear")}</span>
                               </div>
                               <div className="text-[9px] text-muted-foreground">{bearOdds}x</div>
                             </button>
@@ -956,7 +960,7 @@ export default function StrategyPage() {
                           {hasBet && (
                             <div className="flex justify-end mt-1.5">
                               <Badge className="text-[8px] bg-emerald-500/15 text-emerald-400 no-default-hover-elevate no-default-active-elevate">
-                                <Trophy className="h-2 w-2 mr-0.5" /> Bet Placed
+                                <Trophy className="h-2 w-2 mr-0.5" /> {t("strategy.betPlaced")}
                               </Badge>
                             </div>
                           )}
@@ -968,7 +972,7 @@ export default function StrategyPage() {
                   <Card className="border-border bg-card">
                     <CardContent className="p-6 text-center">
                       <Brain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">No AI predictions yet. Visit the Dashboard to generate predictions.</p>
+                      <p className="text-xs text-muted-foreground">{t("strategy.noAiPredictions")}</p>
                     </CardContent>
                   </Card>
                 )}
@@ -979,7 +983,7 @@ export default function StrategyPage() {
       </div>
 
       <Dialog open={investmentOpen} onOpenChange={setInvestmentOpen}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center" style={{ boxShadow: "0 0 12px rgba(16,185,129,0.3)" }}>
@@ -987,10 +991,10 @@ export default function StrategyPage() {
               </div>
               <div>
                 <DialogTitle className="text-base font-bold" data-testid="text-investment-dialog-title">
-                  Investment
+                  {t("strategy.investmentDialog")}
                 </DialogTitle>
                 <DialogDescription className="text-[11px] text-muted-foreground">
-                  Manage API, view P&L, and track copy trading
+                  {t("strategy.investmentDesc")}
                 </DialogDescription>
               </div>
             </div>
@@ -1010,20 +1014,20 @@ export default function StrategyPage() {
                 </Badge>
               ))}
               <Badge variant="outline" className="text-[10px] cursor-pointer" data-testid="badge-inv-exchange-more">
-                More
+                {t("common.more")}
               </Badge>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Card className="border-border bg-background">
                 <CardContent className="p-3">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">Position Amount</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{t("strategy.positionAmount")}</div>
                   <div className="text-lg font-bold tabular-nums" data-testid="text-inv-position">0.00</div>
                 </CardContent>
               </Card>
               <Card className="border-border bg-background">
                 <CardContent className="p-3">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">P&L</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{t("vault.pnl")}</div>
                   <div className="text-lg font-bold tabular-nums" data-testid="text-inv-pnl">
                     0.00 <span className="text-emerald-400 text-[10px]">(0.00%)</span>
                   </div>
@@ -1034,26 +1038,26 @@ export default function StrategyPage() {
             <Card className="border-border bg-background">
               <CardContent className="p-3">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Total Assets</div>
+                  <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{t("strategy.totalAssets")}</div>
                   <RefreshCw className="h-3 w-3 text-muted-foreground cursor-pointer" />
                 </div>
                 <div className="text-2xl font-bold mt-1 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent" data-testid="text-inv-total-assets">$0</div>
                 <div className="mt-2 space-y-1.5">
                   <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
-                    <span>Unrealized P&L</span>
+                    <span>{t("strategy.unrealizedPnl")}</span>
                     <span className="font-medium text-foreground tabular-nums">$0.00</span>
                   </div>
                   <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
-                    <span>Completed Trades</span>
+                    <span>{t("strategy.completedTrades")}</span>
                     <span className="font-medium text-foreground">--</span>
                   </div>
                   <div className="border-t border-border/50 pt-1.5 mt-1.5">
                     <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
-                      <span>Perpetual</span>
+                      <span>{t("strategy.perpetual")}</span>
                       <span className="font-medium text-foreground tabular-nums">$0</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground flex-wrap">
-                      <span>Spot</span>
+                      <span>{t("strategy.spot")}</span>
                       <span className="font-medium text-foreground">--</span>
                     </div>
                   </div>
@@ -1071,14 +1075,14 @@ export default function StrategyPage() {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-7 gap-0.5 text-center">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="text-[9px] text-muted-foreground font-medium py-1">{d}</div>
+              <div className="grid grid-cols-7 gap-px text-center">
+                {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+                  <div key={d} className="text-[8px] text-muted-foreground font-medium py-0.5">{d}</div>
                 ))}
                 {calendarDays.map((cell, idx) => (
                   <div
                     key={idx}
-                    className={`rounded-sm py-1.5 text-center ${cell.day === 0 ? "" : "bg-muted/30 border border-border/30"}`}
+                    className={`rounded-sm py-1 text-center ${cell.day === 0 ? "" : "bg-muted/30 border border-border/30"}`}
                     data-testid={cell.day > 0 ? `cal-day-${cell.day}` : undefined}
                   >
                     {cell.day > 0 && (
@@ -1099,7 +1103,7 @@ export default function StrategyPage() {
                 onClick={() => setDepositOpen(true)}
               >
                 <Wallet className="h-3.5 w-3.5 mr-1" />
-                Deposit
+                {t("common.deposit")}
               </Button>
               <Button
                 className="text-xs bg-gradient-to-r from-cyan-600 to-blue-500 border-cyan-500/50 text-white"
@@ -1107,7 +1111,7 @@ export default function StrategyPage() {
                 onClick={() => setBindApiOpen(true)}
               >
                 <Key className="h-3.5 w-3.5 mr-1" />
-                Bind API
+                {t("strategy.bindApi")}
               </Button>
               <Button
                 className="text-xs bg-gradient-to-r from-blue-600 to-indigo-500 border-blue-500/50 text-white"
@@ -1115,7 +1119,7 @@ export default function StrategyPage() {
                 onClick={() => setBindTelegramOpen(true)}
               >
                 <MessageCircle className="h-3.5 w-3.5 mr-1" />
-                Bind TG
+                {t("strategy.bindTg")}
               </Button>
             </div>
 
@@ -1123,24 +1127,24 @@ export default function StrategyPage() {
               <CardContent className="p-3">
                 <h4 className="text-xs font-bold mb-3 flex items-center gap-1.5" data-testid="text-copy-records-title">
                   <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                  Copy Trading Records
+                  {t("strategy.copyTradingRecords")}
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="text-lg font-bold tabular-nums" data-testid="text-cumulative-return">0%</div>
-                    <div className="text-[10px] text-muted-foreground">Cumulative Return</div>
+                    <div className="text-[10px] text-muted-foreground">{t("strategy.cumulativeReturn")}</div>
                   </div>
                   <div>
                     <div className="text-lg font-bold tabular-nums" data-testid="text-total-profit">0</div>
-                    <div className="text-[10px] text-muted-foreground">Total Profit</div>
+                    <div className="text-[10px] text-muted-foreground">{t("strategy.totalProfit")}</div>
                   </div>
                   <div>
                     <div className="text-lg font-bold text-emerald-400 tabular-nums" data-testid="text-win-count">0</div>
-                    <div className="text-[10px] text-muted-foreground">Win Count</div>
+                    <div className="text-[10px] text-muted-foreground">{t("strategy.winCount")}</div>
                   </div>
                   <div>
                     <div className="text-lg font-bold text-red-400 tabular-nums" data-testid="text-loss-count">0</div>
-                    <div className="text-[10px] text-muted-foreground">Loss Count</div>
+                    <div className="text-[10px] text-muted-foreground">{t("strategy.lossCount")}</div>
                   </div>
                 </div>
               </CardContent>
@@ -1155,21 +1159,21 @@ export default function StrategyPage() {
                     onClick={() => setCopyFilterType("all")}
                     data-testid="badge-filter-all"
                   >
-                    All Strategy Types
+                    {t("strategy.allStrategyTypes")}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-2 flex-wrap">
                   <Clock className="h-3 w-3" />
-                  <span>Select Start Date - Select End Date</span>
+                  <span>{t("strategy.selectDateRange")}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" className="text-xs bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white" data-testid="button-filter-search">
                     <Search className="h-3 w-3 mr-1" />
-                    Search
+                    {t("common.search")}
                   </Button>
                   <Button size="sm" variant="outline" className="text-xs" data-testid="button-filter-reset">
                     <RotateCcw className="h-3 w-3 mr-1" />
-                    Reset
+                    {t("common.reset")}
                   </Button>
                 </div>
               </CardContent>
@@ -1187,10 +1191,10 @@ export default function StrategyPage() {
               </div>
               <div>
                 <DialogTitle className="text-base font-bold" data-testid="text-subscribe-dialog-title">
-                  Subscribe to Strategy
+                  {t("strategy.subscribeToStrategy")}
                 </DialogTitle>
                 <DialogDescription className="text-[11px] text-muted-foreground">
-                  Allocate capital to follow automatically
+                  {t("strategy.subscribeDesc")}
                 </DialogDescription>
               </div>
             </div>
@@ -1199,10 +1203,10 @@ export default function StrategyPage() {
             <div className="space-y-4">
               <div>
                 <div className="text-sm font-bold mb-2">{selectedStrategy.name}</div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5">
                   <Card className="border-border bg-background">
-                    <CardContent className="p-2.5 text-center">
-                      <div className="text-[10px] text-muted-foreground">Leverage</div>
+                    <CardContent className="p-2 text-center">
+                      <div className="text-[10px] text-muted-foreground">{t("strategy.leverage")}</div>
                       <div className="text-sm font-bold" data-testid="text-dialog-leverage">
                         {selectedStrategy.leverage}
                       </div>
@@ -1210,7 +1214,7 @@ export default function StrategyPage() {
                   </Card>
                   <Card className="border-border bg-background">
                     <CardContent className="p-2.5 text-center">
-                      <div className="text-[10px] text-muted-foreground">Win Rate</div>
+                      <div className="text-[10px] text-muted-foreground">{t("strategy.winRateLabel")}</div>
                       <div className="text-sm font-bold text-emerald-400" data-testid="text-dialog-winrate">
                         {Number(selectedStrategy.winRate).toFixed(1)}%
                       </div>
@@ -1218,7 +1222,7 @@ export default function StrategyPage() {
                   </Card>
                   <Card className="border-border bg-background">
                     <CardContent className="p-2.5 text-center">
-                      <div className="text-[10px] text-muted-foreground">Monthly</div>
+                      <div className="text-[10px] text-muted-foreground">{t("strategy.monthly")}</div>
                       <div className="text-sm font-bold text-emerald-400" data-testid="text-dialog-return">
                         +{Number(selectedStrategy.monthlyReturn).toFixed(1)}%
                       </div>
@@ -1227,10 +1231,10 @@ export default function StrategyPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Capital Amount (USDT)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.capitalAmount")}</label>
                 <Input
                   type="number"
-                  placeholder="Enter amount"
+                  placeholder={t("vault.enterAmount")}
                   value={capitalAmount}
                   onChange={(e) => setCapitalAmount(e.target.value)}
                   data-testid="input-capital-amount"
@@ -1240,7 +1244,7 @@ export default function StrategyPage() {
           )}
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setSubscribeOpen(false)} data-testid="button-cancel-subscribe">
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               className="bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
@@ -1249,7 +1253,7 @@ export default function StrategyPage() {
               data-testid="button-confirm-subscribe"
             >
               <TrendingUp className="mr-1 h-4 w-4" />
-              {subscribeMutation.isPending ? "Subscribing..." : "Confirm Subscribe"}
+              {subscribeMutation.isPending ? t("strategy.subscribing") : t("strategy.confirmSubscribe")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1263,16 +1267,16 @@ export default function StrategyPage() {
                 <Wallet className="h-4 w-4 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold" data-testid="text-deposit-dialog-title">Deposit Funds</DialogTitle>
+                <DialogTitle className="text-base font-bold" data-testid="text-deposit-dialog-title">{t("strategy.depositFunds")}</DialogTitle>
                 <DialogDescription className="text-[11px] text-muted-foreground">
-                  Transfer to {investmentExchange} for copy trading
+                  {t("strategy.depositTransferDesc", { exchange: investmentExchange })}
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Network</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.network")}</label>
               <div className="flex gap-1.5 flex-wrap">
                 {["ERC-20", "TRC-20", "BEP-20", "SOL"].map((net) => (
                   <Badge
@@ -1288,10 +1292,10 @@ export default function StrategyPage() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Deposit Address</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.depositAddress")}</label>
               <div className="flex items-center gap-2">
                 <Input
-                  value={walletAddr || "Connect wallet first"}
+                  value={walletAddr || t("strategy.connectWalletFirstInput")}
                   readOnly
                   className="text-xs font-mono"
                   data-testid="input-deposit-address"
@@ -1302,7 +1306,7 @@ export default function StrategyPage() {
                   onClick={() => {
                     if (walletAddr) {
                       navigator.clipboard.writeText(walletAddr);
-                      toast({ title: "Copied", description: "Address copied to clipboard" });
+                      toast({ title: t("common.copied"), description: t("common.copiedDesc") });
                     }
                   }}
                   data-testid="button-copy-address"
@@ -1312,7 +1316,7 @@ export default function StrategyPage() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Amount (USDT)</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("vault.amountUSDT")}</label>
               <Input
                 type="number"
                 placeholder="Min 100 USDT"
@@ -1323,38 +1327,38 @@ export default function StrategyPage() {
             </div>
             <div className="space-y-1 text-[10px] text-muted-foreground">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span>Min Deposit</span><span className="font-medium text-foreground">100 USDT</span>
+                <span>{t("strategy.minDeposit")}</span><span className="font-medium text-foreground">100 USDT</span>
               </div>
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span>Fee</span><span className="font-medium text-foreground">0 USDT</span>
+                <span>{t("strategy.fee")}</span><span className="font-medium text-foreground">0 USDT</span>
               </div>
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span>Expected Arrival</span><span className="font-medium text-foreground">~5 min</span>
+                <span>{t("strategy.expectedArrival")}</span><span className="font-medium text-foreground">{t("strategy.fiveMin")}</span>
               </div>
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setDepositOpen(false)} data-testid="button-cancel-deposit">Cancel</Button>
+            <Button variant="outline" onClick={() => setDepositOpen(false)} data-testid="button-cancel-deposit">{t("common.cancel")}</Button>
             <Button
               className="bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
               onClick={() => {
                 if (!walletAddr) {
-                  toast({ title: "Connect Wallet", description: "Please connect your wallet first", variant: "destructive" });
+                  toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
                   return;
                 }
                 const amt = parseFloat(depositAmount);
                 if (!amt || amt < 100) {
-                  toast({ title: "Invalid Amount", description: "Minimum deposit is 100 USDT", variant: "destructive" });
+                  toast({ title: t("strategy.invalidAmount"), description: t("strategy.hedgeMinError"), variant: "destructive" });
                   return;
                 }
-                toast({ title: "Deposit Submitted", description: `${amt} USDT via ${depositNetwork} submitted to ${investmentExchange}` });
+                toast({ title: t("strategy.depositSubmitted"), description: t("strategy.depositSubmittedDesc", { amount: amt, network: depositNetwork, exchange: investmentExchange }) });
                 setDepositAmount("");
                 setDepositOpen(false);
               }}
               data-testid="button-confirm-deposit"
             >
               <Wallet className="mr-1 h-4 w-4" />
-              Confirm Deposit
+              {t("strategy.confirmDepositBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1368,9 +1372,9 @@ export default function StrategyPage() {
                 <Key className="h-4 w-4 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold" data-testid="text-bind-api-dialog-title">Bind {investmentExchange} API</DialogTitle>
+                <DialogTitle className="text-base font-bold" data-testid="text-bind-api-dialog-title">{t("strategy.bindApiTitle", { exchange: investmentExchange })}</DialogTitle>
                 <DialogDescription className="text-[11px] text-muted-foreground">
-                  Connect API keys for automated copy trading
+                  {t("strategy.bindApiDesc")}
                 </DialogDescription>
               </div>
             </div>
@@ -1380,14 +1384,14 @@ export default function StrategyPage() {
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 text-[10px] text-muted-foreground flex-wrap">
                   <Info className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>Enable <strong>Read & Trade</strong> permissions only. Do not enable withdrawal permissions for security.</span>
+                  <span dangerouslySetInnerHTML={{ __html: t("strategy.apiPermissionNote") }} />
                 </div>
               </CardContent>
             </Card>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">API Key</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.apiKey")}</label>
               <Input
-                placeholder="Enter API key"
+                placeholder={t("strategy.enterApiKey")}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="text-xs font-mono"
@@ -1395,11 +1399,11 @@ export default function StrategyPage() {
               />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">API Secret</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.apiSecret")}</label>
               <div className="flex items-center gap-2">
                 <Input
                   type={showApiSecret ? "text" : "password"}
-                  placeholder="Enter API secret"
+                  placeholder={t("strategy.enterApiSecret")}
                   value={apiSecret}
                   onChange={(e) => setApiSecret(e.target.value)}
                   className="text-xs font-mono"
@@ -1411,11 +1415,11 @@ export default function StrategyPage() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Passphrase (if required)</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.passphrase")}</label>
               <div className="flex items-center gap-2">
                 <Input
                   type={showApiPassphrase ? "text" : "password"}
-                  placeholder="Optional"
+                  placeholder={t("strategy.optional")}
                   value={apiPassphrase}
                   onChange={(e) => setApiPassphrase(e.target.value)}
                   className="text-xs font-mono"
@@ -1428,26 +1432,26 @@ export default function StrategyPage() {
             </div>
             <div className="flex gap-1.5 flex-wrap">
               <Badge variant="outline" className="text-[9px] no-default-hover-elevate no-default-active-elevate">
-                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5 text-emerald-400" />Read
+                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5 text-emerald-400" />{t("strategy.read")}
               </Badge>
               <Badge variant="outline" className="text-[9px] no-default-hover-elevate no-default-active-elevate">
-                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5 text-emerald-400" />Trade
+                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5 text-emerald-400" />{t("nav.trade")}
               </Badge>
               <Badge variant="outline" className="text-[9px] no-default-hover-elevate no-default-active-elevate">
-                <Shield className="h-2.5 w-2.5 mr-0.5 text-red-400" />No Withdraw
+                <Shield className="h-2.5 w-2.5 mr-0.5 text-red-400" />{t("strategy.noWithdraw")}
               </Badge>
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setBindApiOpen(false)} data-testid="button-cancel-bind-api">Cancel</Button>
+            <Button variant="outline" onClick={() => setBindApiOpen(false)} data-testid="button-cancel-bind-api">{t("common.cancel")}</Button>
             <Button
               className="bg-gradient-to-r from-cyan-600 to-blue-500 border-cyan-500/50 text-white"
               onClick={() => {
                 if (!apiKey.trim() || !apiSecret.trim()) {
-                  toast({ title: "Missing Fields", description: "API Key and Secret are required", variant: "destructive" });
+                  toast({ title: t("strategy.missingFields"), description: t("strategy.missingFieldsDesc"), variant: "destructive" });
                   return;
                 }
-                toast({ title: "API Bound", description: `${investmentExchange} API keys successfully saved` });
+                toast({ title: t("strategy.apiBound"), description: t("strategy.apiBoundDesc", { exchange: investmentExchange }) });
                 setApiKey("");
                 setApiSecret("");
                 setApiPassphrase("");
@@ -1456,7 +1460,7 @@ export default function StrategyPage() {
               data-testid="button-confirm-bind-api"
             >
               <Link2 className="mr-1 h-4 w-4" />
-              Bind API
+              {t("strategy.bindApiBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1470,8 +1474,8 @@ export default function StrategyPage() {
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold" data-testid="text-bet-dialog-title">Place Prediction Bet</DialogTitle>
-                <DialogDescription className="text-[11px] text-muted-foreground">Choose your prediction and stake amount</DialogDescription>
+                <DialogTitle className="text-base font-bold" data-testid="text-bet-dialog-title">{t("strategy.placePredictionBet")}</DialogTitle>
+                <DialogDescription className="text-[11px] text-muted-foreground">{t("strategy.betDesc")}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
@@ -1484,7 +1488,7 @@ export default function StrategyPage() {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-2 block">Your Prediction</label>
+                <label className="text-xs text-muted-foreground mb-2 block">{t("strategy.yourPrediction")}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {betMarket.choices.map((c) => {
                     const isSelected = betChoice === c.label;
@@ -1518,10 +1522,10 @@ export default function StrategyPage() {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Stake Amount (USDT)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.stakeAmount")}</label>
                 <Input
                   type="number"
-                  placeholder="Enter amount"
+                  placeholder={t("vault.enterAmount")}
                   value={betAmount}
                   onChange={(e) => setBetAmount(e.target.value)}
                   className="text-sm"
@@ -1546,15 +1550,15 @@ export default function StrategyPage() {
               {betAmount && Number(betAmount) > 0 && betChoice && (
                 <div className="bg-background/50 rounded-md p-3 border border-border/30 space-y-1">
                   <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
-                    <span className="text-muted-foreground">Your Choice</span>
+                    <span className="text-muted-foreground">{t("strategy.yourChoice")}</span>
                     <span className="font-bold">{betChoice}</span>
                   </div>
                   <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
-                    <span className="text-muted-foreground">Stake</span>
+                    <span className="text-muted-foreground">{t("trade.stake")}</span>
                     <span className="font-bold">{Number(betAmount).toFixed(2)} USDT</span>
                   </div>
                   <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
-                    <span className="text-muted-foreground">Potential Payout</span>
+                    <span className="text-muted-foreground">{t("strategy.potentialPayout")}</span>
                     <span className="font-bold text-emerald-400">
                       {(() => {
                         const chosen = betMarket.choices.find(c => c.label === betChoice);
@@ -1569,7 +1573,7 @@ export default function StrategyPage() {
           )}
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setBetDialogOpen(false)} data-testid="button-cancel-bet">Cancel</Button>
+            <Button variant="outline" onClick={() => setBetDialogOpen(false)} data-testid="button-cancel-bet">{t("common.cancel")}</Button>
             <Button
               className="bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
               disabled={!betAmount || Number(betAmount) <= 0 || !betChoice || placeBetMutation.isPending}
@@ -1592,7 +1596,7 @@ export default function StrategyPage() {
               ) : (
                 <DollarSign className="mr-1 h-4 w-4" />
               )}
-              Place Bet
+              {t("strategy.placeBet")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1606,9 +1610,9 @@ export default function StrategyPage() {
                 <MessageCircle className="h-4 w-4 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold" data-testid="text-bind-telegram-dialog-title">Bind Telegram</DialogTitle>
+                <DialogTitle className="text-base font-bold" data-testid="text-bind-telegram-dialog-title">{t("strategy.bindTelegram")}</DialogTitle>
                 <DialogDescription className="text-[11px] text-muted-foreground">
-                  Receive trade notifications via Telegram
+                  {t("strategy.bindTelegramDesc")}
                 </DialogDescription>
               </div>
             </div>
@@ -1619,21 +1623,21 @@ export default function StrategyPage() {
                 <div className="space-y-2 text-[10px] text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <span className="bg-primary/20 text-primary rounded-full h-4 w-4 flex items-center justify-center shrink-0 text-[9px] font-bold">1</span>
-                    <span>Open Telegram and search for <strong>@AxomXBot</strong></span>
+                    <span dangerouslySetInnerHTML={{ __html: t("strategy.tgStep1") }} />
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="bg-primary/20 text-primary rounded-full h-4 w-4 flex items-center justify-center shrink-0 text-[9px] font-bold">2</span>
-                    <span>Send <strong>/start</strong> to the bot</span>
+                    <span dangerouslySetInnerHTML={{ __html: t("strategy.tgStep2") }} />
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="bg-primary/20 text-primary rounded-full h-4 w-4 flex items-center justify-center shrink-0 text-[9px] font-bold">3</span>
-                    <span>Enter your Telegram username below</span>
+                    <span dangerouslySetInnerHTML={{ __html: t("strategy.tgStep3") }} />
                   </div>
                 </div>
               </CardContent>
             </Card>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Telegram Username</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("strategy.telegramUsername")}</label>
               <Input
                 placeholder="@your_username"
                 value={telegramUsername}
@@ -1645,35 +1649,35 @@ export default function StrategyPage() {
             <div className="space-y-1 text-[10px] text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
-                <span>Trade execution alerts</span>
+                <span>{t("strategy.tgAlertTrades")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
-                <span>P&L daily summary</span>
+                <span>{t("strategy.tgAlertPnl")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
-                <span>Risk warnings & liquidation alerts</span>
+                <span>{t("strategy.tgAlertRisk")}</span>
               </div>
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setBindTelegramOpen(false)} data-testid="button-cancel-bind-telegram">Cancel</Button>
+            <Button variant="outline" onClick={() => setBindTelegramOpen(false)} data-testid="button-cancel-bind-telegram">{t("common.cancel")}</Button>
             <Button
               className="bg-gradient-to-r from-blue-600 to-indigo-500 border-blue-500/50 text-white"
               onClick={() => {
                 if (!telegramUsername.trim()) {
-                  toast({ title: "Missing Username", description: "Please enter your Telegram username", variant: "destructive" });
+                  toast({ title: t("strategy.missingUsername"), description: t("strategy.missingUsernameDesc"), variant: "destructive" });
                   return;
                 }
-                toast({ title: "Telegram Bound", description: `Notifications will be sent to ${telegramUsername}` });
+                toast({ title: t("strategy.telegramBound"), description: t("strategy.telegramBoundDesc", { username: telegramUsername }) });
                 setTelegramUsername("");
                 setBindTelegramOpen(false);
               }}
               data-testid="button-confirm-bind-telegram"
             >
               <MessageCircle className="mr-1 h-4 w-4" />
-              Bind Telegram
+              {t("strategy.bindTelegramBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>

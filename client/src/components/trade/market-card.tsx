@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market }: MarketCardProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border-border bg-card" data-testid={`market-${market.id}`}>
       <CardContent className="p-4">
@@ -44,10 +46,10 @@ export function MarketCard({ market }: MarketCardProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-neon-value">{market.yesOdds}%</span>
                   <Button size="sm" className="h-6 text-[10px] bg-primary/20 text-primary">
-                    Yes
+                    {t("common.yes")}
                   </Button>
                   <Button size="sm" className="h-6 text-[10px] bg-red-500/20 text-red-400">
-                    No
+                    {t("common.no")}
                   </Button>
                 </div>
               </div>
@@ -59,10 +61,10 @@ export function MarketCard({ market }: MarketCardProps) {
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-red-400">{market.noOdds}%</span>
                     <Button size="sm" className="h-6 text-[10px] bg-primary/20 text-primary">
-                      Yes
+                      {t("common.yes")}
                     </Button>
                     <Button size="sm" className="h-6 text-[10px] bg-red-500/20 text-red-400">
-                      No
+                      {t("common.no")}
                     </Button>
                   </div>
                 </div>

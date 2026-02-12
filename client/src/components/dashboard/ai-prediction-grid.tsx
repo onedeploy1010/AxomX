@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, TrendingUp, TrendingDown, Minus, Clock, Brain } from "lucide-react";
 import { formatUSD } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 const PREDICTION_TIMEFRAMES = ["5M", "15M", "30M", "1H", "4H", "1D", "1W"] as const;
 
@@ -27,6 +28,7 @@ interface AiPredictionGridProps {
 }
 
 export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps) {
+  const { t } = useTranslation();
   const [selectedTf, setSelectedTf] = useState<string>("1H");
 
   const { data: prediction, isLoading, isFetching } = useQuery<PredictionResult>({
@@ -52,7 +54,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
             <Brain className="h-4 w-4 text-primary" />
-            <span className="text-sm font-bold">AI Price Prediction</span>
+            <span className="text-sm font-bold">{t("dashboard.aiPricePrediction")}</span>
             {isFetching && (
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
             )}
@@ -63,12 +65,12 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
           </Badge>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 mb-4" data-testid="prediction-timeframe-grid">
+        <div className="flex gap-1 mb-4 overflow-x-auto" data-testid="prediction-timeframe-grid">
           {PREDICTION_TIMEFRAMES.map((tf) => (
             <button
               key={tf}
               className={`
-                py-2 rounded-md text-xs font-bold text-center transition-all
+                flex-1 min-w-[38px] py-2 rounded-md text-xs font-bold text-center transition-all
                 ${selectedTf === tf
                   ? "bg-primary text-white shadow-[0_0_10px_rgba(0,188,165,0.4)]"
                   : "bg-card border border-border/60 text-muted-foreground hover-elevate"
@@ -115,12 +117,12 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
                   </div>
                   <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {selectedTf} Timeframe
+                    {selectedTf} {t("dashboard.timeframe")}
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs text-muted-foreground mb-0.5">Confidence</div>
+                <div className="text-xs text-muted-foreground mb-0.5">{t("dashboard.confidence")}</div>
                 <div className="text-lg font-bold text-neon-value" data-testid="text-prediction-confidence">
                   {confidence}%
                 </div>
@@ -129,7 +131,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-background/50 rounded-md p-2.5 border border-border/30">
-                <div className="text-[10px] text-muted-foreground mb-0.5">Target Price</div>
+                <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.targetPrice")}</div>
                 <div className={`text-sm font-bold ${isBullish ? "text-emerald-400" : isBearish ? "text-red-400" : "text-foreground"}`}
                   data-testid="text-prediction-target"
                 >
@@ -137,7 +139,7 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
                 </div>
               </div>
               <div className="bg-background/50 rounded-md p-2.5 border border-border/30">
-                <div className="text-[10px] text-muted-foreground mb-0.5">Expected Change</div>
+                <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.expectedChange")}</div>
                 <div className={`text-sm font-bold ${parseFloat(priceDiff) >= 0 ? "text-emerald-400" : "text-red-400"}`}
                   data-testid="text-prediction-change"
                 >
@@ -147,21 +149,21 @@ export function AiPredictionGrid({ asset, currentPrice }: AiPredictionGridProps)
             </div>
 
             <div className="bg-background/30 rounded-md p-2.5 border border-border/20">
-              <div className="text-[10px] text-muted-foreground mb-0.5">AI Analysis</div>
+              <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.aiAnalysis")}</div>
               <p className="text-xs text-foreground/80" data-testid="text-prediction-reasoning">
                 {prediction.reasoning}
               </p>
             </div>
 
             <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground flex-wrap">
-              <span>Fear & Greed: {prediction.fearGreedIndex} ({prediction.fearGreedLabel})</span>
-              <span>Source: OpenAI + Market Data</span>
+              <span>{t("dashboard.fearGreed")}: {prediction.fearGreedIndex} ({prediction.fearGreedLabel})</span>
+              <span>{t("dashboard.sourceOpenAI")}</span>
             </div>
           </div>
         ) : (
           <div className="text-center py-4">
             <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">Select a timeframe to get AI prediction</p>
+            <p className="text-xs text-muted-foreground">{t("dashboard.selectTimeframe")}</p>
           </div>
         )}
       </CardContent>

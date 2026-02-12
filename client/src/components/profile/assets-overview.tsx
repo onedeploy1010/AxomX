@@ -5,8 +5,10 @@ import { useActiveAccount } from "thirdweb/react";
 import { useQuery } from "@tanstack/react-query";
 import { formatCompact } from "@/lib/constants";
 import type { Profile } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export function AssetsOverview() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const walletAddr = account?.address || "";
 
@@ -22,12 +24,12 @@ export function AssetsOverview() {
 
   return (
     <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
-      <h2 className="text-lg font-bold mb-3" data-testid="text-profile-title">Assets Overview</h2>
+      <h2 className="text-lg font-bold mb-3" data-testid="text-profile-title">{t("profile.assetsOverview")}</h2>
       <Card className="border-border bg-card/50 glow-green-sm mb-3">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1">Net Assets</div>
+              <div className="text-[10px] text-muted-foreground mb-1">{t("profile.netAssets")}</div>
               {isLoading ? (
                 <Skeleton className="h-8 w-24" />
               ) : (
@@ -44,7 +46,7 @@ export function AssetsOverview() {
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
-              <ArrowDownToLine className="h-3 w-3" /> Deposited
+              <ArrowDownToLine className="h-3 w-3" /> {t("profile.deposited")}
             </div>
             {isLoading ? (
               <Skeleton className="h-5 w-16" />
@@ -56,7 +58,7 @@ export function AssetsOverview() {
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
-              <ArrowUpFromLine className="h-3 w-3" /> Withdrawn
+              <ArrowUpFromLine className="h-3 w-3" /> {t("profile.withdrawn")}
             </div>
             {isLoading ? (
               <Skeleton className="h-5 w-16" />
@@ -68,7 +70,7 @@ export function AssetsOverview() {
         <Card className="border-border bg-card/50">
           <CardContent className="p-3">
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
-              <Users className="h-3 w-3" /> Referral
+              <Users className="h-3 w-3" /> {t("profile.referral")}
             </div>
             {isLoading ? (
               <Skeleton className="h-5 w-16" />

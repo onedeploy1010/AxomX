@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface DepthBarProps {
   buyPercent: string;
@@ -11,6 +12,8 @@ interface DepthBarProps {
 }
 
 export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, fearGreedLabel }: DepthBarProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return <Skeleton className="h-20 w-full rounded-md" data-testid="skeleton-depth-bar" />;
   }
@@ -37,7 +40,7 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
     <Card className="border-border bg-card" data-testid="card-depth-bar">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <span className="text-sm font-medium">Depth Ratio</span>
+          <span className="text-sm font-medium">{t("dashboard.depthRatio")}</span>
           {fearGreedIndex !== undefined && (
             <div className="flex items-center gap-2">
               <span className={`text-lg font-bold tabular-nums ${indexColor}`} data-testid="text-fear-greed-index">
@@ -57,8 +60,8 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
-              <span className="text-xs text-neon-value" data-testid="text-longs-percent">Longs: {buyPercent}%</span>
-              <span className="text-xs text-red-400" data-testid="text-shorts-percent">Shorts: {sellPercent}%</span>
+              <span className="text-xs text-neon-value" data-testid="text-longs-percent">{t("dashboard.longs")}: {buyPercent}%</span>
+              <span className="text-xs text-red-400" data-testid="text-shorts-percent">{t("dashboard.shorts")}: {sellPercent}%</span>
             </div>
             <div className="flex h-3 overflow-hidden rounded-full" data-testid="bar-depth-ratio">
               <div

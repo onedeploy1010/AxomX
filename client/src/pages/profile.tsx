@@ -11,15 +11,17 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Profile } from "@shared/schema";
 import { NodeSection } from "@/components/profile/node-section";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 
 const MENU_ITEMS = [
-  { label: "Referral & Team", icon: GitBranch, path: "/profile/referral", description: "Referral tree & team performance" },
-  { label: "Transaction History", icon: History, path: "/profile/transactions", description: "Deposits, withdrawals & records" },
-  { label: "Notifications", icon: Bell, path: "/profile/notifications", description: "Alerts & messages" },
-  { label: "Settings", icon: Settings, path: "/profile/settings", description: "Language & preferences" },
+  { labelKey: "profile.referralTeam", icon: GitBranch, path: "/profile/referral", descKey: "profile.referralTeamDesc" },
+  { labelKey: "profile.transactionHistory", icon: History, path: "/profile/transactions", descKey: "profile.transactionHistoryDesc" },
+  { labelKey: "profile.notifications", icon: Bell, path: "/profile/notifications", descKey: "profile.notificationsDesc" },
+  { labelKey: "profile.settings", icon: Settings, path: "/profile/settings", descKey: "profile.settingsDesc" },
 ];
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -37,7 +39,7 @@ export default function ProfilePage() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "VIP Activated", description: "Welcome to VIP membership" });
+      toast({ title: t("strategy.vipActivated"), description: t("strategy.vipActivatedDesc") });
       queryClient.invalidateQueries({ queryKey: ["/api/profile", walletAddr] });
     },
     onError: (err: Error) => {
@@ -53,12 +55,12 @@ export default function ProfilePage() {
   return (
     <div className="space-y-4 pb-20" data-testid="page-profile">
       <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
-        <h2 className="text-lg font-bold mb-3" data-testid="text-profile-title">Assets Overview</h2>
+        <h2 className="text-lg font-bold mb-3" data-testid="text-profile-title">{t("profile.assetsOverview")}</h2>
         <Card className="border-border bg-card/50 glow-green-sm mb-3">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <div className="text-[10px] text-muted-foreground mb-1">Net Assets</div>
+                <div className="text-[10px] text-muted-foreground mb-1">{t("profile.netAssets")}</div>
                 {!isConnected ? (
                   <div className="text-2xl font-bold text-muted-foreground" data-testid="text-net-assets">--</div>
                 ) : profileLoading ? (
@@ -77,7 +79,7 @@ export default function ProfilePage() {
           <Card className="border-border bg-card/50">
             <CardContent className="p-3">
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
-                <ArrowDownToLine className="h-3 w-3" /> Deposited
+                <ArrowDownToLine className="h-3 w-3" /> {t("profile.deposited")}
               </div>
               {!isConnected ? (
                 <div className="text-sm font-bold text-muted-foreground" data-testid="text-total-deposited">--</div>
@@ -91,7 +93,7 @@ export default function ProfilePage() {
           <Card className="border-border bg-card/50">
             <CardContent className="p-3">
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
-                <ArrowUpFromLine className="h-3 w-3" /> Withdrawn
+                <ArrowUpFromLine className="h-3 w-3" /> {t("profile.withdrawn")}
               </div>
               {!isConnected ? (
                 <div className="text-sm font-bold text-muted-foreground" data-testid="text-total-withdrawn">--</div>
@@ -105,7 +107,7 @@ export default function ProfilePage() {
           <Card className="border-border bg-card/50">
             <CardContent className="p-3">
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
-                <Users className="h-3 w-3" /> Referral
+                <Users className="h-3 w-3" /> {t("profile.referral")}
               </div>
               {!isConnected ? (
                 <div className="text-sm font-bold text-muted-foreground" data-testid="text-referral-earnings">--</div>
@@ -125,7 +127,7 @@ export default function ProfilePage() {
             <CardContent className="p-4 text-center">
               <WalletCards className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-xs text-muted-foreground" data-testid="text-connect-prompt">
-                Connect your wallet to view your data, trade, and manage assets.
+                {t("common.connectWalletPrompt")}
               </p>
             </CardContent>
           </Card>
@@ -137,9 +139,9 @@ export default function ProfilePage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="min-w-0 flex-1">
-                <div className="text-xs text-muted-foreground mb-1">Connected Wallet</div>
+                <div className="text-xs text-muted-foreground mb-1">{t("profile.connectedWallet")}</div>
                 {!isConnected ? (
-                  <div className="font-mono text-sm text-muted-foreground" data-testid="text-wallet-address">Not connected</div>
+                  <div className="font-mono text-sm text-muted-foreground" data-testid="text-wallet-address">{t("common.notConnected")}</div>
                 ) : profileLoading ? (
                   <Skeleton className="h-5 w-32" />
                 ) : (
@@ -154,7 +156,7 @@ export default function ProfilePage() {
                   variant="ghost"
                   onClick={() => {
                     navigator.clipboard.writeText(walletAddr);
-                    toast({ title: "Copied", description: "Address copied" });
+                    toast({ title: t("common.copied"), description: t("common.copiedDesc") });
                   }}
                   data-testid="button-copy-address"
                 >
@@ -165,10 +167,10 @@ export default function ProfilePage() {
             {isConnected && profile && (
               <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-rank">
-                  Rank: {profile.rank}
+                  {t("common.rank")}: {profile.rank}
                 </Badge>
                 <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-node-type">
-                  Node: {profile.nodeType}
+                  {t("common.node")}: {profile.nodeType}
                 </Badge>
                 {profile.isVip && (
                   <Badge className="bg-primary/20 text-primary text-[10px] no-default-hover-elevate no-default-active-elevate" data-testid="badge-vip">
@@ -180,10 +182,10 @@ export default function ProfilePage() {
             {!isConnected && (
               <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
-                  Rank: --
+                  {t("common.rank")}: --
                 </Badge>
                 <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
-                  Node: --
+                  {t("common.node")}: --
                 </Badge>
               </div>
             )}
@@ -198,7 +200,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <Crown className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-xs font-semibold">
-                  {isConnected && profile?.isVip ? "VIP Active" : "Upgrade to VIP"}
+                  {isConnected && profile?.isVip ? t("profile.vipActive") : t("profile.upgradeToVip")}
                 </span>
               </div>
               {isConnected && !profile?.isVip && (
@@ -208,12 +210,12 @@ export default function ProfilePage() {
                   disabled={vipMutation.isPending}
                   data-testid="button-subscribe-vip"
                 >
-                  {vipMutation.isPending ? "Processing..." : "Subscribe $99/mo"}
+                  {vipMutation.isPending ? t("common.processing") : t("profile.subscribeVip")}
                 </Button>
               )}
               {!isConnected && (
                 <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
-                  Connect to unlock
+                  {t("common.connectToUnlock")}
                 </Badge>
               )}
             </div>
@@ -227,7 +229,7 @@ export default function ProfilePage() {
         ) : (
           <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.2s both" }}>
             <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-              <h3 className="text-sm font-bold">Node Membership</h3>
+              <h3 className="text-sm font-bold">{t("profile.nodeMembership")}</h3>
             </div>
             <Card className="border-border bg-card">
               <CardContent className="p-4">
@@ -236,8 +238,8 @@ export default function ProfilePage() {
                     <Shield className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold">Become a Node Operator</div>
-                    <div className="text-[10px] text-muted-foreground">Connect wallet to view node plans</div>
+                    <div className="text-sm font-bold">{t("profile.becomeNodeOperator")}</div>
+                    <div className="text-[10px] text-muted-foreground">{t("profile.connectToViewNodePlans")}</div>
                   </div>
                 </div>
               </CardContent>
@@ -247,7 +249,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.25s both" }}>
-        <h3 className="text-sm font-bold mb-3">Menu</h3>
+        <h3 className="text-sm font-bold mb-3">{t("profile.menu")}</h3>
         <Card className="border-border bg-card">
           <CardContent className="p-0">
             {MENU_ITEMS.map((item, idx) => (
@@ -257,14 +259,14 @@ export default function ProfilePage() {
                   idx < MENU_ITEMS.length - 1 ? "border-b border-border/50" : ""
                 }`}
                 onClick={() => navigate(item.path)}
-                data-testid={`menu-${item.label.toLowerCase().replace(/[^a-z]/g, "-")}`}
+                data-testid={`menu-${item.path.split("/").pop()}`}
               >
                 <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
                   <item.icon className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium">{item.label}</div>
-                  <div className="text-[10px] text-muted-foreground">{item.description}</div>
+                  <div className="text-sm font-medium">{t(item.labelKey)}</div>
+                  <div className="text-[10px] text-muted-foreground">{t(item.descKey)}</div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </button>

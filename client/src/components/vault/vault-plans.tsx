@@ -5,6 +5,7 @@ import { VAULT_PLANS } from "@/lib/data";
 import { formatDailyRate } from "@/lib/formulas";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface VaultPlansProps {
   selectedPlan?: string;
@@ -12,6 +13,7 @@ interface VaultPlansProps {
 }
 
 export function VaultPlans({ selectedPlan, onSelectPlan }: VaultPlansProps) {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleSelect = (key: string) => {
@@ -29,8 +31,8 @@ export function VaultPlans({ selectedPlan, onSelectPlan }: VaultPlansProps) {
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-sm font-bold">Vault Plans</div>
-                <div className="text-[10px] text-muted-foreground">Earn yield with locked staking</div>
+                <div className="text-sm font-bold">{t("vault.vaultPlans")}</div>
+                <div className="text-[10px] text-muted-foreground">{t("vault.earnYield")}</div>
               </div>
             </div>
             <Button
@@ -38,7 +40,7 @@ export function VaultPlans({ selectedPlan, onSelectPlan }: VaultPlansProps) {
               onClick={() => setDialogOpen(true)}
               data-testid="button-open-plans-dialog"
             >
-              View Plans
+              {t("vault.viewPlans")}
             </Button>
           </div>
         </CardContent>
@@ -47,9 +49,9 @@ export function VaultPlans({ selectedPlan, onSelectPlan }: VaultPlansProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Choose a Vault Plan</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{t("vault.chooseVaultPlan")}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Select a plan to start earning yield on your assets
+              {t("vault.selectPlanDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
@@ -76,11 +78,11 @@ export function VaultPlans({ selectedPlan, onSelectPlan }: VaultPlansProps) {
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                         <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                        <span>Daily rate: {formatDailyRate(plan.dailyRate)}</span>
+                        <span>{t("vault.dailyRate")}: {formatDailyRate(plan.dailyRate)}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                         <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                        <span>Lock period: {plan.days} days</span>
+                        <span>{t("vault.lockPeriod")}: {plan.days} days</span>
                       </div>
                     </div>
                   </CardContent>

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ForecastData {
   direction: string;
@@ -48,6 +49,7 @@ export function PriceChart({
   selectedTimeframe,
   onTimeframeChange,
 }: PriceChartProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -143,7 +145,7 @@ export function PriceChart({
         {forecastLoading && !forecast && (
           <Badge className="ml-auto text-[9px] shrink-0 bg-muted/30 text-muted-foreground no-default-hover-elevate no-default-active-elevate animate-pulse">
             <Sparkles className="mr-1 h-2.5 w-2.5" />
-            Loading...
+            {t("common.loading")}
           </Badge>
         )}
       </div>
@@ -172,7 +174,7 @@ export function PriceChart({
                 }}
               >
                 {directionIcon}
-                Target: {formatUSD(targetPrice)}
+                {t("dashboard.target")}: {formatUSD(targetPrice)}
               </div>
             </div>
           )}
@@ -216,7 +218,7 @@ export function PriceChart({
                 }}
                 formatter={(value: any, name: string) => {
                   if (value === null || value === undefined) return ["-", ""];
-                  const label = name === "forecastPrice" ? "AI Forecast" : "Price";
+                  const label = name === "forecastPrice" ? t("dashboard.aiForecast") : t("common.price");
                   return [formatUSD(Number(value)), label];
                 }}
               />

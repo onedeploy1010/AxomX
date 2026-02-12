@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, WalletCards } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import type { Transaction } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 const TX_TYPE_COLORS: Record<string, string> = {
   DEPOSIT: "bg-primary/15 text-primary",
@@ -18,6 +19,7 @@ const TX_TYPE_COLORS: Record<string, string> = {
 };
 
 export default function ProfileTransactionsPage() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
@@ -35,7 +37,7 @@ export default function ProfileTransactionsPage() {
           <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-lg font-bold">Transaction History</h1>
+          <h1 className="text-lg font-bold">{t("profile.transactionHistory")}</h1>
         </div>
       </div>
 
@@ -44,7 +46,7 @@ export default function ProfileTransactionsPage() {
           <Card className="border-border bg-card border-dashed">
             <CardContent className="p-6 text-center">
               <WalletCards className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground" data-testid="text-connect-prompt">Connect wallet to view transactions</p>
+              <p className="text-xs text-muted-foreground" data-testid="text-connect-prompt">{t("profile.connectToViewTransactions")}</p>
             </CardContent>
           </Card>
         ) : txLoading ? (
@@ -57,7 +59,7 @@ export default function ProfileTransactionsPage() {
           <Card className="border-border bg-card">
             <CardContent className="p-6 text-center">
               <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground" data-testid="text-no-transactions">No transactions yet</p>
+              <p className="text-xs text-muted-foreground" data-testid="text-no-transactions">{t("profile.noTransactions")}</p>
             </CardContent>
           </Card>
         ) : (

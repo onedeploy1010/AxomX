@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { formatUSD } from "@/lib/constants";
 import type { CryptoPrice } from "@/hooks/use-crypto-price";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 interface PriceHeaderProps {
   coin: CryptoPrice | undefined;
@@ -10,6 +11,8 @@ interface PriceHeaderProps {
 }
 
 export function PriceHeader({ coin, isLoading }: PriceHeaderProps) {
+  const { t } = useTranslation();
+
   if (isLoading || !coin) {
     return (
       <div className="mb-3">
@@ -25,7 +28,7 @@ export function PriceHeader({ coin, isLoading }: PriceHeaderProps) {
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-1">
         <img src={coin.image} alt={coin.name} className="h-5 w-5 rounded-full" />
-        <span className="text-sm text-muted-foreground">{coin.symbol.toUpperCase()} Price</span>
+        <span className="text-sm text-muted-foreground">{t("dashboard.priceLabel", { symbol: coin.symbol.toUpperCase() })}</span>
       </div>
       <div className="flex items-baseline gap-3 flex-wrap">
         <span className="text-3xl font-bold tracking-tight" data-testid="text-price">

@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +25,7 @@ const LANGUAGES = [
 
 export default function ProfileSettingsPage() {
   const [, navigate] = useLocation();
+  const { t } = useTranslation();
   const [langDialogOpen, setLangDialogOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("en");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -36,6 +39,7 @@ export default function ProfileSettingsPage() {
 
   const selectLanguage = (code: string) => {
     setCurrentLang(code);
+    i18n.changeLanguage(code);
     localStorage.setItem("axomx-lang", code);
     setLangDialogOpen(false);
   };
@@ -55,12 +59,12 @@ export default function ProfileSettingsPage() {
           <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-lg font-bold">Settings</h1>
+          <h1 className="text-lg font-bold">{t("settings.title")}</h1>
         </div>
       </div>
 
       <div className="px-4 space-y-3" style={{ animation: "fadeSlideIn 0.5s ease-out 0.1s both" }}>
-        <h3 className="text-sm font-bold">General</h3>
+        <h3 className="text-sm font-bold">{t("settings.general")}</h3>
 
         <Card className="border-border bg-card">
           <CardContent className="p-0">
@@ -73,8 +77,8 @@ export default function ProfileSettingsPage() {
                 <Globe className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium">Language</div>
-                <div className="text-[10px] text-muted-foreground">Interface language setting</div>
+                <div className="text-sm font-medium">{t("settings.language")}</div>
+                <div className="text-[10px] text-muted-foreground">{t("settings.languageDesc")}</div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <span className="text-xs text-muted-foreground">{currentLangObj.native}</span>
@@ -91,8 +95,8 @@ export default function ProfileSettingsPage() {
                 <Bell className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium">Push Notifications</div>
-                <div className="text-[10px] text-muted-foreground">Receive alerts and updates</div>
+                <div className="text-sm font-medium">{t("settings.pushNotifications")}</div>
+                <div className="text-[10px] text-muted-foreground">{t("settings.pushNotificationsDesc")}</div>
               </div>
               <div
                 className={`relative h-6 w-11 rounded-full transition-colors ${
@@ -109,7 +113,7 @@ export default function ProfileSettingsPage() {
           </CardContent>
         </Card>
 
-        <h3 className="text-sm font-bold pt-2">Security</h3>
+        <h3 className="text-sm font-bold pt-2">{t("settings.security")}</h3>
 
         <Card className="border-border bg-card">
           <CardContent className="p-0">
@@ -121,8 +125,8 @@ export default function ProfileSettingsPage() {
                 <Shield className="h-4 w-4 text-amber-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium">Security Center</div>
-                <div className="text-[10px] text-muted-foreground">2FA, password & device management</div>
+                <div className="text-sm font-medium">{t("settings.securityCenter")}</div>
+                <div className="text-[10px] text-muted-foreground">{t("settings.securityCenterDesc")}</div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </button>
@@ -130,16 +134,16 @@ export default function ProfileSettingsPage() {
         </Card>
 
         <div className="pt-4 text-center">
-          <span className="text-[10px] text-muted-foreground">AxomX v1.0.0</span>
+          <span className="text-[10px] text-muted-foreground">{t("settings.version")}</span>
         </div>
       </div>
 
       <Dialog open={langDialogOpen} onOpenChange={setLangDialogOpen}>
         <DialogContent className="bg-card border-border max-w-sm max-h-[70vh]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Select Language</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{t("settings.selectLanguage")}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Choose your preferred interface language
+              {t("settings.selectLanguageDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1 overflow-y-auto max-h-[50vh] py-2">

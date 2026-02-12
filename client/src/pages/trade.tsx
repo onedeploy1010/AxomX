@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useActiveAccount } from "thirdweb/react";
+import { useTranslation } from "react-i18next";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import type { TradeBet } from "@shared/schema";
 const TIMEFRAMES = ["5M", "30M", "4H", "1M"] as const;
 
 export default function Trade() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const walletAddress = account?.address || "";
 
@@ -75,7 +77,7 @@ export default function Trade() {
     },
   });
 
-  const tfLabel = timeframe === "1M" ? "1 Min Signal" : timeframe === "5M" ? "5 Min Signal" : timeframe === "30M" ? "30 Min Signal" : "4H Signal";
+  const tfLabel = timeframe === "1M" ? t("trade.signal1min") : timeframe === "5M" ? t("trade.signal5min") : timeframe === "30M" ? t("trade.signal30min") : t("trade.signal4h");
 
   return (
     <div className="space-y-3 pb-52">
@@ -92,7 +94,7 @@ export default function Trade() {
         </Select>
 
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          Data:
+          {t("common.data")}:
           <Badge variant="outline" className="text-[9px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate px-1.5 py-0">
             Binance
           </Badge>
@@ -125,7 +127,7 @@ export default function Trade() {
             onClick={() => setGridView("big")}
             data-testid="button-bigroad"
           >
-            Big Road
+            {t("trade.bigRoad")}
           </Button>
           <Button
             size="sm"
@@ -134,7 +136,7 @@ export default function Trade() {
             onClick={() => setGridView("small")}
             data-testid="button-smallroad"
           >
-            Small Road
+            {t("trade.smallRoad")}
           </Button>
         </div>
       </div>
@@ -157,7 +159,7 @@ export default function Trade() {
               onClick={() => setInfoTab("market")}
               data-testid="button-market-tab"
             >
-              Market
+              {t("trade.market")}
             </Button>
             <Button
               size="sm"
@@ -166,10 +168,10 @@ export default function Trade() {
               onClick={() => setInfoTab("leaderboard")}
               data-testid="button-leaderboard-tab"
             >
-              Leaderboard
+              {t("trade.leaderboard")}
             </Button>
           </div>
-          <span className="text-[10px] text-muted-foreground">Source: Polymarket</span>
+          <span className="text-[10px] text-muted-foreground">{t("trade.sourcePolymarket")}</span>
         </div>
 
         {infoTab === "market" ? (
@@ -185,7 +187,7 @@ export default function Trade() {
               )}
               <div className="flex items-center gap-1 text-[10px] text-primary/70">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Live 1s
+                {t("trade.live1s")}
               </div>
             </div>
             <PriceChart data={chartData} isLoading={chartLoading} color="hsl(174, 72%, 46%)" />
@@ -193,7 +195,7 @@ export default function Trade() {
         ) : (
           <Card className="border-border bg-card">
             <CardContent className="p-4 text-center text-sm text-muted-foreground">
-              No leaderboard data
+              {t("trade.noLeaderboardData")}
             </CardContent>
           </Card>
         )}
@@ -205,16 +207,16 @@ export default function Trade() {
 
       <div className="px-4 space-y-2" style={{ animation: "fadeSlideIn 0.35s ease-out 0.2s both" }}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <span className="text-xs font-medium text-muted-foreground">Orders ({bets.length})</span>
+          <span className="text-xs font-medium text-muted-foreground">{t("trade.orders", { count: bets.length })}</span>
           <Button variant="ghost" size="sm" className="text-primary" data-testid="button-batch-claim">
-            Batch Claim
+            {t("trade.batchClaim")}
           </Button>
         </div>
 
         {bets.length === 0 ? (
           <Card className="border-border bg-card">
             <CardContent className="p-6 text-center text-sm text-muted-foreground" data-testid="text-no-orders">
-              No orders yet
+              {t("trade.noOrdersYet")}
             </CardContent>
           </Card>
         ) : (
@@ -238,7 +240,7 @@ export default function Trade() {
                             : "text-red-400 border-red-400/30"
                         }`}
                       >
-                        {bet.direction === "up" || bet.direction === "bull" ? "Bull" : "Bear"}
+                        {bet.direction === "up" || bet.direction === "bull" ? t("trade.bull") : t("trade.bear")}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2 text-xs flex-wrap">
@@ -250,13 +252,13 @@ export default function Trade() {
                             bet.result === "WIN" ? "text-neon-value" : "text-red-400"
                           }`}
                         >
-                          {bet.result === "WIN" ? "Won" : "Lost"}
+                          {bet.result === "WIN" ? t("trade.won") : t("trade.lost")}
                         </Badge>
                       )}
                       {!bet.result && (
                         <span className="flex items-center gap-0.5 text-yellow-400/70">
                           <Clock className="h-3 w-3" />
-                          Pending
+                          {t("trade.pending")}
                         </span>
                       )}
                     </div>

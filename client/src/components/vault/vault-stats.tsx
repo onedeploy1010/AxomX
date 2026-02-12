@@ -4,6 +4,7 @@ import { Clock, Users, Lock, Layers } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { VAULT_PLANS } from "@/lib/data";
+import { useTranslation } from "react-i18next";
 
 interface VaultOverviewResponse {
   tvl: string;
@@ -12,6 +13,7 @@ interface VaultOverviewResponse {
 }
 
 export function VaultStats() {
+  const { t } = useTranslation();
   const { data: overview, isLoading } = useQuery<VaultOverviewResponse>({
     queryKey: ["/api/vault/overview"],
   });
@@ -43,7 +45,7 @@ export function VaultStats() {
       <Card className="border-border bg-card">
         <CardContent className="p-3">
           <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-            <Layers className="h-3 w-3" /> TVL
+            <Layers className="h-3 w-3" /> {t("vault.tvl")}
           </div>
           <div className="text-lg font-bold" data-testid="text-tvl">{tvlFormatted}</div>
         </CardContent>
@@ -51,7 +53,7 @@ export function VaultStats() {
       <Card className="border-border bg-card">
         <CardContent className="p-3">
           <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-            <Clock className="h-3 w-3" /> Max APR
+            <Clock className="h-3 w-3" /> {t("vault.maxApr")}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-neon-value" data-testid="text-max-apr">{maxApr}%</span>
@@ -62,7 +64,7 @@ export function VaultStats() {
       <Card className="border-border bg-card">
         <CardContent className="p-3">
           <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-            <Users className="h-3 w-3" /> Holders
+            <Users className="h-3 w-3" /> {t("vault.holders")}
           </div>
           <div className="text-lg font-bold" data-testid="text-holders">{overview.holders}</div>
         </CardContent>
@@ -70,7 +72,7 @@ export function VaultStats() {
       <Card className="border-border bg-card">
         <CardContent className="p-3">
           <div className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-            <Lock className="h-3 w-3" /> Active Positions
+            <Lock className="h-3 w-3" /> {t("vault.activePositions")}
           </div>
           <div className="text-lg font-bold" data-testid="text-positions">{overview.totalPositions}</div>
         </CardContent>

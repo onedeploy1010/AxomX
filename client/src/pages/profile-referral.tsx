@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import type { Profile } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 interface ReferralData {
   referrals: Array<{
@@ -32,6 +33,7 @@ interface ReferralData {
 }
 
 export default function ProfileReferralPage() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -53,7 +55,7 @@ export default function ProfileReferralPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ title: "Copied", description: "Copied to clipboard" });
+    toast({ title: t("common.copied"), description: t("common.copiedDesc") });
   };
 
   const totalTeamDeposits = teamData?.referrals.reduce((sum, ref) => {
@@ -69,14 +71,14 @@ export default function ProfileReferralPage() {
           <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-lg font-bold">Referral & Team</h1>
+          <h1 className="text-lg font-bold">{t("profile.referralTeam")}</h1>
         </div>
 
         {!isConnected ? (
           <Card className="border-border bg-card/50 border-dashed">
             <CardContent className="p-4 text-center">
               <WalletCards className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">Connect wallet to view referral data</p>
+              <p className="text-xs text-muted-foreground">{t("profile.connectToViewReferral")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -84,26 +86,26 @@ export default function ProfileReferralPage() {
             <CardContent className="p-4 space-y-3">
               <div>
                 <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                  <span className="text-xs text-muted-foreground">Referral Link</span>
+                  <span className="text-xs text-muted-foreground">{t("profile.referralLink")}</span>
                   <Button
                     size="sm"
                     onClick={() => copyToClipboard(referralLink)}
                     data-testid="button-copy-referral"
                   >
-                    <Link2 className="mr-1 h-3 w-3" /> Copy Link
+                    <Link2 className="mr-1 h-3 w-3" /> {t("common.copyLink")}
                   </Button>
                 </div>
                 <div className="text-xs font-mono text-muted-foreground truncate" data-testid="text-referral-link">{referralLink}</div>
               </div>
               <div>
                 <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                  <span className="text-xs text-muted-foreground">Referral Code</span>
+                  <span className="text-xs text-muted-foreground">{t("profile.referralCode")}</span>
                   <Button
                     size="sm"
                     onClick={() => copyToClipboard(refCode || "")}
                     data-testid="button-copy-code"
                   >
-                    <Copy className="mr-1 h-3 w-3" /> Copy
+                    <Copy className="mr-1 h-3 w-3" /> {t("common.copy")}
                   </Button>
                 </div>
                 <div className="text-xs font-mono text-muted-foreground" data-testid="text-ref-code">
@@ -116,39 +118,39 @@ export default function ProfileReferralPage() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.1s both" }}>
-        <h3 className="text-sm font-bold mb-3">Team Performance</h3>
+        <h3 className="text-sm font-bold mb-3">{t("profile.teamPerformance")}</h3>
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <Users className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold text-neon-value" data-testid="text-team-size">{isConnected ? (teamData?.teamSize || 0) : "--"}</div>
-              <div className="text-[10px] text-muted-foreground">Team Size</div>
+              <div className="text-[10px] text-muted-foreground">{t("profile.teamSize")}</div>
             </CardContent>
           </Card>
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <UserPlus className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold text-neon-value" data-testid="text-direct-count">{isConnected ? (teamData?.directCount || 0) : "--"}</div>
-              <div className="text-[10px] text-muted-foreground">Direct</div>
+              <div className="text-[10px] text-muted-foreground">{t("profile.direct")}</div>
             </CardContent>
           </Card>
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <ArrowDownToLine className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold text-neon-value" data-testid="text-team-deposits">{isConnected ? formatCompact(totalTeamDeposits) : "--"}</div>
-              <div className="text-[10px] text-muted-foreground">Deposits</div>
+              <div className="text-[10px] text-muted-foreground">{t("profile.deposits")}</div>
             </CardContent>
           </Card>
         </div>
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.2s both" }}>
-        <h3 className="text-sm font-bold mb-3">Referral Tree</h3>
+        <h3 className="text-sm font-bold mb-3">{t("profile.referralTree")}</h3>
         {!isConnected ? (
           <Card className="border-border bg-card">
             <CardContent className="p-6 text-center">
               <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">Connect wallet to view your team</p>
+              <p className="text-xs text-muted-foreground">{t("profile.connectToViewTeam")}</p>
             </CardContent>
           </Card>
         ) : isLoading ? (
@@ -158,7 +160,7 @@ export default function ProfileReferralPage() {
             <CardContent className="p-6 text-center">
               <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-xs text-muted-foreground" data-testid="text-no-referrals">
-                No team members yet. Share your referral code!
+                {t("profile.noTeamMembers")}
               </p>
             </CardContent>
           </Card>

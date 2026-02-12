@@ -8,6 +8,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { useQuery } from "@tanstack/react-query";
 import { shortenAddress, formatCompact } from "@/lib/constants";
 import type { Profile } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 interface ReferralData {
   referrals: Array<{
@@ -35,6 +36,7 @@ interface ReferralCardProps {
 }
 
 export function ReferralCard({ refCode }: ReferralCardProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const account = useActiveAccount();
   const walletAddr = account?.address || "";
@@ -46,7 +48,7 @@ export function ReferralCard({ refCode }: ReferralCardProps) {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ title: "Copied", description: "Copied to clipboard" });
+    toast({ title: t("common.copied"), description: t("common.copiedDesc") });
   };
 
   const referralLink = refCode ? `${window.location.origin}?ref=${refCode}` : "--";
@@ -63,26 +65,26 @@ export function ReferralCard({ refCode }: ReferralCardProps) {
         <CardContent className="p-4 space-y-3">
           <div>
             <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-              <span className="text-xs text-muted-foreground">Referral Link</span>
+              <span className="text-xs text-muted-foreground">{t("profile.referralLink")}</span>
               <Button
                 size="sm"
                 onClick={() => copyToClipboard(referralLink)}
                 data-testid="button-copy-referral"
               >
-                <Link2 className="mr-1 h-3 w-3" /> Copy Link
+                <Link2 className="mr-1 h-3 w-3" /> {t("common.copyLink")}
               </Button>
             </div>
             <div className="text-xs font-mono text-muted-foreground truncate" data-testid="text-referral-link">{referralLink}</div>
           </div>
           <div>
             <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-              <span className="text-xs text-muted-foreground">Referral Code</span>
+              <span className="text-xs text-muted-foreground">{t("profile.referralCode")}</span>
               <Button
                 size="sm"
                 onClick={() => copyToClipboard(refCode || "")}
                 data-testid="button-copy-code"
               >
-                <Copy className="mr-1 h-3 w-3" /> Copy
+                <Copy className="mr-1 h-3 w-3" /> {t("common.copy")}
               </Button>
             </div>
             <div className="text-xs font-mono text-muted-foreground" data-testid="text-ref-code">
@@ -93,34 +95,34 @@ export function ReferralCard({ refCode }: ReferralCardProps) {
       </Card>
 
       <div>
-        <h3 className="text-sm font-bold mb-3">Team Performance</h3>
+        <h3 className="text-sm font-bold mb-3">{t("profile.teamPerformance")}</h3>
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <Users className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold" data-testid="text-team-size">{teamData?.teamSize || 0}</div>
-              <div className="text-[10px] text-muted-foreground">Team Size</div>
+              <div className="text-[10px] text-muted-foreground">{t("profile.teamSize")}</div>
             </CardContent>
           </Card>
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <UserPlus className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold" data-testid="text-direct-count">{teamData?.directCount || 0}</div>
-              <div className="text-[10px] text-muted-foreground">Direct</div>
+              <div className="text-[10px] text-muted-foreground">{t("profile.direct")}</div>
             </CardContent>
           </Card>
           <Card className="border-border bg-card">
             <CardContent className="p-3 text-center">
               <ArrowDownToLine className="h-4 w-4 text-primary mx-auto mb-1" />
               <div className="text-lg font-bold" data-testid="text-team-deposits">{formatCompact(totalTeamDeposits)}</div>
-              <div className="text-[10px] text-muted-foreground">Deposits</div>
+              <div className="text-[10px] text-muted-foreground">{t("profile.deposits")}</div>
             </CardContent>
           </Card>
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-bold mb-3">Referral Tree</h3>
+        <h3 className="text-sm font-bold mb-3">{t("profile.referralTree")}</h3>
         {isLoading ? (
           <Skeleton className="h-24 w-full rounded-md" />
         ) : !teamData?.referrals.length ? (
@@ -128,7 +130,7 @@ export function ReferralCard({ refCode }: ReferralCardProps) {
             <CardContent className="p-6 text-center">
               <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-xs text-muted-foreground" data-testid="text-no-referrals">
-                No team members yet. Share your referral code!
+                {t("profile.noTeamMembers")}
               </p>
             </CardContent>
           </Card>

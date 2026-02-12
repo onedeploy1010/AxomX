@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Activity } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CryptoPrice } from "@/hooks/use-crypto-price";
+import { useTranslation } from "react-i18next";
 
 interface TrendingFeedProps {
   prices: CryptoPrice[] | undefined;
@@ -9,12 +10,14 @@ interface TrendingFeedProps {
 }
 
 export function TrendingFeed({ prices, isLoading }: TrendingFeedProps) {
+  const { t } = useTranslation();
+
   if (isLoading || !prices) {
     return (
       <div>
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
           <Activity className="h-4 w-4 text-primary" />
-          Trending
+          {t("dashboard.trending")}
         </h3>
         <div className="flex gap-2">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -33,7 +36,7 @@ export function TrendingFeed({ prices, isLoading }: TrendingFeedProps) {
     <div data-testid="section-trending-feed">
       <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <Activity className="h-4 w-4 text-primary" />
-        Trending
+        {t("dashboard.trending")}
       </h3>
       <div
         className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Minus, Plus, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BET_DEFAULTS } from "@/lib/data";
@@ -15,6 +16,7 @@ interface BetControlsProps {
 }
 
 export function BetControls({ amount, onAmountChange, duration, onDurationChange, onBet, isPending }: BetControlsProps) {
+  const { t } = useTranslation();
   const [activeDir, setActiveDir] = useState<"up" | "down" | null>(null);
 
   const durationIndex = DURATIONS.indexOf(duration);
@@ -43,9 +45,9 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
             >
               <Minus className="h-4 w-4" />
             </Button>
-            <div className="flex items-baseline gap-1 min-w-[60px] justify-center">
+            <div className="flex items-baseline gap-1 min-w-[50px] justify-center">
               <span className="text-lg font-bold" data-testid="text-bet-amount">${amount}</span>
-              <span className="text-[9px] text-muted-foreground">Stake</span>
+              <span className="text-[9px] text-muted-foreground">{t("trade.stake")}</span>
             </div>
             <Button
               size="icon"
@@ -66,9 +68,9 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="text-center min-w-[50px]">
+            <div className="text-center min-w-[42px]">
               <span className="text-lg font-bold" data-testid="text-duration">{duration}</span>
-              <div className="text-[9px] text-muted-foreground">Duration</div>
+              <div className="text-[9px] text-muted-foreground">{t("trade.duration")}</div>
             </div>
             <Button
               size="icon"
@@ -89,7 +91,7 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
             style={{ boxShadow: "0 0 12px rgba(239,68,68,0.3)" }}
             data-testid="button-bear"
           >
-            Bear {BET_DEFAULTS.payoutPercent}%
+            {t("trade.bear")} {BET_DEFAULTS.payoutPercent}%
             {activeDir === "down" && <span className="absolute inset-0 rounded-md animate-ping bg-red-400/20" />}
           </Button>
           <Button
@@ -99,7 +101,7 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
             style={{ boxShadow: "0 0 12px rgba(16,185,129,0.3)" }}
             data-testid="button-bull"
           >
-            Bull {BET_DEFAULTS.payoutPercent}%
+            {t("trade.bull")} {BET_DEFAULTS.payoutPercent}%
             {activeDir === "up" && <span className="absolute inset-0 rounded-md animate-ping bg-primary/20" />}
           </Button>
         </div>
@@ -110,7 +112,7 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
           data-testid="button-ai-smarty"
         >
           <Sparkles className="h-4 w-4 mr-1.5" />
-          AI Smarty
+          {t("trade.aiSmarty")}
         </Button>
       </div>
     </div>

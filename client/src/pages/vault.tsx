@@ -18,8 +18,10 @@ import { useToast } from "@/hooks/use-toast";
 import { VAULT_PLANS } from "@/lib/data";
 import { formatUSD, shortenAddress } from "@/lib/constants";
 import type { VaultPosition, Transaction } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 function TransactionTable({ walletAddress, type }: { walletAddress: string; type: string }) {
+  const { t } = useTranslation();
   const { data: txs, isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions", walletAddress, type],
     queryFn: async () => {
@@ -47,7 +49,7 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
       <Card className="border-border bg-card">
         <CardContent className="p-4 text-center py-8">
           <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-          <div className="text-sm text-muted-foreground" data-testid={`text-no-${type.toLowerCase()}-records`}>No records</div>
+          <div className="text-sm text-muted-foreground" data-testid={`text-no-${type.toLowerCase()}-records`}>{t("common.noRecords")}</div>
         </CardContent>
       </Card>
     );
@@ -56,14 +58,15 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
   return (
     <Card className="border-border bg-card">
       <CardContent className="p-4">
-        <div className="grid grid-cols-5 text-[10px] text-muted-foreground mb-2 font-medium gap-1">
-          <span>Token</span><span>Amount</span><span>TXID</span><span>Status</span><span>Date</span>
+        <div className="overflow-x-auto">
+        <div className="grid grid-cols-5 text-[10px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
+          <span>{t("common.token")}</span><span>{t("common.amount")}</span><span>{t("common.txid")}</span><span>{t("common.status")}</span><span>{t("common.date")}</span>
         </div>
         <div className="space-y-1">
           {txs.map((tx, idx) => (
             <div
               key={tx.id}
-              className="grid grid-cols-5 text-xs py-2 border-b border-border/30 last:border-0 gap-1"
+              className="grid grid-cols-5 text-xs py-2 border-b border-border/30 last:border-0 gap-1 min-w-[340px]"
               style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.05}s both` }}
               data-testid={`row-tx-${tx.id}`}
             >
@@ -87,12 +90,14 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
             </div>
           ))}
         </div>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
 export default function Vault() {
+  const { t } = useTranslation();
   const account = useActiveAccount();
   const walletAddress = account?.address || "";
   const { toast } = useToast();
@@ -132,7 +137,7 @@ export default function Vault() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Deposit successful", description: "Your vault position has been created." });
+      toast({ title: t("vault.depositSuccess"), description: t("vault.depositSuccessDesc") });
       queryClient.invalidateQueries({ queryKey: ["/api/vault/positions", walletAddress] });
       queryClient.invalidateQueries({ queryKey: ["/api/vault/overview"] });
       queryClient.invalidateQueries({ queryKey: ["/api/transactions", walletAddress] });
@@ -140,7 +145,7 @@ export default function Vault() {
       setDepositAmount("");
     },
     onError: (err: Error) => {
-      toast({ title: "Deposit failed", description: err.message, variant: "destructive" });
+      toast({ title: t("vault.depositFailed"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -151,8 +156,8 @@ export default function Vault() {
     },
     onSuccess: (data: any) => {
       toast({
-        title: "Withdrawal successful",
-        description: `Withdrawn $${Number(data.totalWithdraw).toFixed(2)} (Yield: $${Number(data.yieldAmount).toFixed(2)})`,
+        title: t("vault.withdrawalSuccess"),
+        description: t("vault.withdrawnTotal", { total: Number(data.totalWithdraw).toFixed(2), yield: Number(data.yieldAmount).toFixed(2) }),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vault/positions", walletAddress] });
       queryClient.invalidateQueries({ queryKey: ["/api/vault/overview"] });
@@ -161,14 +166,14 @@ export default function Vault() {
       setSelectedPositionId("");
     },
     onError: (err: Error) => {
-      toast({ title: "Withdrawal failed", description: err.message, variant: "destructive" });
+      toast({ title: t("vault.withdrawalFailed"), description: err.message, variant: "destructive" });
     },
   });
 
   const handleDeposit = () => {
     const amount = parseFloat(depositAmount);
     if (!walletAddress || !selectedPlan || isNaN(amount) || amount <= 0) {
-      toast({ title: "Invalid input", description: "Please enter a valid amount and connect your wallet.", variant: "destructive" });
+      toast({ title: t("vault.invalidInput"), description: t("vault.invalidInputDesc"), variant: "destructive" });
       return;
     }
     const txHash = `0x${Date.now().toString(16)}${Math.random().toString(16).slice(2, 10)}`;
@@ -197,7 +202,7 @@ export default function Vault() {
       <VaultChart />
 
       <div className="px-4">
-        <h3 className="text-base font-bold mb-3">Vault Details</h3>
+        <h3 className="text-base font-bold mb-3">{t("vault.vaultDetails")}</h3>
         <VaultStats />
       </div>
 
@@ -206,13 +211,13 @@ export default function Vault() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-4 mb-3 flex-wrap">
               <div>
-                <div className="text-[10px] text-muted-foreground">Your Position</div>
+                <div className="text-[10px] text-muted-foreground">{t("vault.yourPosition")}</div>
                 <div className="text-xl font-bold" data-testid="text-my-position">
                   {walletAddress ? formatUSD(totalPrincipal) : "$0.00"}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground">Accumulated Yield</div>
+                <div className="text-[10px] text-muted-foreground">{t("vault.accumulatedYield")}</div>
                 <div className="text-xl font-bold text-neon-value" data-testid="text-my-yield">
                   {walletAddress ? formatUSD(totalYield) : "$0.00"}
                 </div>
@@ -224,7 +229,7 @@ export default function Vault() {
               disabled={totalYield <= 0}
               data-testid="button-claim"
             >
-              <Sparkles className="mr-2 h-4 w-4" /> Claim Yield
+              <Sparkles className="mr-2 h-4 w-4" /> {t("vault.claimYield")}
             </Button>
           </CardContent>
         </Card>
@@ -235,15 +240,16 @@ export default function Vault() {
       </div>
 
       <div className="px-4">
-        <h3 className="text-sm font-bold mb-3">Positions</h3>
+        <h3 className="text-sm font-bold mb-3">{t("vault.positions")}</h3>
         <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="grid grid-cols-5 text-[10px] text-muted-foreground mb-2 font-medium gap-1">
-              <span>Amount</span>
-              <span>Start</span>
-              <span>Lock</span>
-              <span>Remaining</span>
-              <span>Action</span>
+            <div className="overflow-x-auto">
+            <div className="grid grid-cols-5 text-[10px] text-muted-foreground mb-2 font-medium gap-1 min-w-[340px]">
+              <span>{t("common.amount")}</span>
+              <span>{t("vault.start")}</span>
+              <span>{t("vault.lock")}</span>
+              <span>{t("vault.remaining")}</span>
+              <span>{t("vault.action")}</span>
             </div>
             {positionsLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
@@ -251,7 +257,7 @@ export default function Vault() {
               ))
             ) : !positions || positions.length === 0 ? (
               <div className="text-center py-6 text-sm text-muted-foreground" data-testid="text-no-positions">
-                No positions yet
+                {t("vault.noPositionsYet")}
               </div>
             ) : (
               <div className="space-y-1">
@@ -266,7 +272,7 @@ export default function Vault() {
                   return (
                     <div
                       key={pos.id}
-                      className="grid grid-cols-5 items-center text-xs py-2 border-b border-border/30 last:border-0 gap-1"
+                      className="grid grid-cols-5 items-center text-xs py-2 border-b border-border/30 last:border-0 gap-1 min-w-[340px]"
                       style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.08}s both` }}
                       data-testid={`row-position-${pos.id}`}
                     >
@@ -286,7 +292,7 @@ export default function Vault() {
                             disabled={withdrawMutation.isPending}
                             data-testid={`button-withdraw-${pos.id}`}
                           >
-                            Withdraw
+                            {t("common.withdraw")}
                           </Button>
                         ) : (
                           <Badge className="text-[9px] bg-muted/50 text-muted-foreground no-default-hover-elevate no-default-active-elevate">
@@ -299,6 +305,7 @@ export default function Vault() {
                 })}
               </div>
             )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -307,13 +314,13 @@ export default function Vault() {
         <Tabs defaultValue="deposit">
           <TabsList className="w-full bg-card border border-border">
             <TabsTrigger value="deposit" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-deposit">
-              Deposit
+              {t("vault.depositTab")}
             </TabsTrigger>
             <TabsTrigger value="withdraw" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-withdraw">
-              Withdraw
+              {t("vault.withdrawTab")}
             </TabsTrigger>
             <TabsTrigger value="yield" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-yield">
-              Yield
+              {t("vault.yieldTab")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="deposit" className="mt-3">
@@ -321,7 +328,7 @@ export default function Vault() {
               <TransactionTable walletAddress={walletAddress} type="DEPOSIT" />
             ) : (
               <Card className="border-border bg-card">
-                <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">Connect wallet to view</CardContent>
+                <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">{t("common.connectWalletToView")}</CardContent>
               </Card>
             )}
           </TabsContent>
@@ -330,7 +337,7 @@ export default function Vault() {
               <TransactionTable walletAddress={walletAddress} type="WITHDRAW" />
             ) : (
               <Card className="border-border bg-card">
-                <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">Connect wallet to view</CardContent>
+                <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">{t("common.connectWalletToView")}</CardContent>
               </Card>
             )}
           </TabsContent>
@@ -339,7 +346,7 @@ export default function Vault() {
               <TransactionTable walletAddress={walletAddress} type="YIELD" />
             ) : (
               <Card className="border-border bg-card">
-                <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">Connect wallet to view</CardContent>
+                <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">{t("common.connectWalletToView")}</CardContent>
               </Card>
             )}
           </TabsContent>
@@ -353,7 +360,7 @@ export default function Vault() {
             onClick={() => setDepositOpen(true)}
             data-testid="button-deposit-vault"
           >
-            <ArrowDownToLine className="mr-2 h-4 w-4" /> Deposit to Vault
+            <ArrowDownToLine className="mr-2 h-4 w-4" /> {t("vault.depositToVault")}
           </Button>
           <Button
             variant="secondary"
@@ -361,7 +368,7 @@ export default function Vault() {
             onClick={() => setRedeemOpen(true)}
             data-testid="button-redeem-vault"
           >
-            <ArrowUpFromLine className="mr-2 h-4 w-4" /> Redeem from Vault
+            <ArrowUpFromLine className="mr-2 h-4 w-4" /> {t("vault.redeemFromVault")}
           </Button>
         </div>
       </div>
@@ -369,14 +376,14 @@ export default function Vault() {
       <Dialog open={depositOpen} onOpenChange={setDepositOpen}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Deposit to Vault</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{t("vault.depositToVault")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Select Plan</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("vault.selectPlan")}</label>
               <Select value={selectedPlan} onValueChange={setSelectedPlan}>
                 <SelectTrigger data-testid="select-plan">
-                  <SelectValue placeholder="Choose a plan" />
+                  <SelectValue placeholder={t("vault.choosePlan")} />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(VAULT_PLANS).map(([key, plan]) => (
@@ -388,10 +395,10 @@ export default function Vault() {
               </Select>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">Amount (USDT)</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">{t("vault.amountUSDT")}</label>
               <Input
                 type="number"
-                placeholder="Enter amount"
+                placeholder={t("vault.enterAmount")}
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(e.target.value)}
                 min="1"
@@ -402,18 +409,18 @@ export default function Vault() {
             {selectedPlan && (
               <div className="bg-muted/30 rounded-md p-3 text-xs space-y-1">
                 <div className="flex justify-between gap-2">
-                  <span className="text-muted-foreground">Daily Rate</span>
+                  <span className="text-muted-foreground">{t("vault.dailyRate")}</span>
                   <span className="text-neon-value">
                     {(VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.dailyRate * 100).toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <span className="text-muted-foreground">Lock Period</span>
+                  <span className="text-muted-foreground">{t("vault.lockPeriod")}</span>
                   <span>{VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.days} days</span>
                 </div>
                 {depositAmount && !isNaN(parseFloat(depositAmount)) && (
                   <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
-                    <span className="text-muted-foreground">Est. Total Yield</span>
+                    <span className="text-muted-foreground">{t("vault.estTotalYield")}</span>
                     <span className="text-neon-value font-medium">
                       ${(parseFloat(depositAmount) * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.dailyRate * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.days).toFixed(2)}
                     </span>
@@ -429,7 +436,7 @@ export default function Vault() {
               disabled={depositMutation.isPending || !walletAddress}
               data-testid="button-confirm-deposit"
             >
-              {depositMutation.isPending ? "Processing..." : !walletAddress ? "Connect Wallet First" : "Confirm Deposit"}
+              {depositMutation.isPending ? t("common.processing") : !walletAddress ? t("common.connectWalletFirst") : t("vault.confirmDeposit")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -438,23 +445,23 @@ export default function Vault() {
       <Dialog open={redeemOpen} onOpenChange={setRedeemOpen}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Redeem from Vault</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{t("vault.redeemFromVault")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {!walletAddress ? (
               <div className="text-center py-4 text-sm text-muted-foreground">
-                Connect wallet to view positions
+                {t("vault.connectToViewPositions")}
               </div>
             ) : activePositions.length === 0 ? (
               <div className="text-center py-4 text-sm text-muted-foreground" data-testid="text-no-active-positions">
-                No active positions to redeem
+                {t("vault.noActivePositions")}
               </div>
             ) : (
               <>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Select Position</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t("vault.selectPosition")}</label>
                 <Select value={selectedPositionId} onValueChange={setSelectedPositionId}>
                   <SelectTrigger data-testid="select-position">
-                    <SelectValue placeholder="Choose a position" />
+                    <SelectValue placeholder={t("vault.choosePosition")} />
                   </SelectTrigger>
                   <SelectContent>
                     {activePositions.map((pos) => {
@@ -479,20 +486,20 @@ export default function Vault() {
                   return (
                     <div className="bg-muted/30 rounded-md p-3 text-xs space-y-1">
                       <div className="flex justify-between gap-2">
-                        <span className="text-muted-foreground">Principal</span>
+                        <span className="text-muted-foreground">{t("vault.principal")}</span>
                         <span>${Number(pos.principal).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-muted-foreground">Yield ({days}d)</span>
+                        <span className="text-muted-foreground">{t("vault.yieldDays", { days })}</span>
                         <span className="text-neon-value">${yieldAmt.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
-                        <span className="text-muted-foreground">Total</span>
+                        <span className="text-muted-foreground">{t("vault.total")}</span>
                         <span className="font-medium">${total.toFixed(2)}</span>
                       </div>
                       {isEarly && (
                         <div className="text-yellow-400 text-[10px] mt-1">
-                          Early withdrawal - lock period not complete
+                          {t("vault.earlyWithdrawal")}
                         </div>
                       )}
                     </div>
@@ -508,7 +515,7 @@ export default function Vault() {
               disabled={withdrawMutation.isPending || !selectedPositionId || !walletAddress}
               data-testid="button-confirm-redeem"
             >
-              {withdrawMutation.isPending ? "Processing..." : "Confirm Redemption"}
+              {withdrawMutation.isPending ? t("common.processing") : t("vault.confirmRedemption")}
             </Button>
           </DialogFooter>
         </DialogContent>

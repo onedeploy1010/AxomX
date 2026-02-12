@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface TradeStats {
@@ -37,6 +38,7 @@ function useCountUp(target: number, duration: number = 800): number {
 }
 
 export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
+  const { t } = useTranslation();
   const totalAnim = useCountUp(stats.total);
   const winsAnim = useCountUp(stats.wins);
   const lossesAnim = useCountUp(stats.losses);
@@ -61,28 +63,28 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
     >
       <CardContent className="p-3">
         <div className="text-xs font-medium mb-2 text-primary/80">
-          My Stats
+          {t("trade.myStats")}
         </div>
-        <div className="grid grid-cols-4 gap-4 text-center">
+        <div className="grid grid-cols-4 gap-2 text-center">
           <div>
-            <div className="text-lg font-bold text-neon-value" data-testid="text-total-bets">{totalAnim}</div>
-            <div className="text-[10px] text-muted-foreground">Total Bets</div>
+            <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-total-bets">{totalAnim}</div>
+            <div className="text-[10px] text-muted-foreground">{t("trade.totalBets")}</div>
           </div>
           <div>
-            <div className="text-lg font-bold" data-testid="text-win-loss">
+            <div className="text-base font-bold tabular-nums" data-testid="text-win-loss">
               <span className="text-neon-value">{winsAnim}</span>
               <span className="text-muted-foreground">/</span>
               <span className="text-red-400">{lossesAnim}</span>
             </div>
-            <div className="text-[10px] text-muted-foreground">W/L</div>
+            <div className="text-[10px] text-muted-foreground">{t("trade.wl")}</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-neon-value" data-testid="text-win-rate">{winRate}%</div>
-            <div className="text-[10px] text-muted-foreground">Win Rate</div>
+            <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-win-rate">{winRate}%</div>
+            <div className="text-[10px] text-muted-foreground">{t("trade.winRate")}</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-neon-value" data-testid="text-total-staked">${staked.toFixed(0)}</div>
-            <div className="text-[10px] text-muted-foreground">Staked</div>
+            <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-total-staked">${staked.toFixed(0)}</div>
+            <div className="text-[10px] text-muted-foreground">{t("trade.staked")}</div>
           </div>
         </div>
       </CardContent>
