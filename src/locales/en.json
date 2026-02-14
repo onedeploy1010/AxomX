@@ -425,7 +425,9 @@
     "nodeEarningsDetail": "Node Earnings Detail",
     "viewEarningsDetail": "View Earnings Detail",
     "earningsRecords": "Earnings Records",
-    "noEarningsRecords": "No earnings records yet"
+    "noEarningsRecords": "No earnings records yet",
+    "myTeam": "My Team",
+    "goBack": "Go Back"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

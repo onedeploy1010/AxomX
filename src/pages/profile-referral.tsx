@@ -2,9 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
-import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards, Layers, TrendingUp } from "lucide-react";
+import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards, Layers, TrendingUp, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -41,6 +42,23 @@ export default function ProfileReferralPage() {
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;
 
+  // Breadcrumb navigation for drilling into sub-trees
+  const [addrStack, setAddrStack] = useState<Array<{ addr: string; label: string }>>([]);
+  const viewingAddr = addrStack.length > 0 ? addrStack[addrStack.length - 1].addr : walletAddr;
+  const isViewingSelf = viewingAddr === walletAddr;
+
+  const drillInto = useCallback((addr: string, label: string) => {
+    setAddrStack((prev) => [...prev, { addr, label }]);
+  }, []);
+
+  const goBack = useCallback(() => {
+    setAddrStack((prev) => prev.slice(0, -1));
+  }, []);
+
+  const goToRoot = useCallback(() => {
+    setAddrStack([]);
+  }, []);
+
   const { data: profile } = useQuery<Profile>({
     queryKey: ["profile", walletAddr],
     queryFn: () => getProfile(walletAddr),
@@ -48,8 +66,8 @@ export default function ProfileReferralPage() {
   });
 
   const { data: teamData, isLoading } = useQuery<ReferralData>({
-    queryKey: ["referrals", walletAddr],
-    queryFn: () => getReferralTree(walletAddr),
+    queryKey: ["referrals", viewingAddr],
+    queryFn: () => getReferralTree(viewingAddr),
     enabled: isConnected,
   });
 
@@ -159,6 +177,34 @@ export default function ProfileReferralPage() {
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.2s both" }}>
         <h3 className="text-sm font-bold mb-3">{t("profile.referralTree")}</h3>
+
+        {/* Breadcrumb navigation */}
+        {!isViewingSelf && (
+          <div className="flex items-center gap-1 mb-3 flex-wrap text-[12px]">
+            <button
+              className="text-primary hover:underline font-medium"
+              onClick={goToRoot}
+            >
+              {t("profile.myTeam")}
+            </button>
+            {addrStack.map((item, idx) => (
+              <span key={idx} className="flex items-center gap-1">
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                {idx < addrStack.length - 1 ? (
+                  <button
+                    className="text-primary hover:underline font-medium"
+                    onClick={() => setAddrStack((prev) => prev.slice(0, idx + 1))}
+                  >
+                    {item.label}
+                  </button>
+                ) : (
+                  <span className="text-muted-foreground">{item.label}</span>
+                )}
+              </span>
+            ))}
+          </div>
+        )}
+
         {!isConnected ? (
           <Card className="border-border bg-card">
             <CardContent className="p-6 text-center">
@@ -175,13 +221,21 @@ export default function ProfileReferralPage() {
               <p className="text-xs text-muted-foreground" data-testid="text-no-referrals">
                 {t("profile.noTeamMembers")}
               </p>
+              {!isViewingSelf && (
+                <Button size="sm" variant="ghost" className="mt-2" onClick={goBack}>
+                  <ArrowLeft className="mr-1 h-3 w-3" /> {t("profile.goBack")}
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-0" data-testid="referral-tree">
             {teamData.referrals.map((ref) => (
               <div key={ref.id} className="mb-3">
-                <div className="flex items-center gap-2 p-2 rounded-md bg-card border border-border">
+                <button
+                  className="w-full flex items-center gap-2 p-2 rounded-md bg-card border border-border hover-elevate text-left"
+                  onClick={() => drillInto(ref.walletAddress, shortenAddress(ref.walletAddress))}
+                >
                   <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-mono truncate" data-testid={`text-ref-wallet-${ref.id}`}>
@@ -194,13 +248,15 @@ export default function ProfileReferralPage() {
                   <Badge variant="secondary" className="text-[11px] no-default-hover-elevate no-default-active-elevate shrink-0">
                     {ref.nodeType}
                   </Badge>
-                </div>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                </button>
                 {ref.subReferrals && ref.subReferrals.length > 0 && (
                   <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-3">
                     {ref.subReferrals.map((sub) => (
-                      <div
+                      <button
                         key={sub.id}
-                        className="flex items-center gap-2 p-2 rounded-md bg-card/50 border border-border/50"
+                        className="w-full flex items-center gap-2 p-2 rounded-md bg-card/50 border border-border/50 hover-elevate text-left"
+                        onClick={() => drillInto(sub.walletAddress, shortenAddress(sub.walletAddress))}
                       >
                         <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -211,7 +267,8 @@ export default function ProfileReferralPage() {
                         <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0">
                           {sub.rank}
                         </Badge>
-                      </div>
+                        <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                      </button>
                     ))}
                   </div>
                 )}

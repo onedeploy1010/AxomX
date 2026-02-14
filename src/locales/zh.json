@@ -425,7 +425,9 @@
     "nodeEarningsDetail": "节点收益详情",
     "viewEarningsDetail": "查看收益详情",
     "earningsRecords": "收益记录",
-    "noEarningsRecords": "暂无收益记录"
+    "noEarningsRecords": "暂无收益记录",
+    "myTeam": "我的团队",
+    "goBack": "返回"
   },
   "market": {
     "marketAnalysis": "市场分析",
