@@ -415,7 +415,13 @@
     "withdrawCommissionDesc": "佣金提取申请已提交",
     "directRef": "直推",
     "differential": "差级",
-    "from": "来自"
+    "from": "来自",
+    "totalEarningsLabel": "总收益",
+    "nodeEarningsLabel": "节点",
+    "vaultEarningsLabel": "金库",
+    "brokerEarningsLabel": "经纪人",
+    "withdrawEarnings": "提取收益",
+    "withdrawEarningsDesc": "收益提取申请已提交"
   },
   "market": {
     "marketAnalysis": "市场分析",

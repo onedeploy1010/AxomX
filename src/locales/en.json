@@ -415,7 +415,13 @@
     "withdrawCommissionDesc": "Commission withdrawal request submitted",
     "directRef": "Direct",
     "differential": "Diff.",
-    "from": "From"
+    "from": "From",
+    "totalEarningsLabel": "Total Earnings",
+    "nodeEarningsLabel": "Node",
+    "vaultEarningsLabel": "Vault",
+    "brokerEarningsLabel": "Broker",
+    "withdrawEarnings": "Withdraw Earnings",
+    "withdrawEarningsDesc": "Earnings withdrawal request submitted"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

@@ -6,8 +6,10 @@ import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
 import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getProfile, subscribeVip } from "@/lib/api";
+import { getProfile, getNodeOverview, getVaultPositions, subscribeVip } from "@/lib/api";
+import type { NodeOverview } from "@shared/types";
 import { queryClient } from "@/lib/queryClient";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VIP_CONTRACT_ADDRESS } from "@/lib/contracts";
@@ -19,7 +21,6 @@ import { useTranslation } from "react-i18next";
 
 const MENU_ITEMS = [
   { labelKey: "profile.nodeManagement", icon: Server, path: "/profile/nodes", descKey: "profile.nodeManagementDesc" },
-  { labelKey: "profile.brokerEarnings", icon: TrendingUp, path: "/profile/commission", descKey: "profile.brokerEarningsDesc" },
   { labelKey: "profile.referralTeam", icon: GitBranch, path: "/profile/referral", descKey: "profile.referralTeamDesc" },
   { labelKey: "profile.transactionHistory", icon: History, path: "/profile/transactions", descKey: "profile.transactionHistoryDesc" },
   { labelKey: "profile.notifications", icon: Bell, path: "/profile/notifications", descKey: "profile.notificationsDesc" },
@@ -40,16 +41,40 @@ export default function ProfilePage() {
     enabled: isConnected,
   });
 
+  const { data: nodeOverview } = useQuery<NodeOverview>({
+    queryKey: ["node-overview", walletAddr],
+    queryFn: () => getNodeOverview(walletAddr),
+    enabled: isConnected,
+  });
+
+  const { data: vaultPositions } = useQuery({
+    queryKey: ["vault-positions", walletAddr],
+    queryFn: () => getVaultPositions(walletAddr),
+    enabled: isConnected,
+  });
+
+  const vaultYield = useMemo(() => {
+    if (!vaultPositions) return 0;
+    const now = new Date();
+    let yieldSum = 0;
+    for (const p of vaultPositions) {
+      if (p.status !== "ACTIVE") continue;
+      const amt = Number(p.principal || 0);
+      const start = new Date(p.startDate!);
+      const days = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+      yieldSum += amt * Number(p.dailyRate || 0) * days;
+    }
+    return yieldSum;
+  }, [vaultPositions]);
+
   const payment = usePayment();
 
   const vipMutation = useMutation({
     mutationFn: async () => {
-      // Step 1: On-chain USDC payment (if VIP contract is deployed)
       let txHash: string | undefined;
       if (VIP_CONTRACT_ADDRESS) {
         txHash = await payment.payVIPSubscribe("monthly");
       }
-      // Step 2: Record to database
       const result = await subscribeVip(walletAddr, txHash, "monthly");
       payment.markSuccess();
       return result;
@@ -72,6 +97,8 @@ export default function ProfilePage() {
   const deposited = Number(profile?.totalDeposited || 0);
   const withdrawn = Number(profile?.totalWithdrawn || 0);
   const referralEarnings = Number(profile?.referralEarnings || 0);
+  const nodeEarnings = Number(nodeOverview?.rewards?.totalEarnings || 0);
+  const totalEarnings = nodeEarnings + vaultYield + referralEarnings;
   const net = deposited - withdrawn + referralEarnings;
 
   return (
@@ -142,6 +169,56 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
+
+      {isConnected && (
+        <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.08s both" }}>
+          <Card className="border-border bg-card glow-green-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] text-muted-foreground mb-0.5">{t("profile.totalEarningsLabel")}</div>
+                    {profileLoading ? (
+                      <Skeleton className="h-6 w-20" />
+                    ) : (
+                      <div className="text-lg font-bold text-neon-value" data-testid="text-total-earnings">
+                        ${totalEarnings.toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    toast({ title: t("profile.withdrawEarnings"), description: t("profile.withdrawEarningsDesc") });
+                  }}
+                  disabled={totalEarnings <= 0}
+                  data-testid="button-withdraw-earnings"
+                >
+                  <ArrowUpFromLine className="mr-1 h-3 w-3" /> {t("common.withdraw")}
+                </Button>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-md bg-card/80 border border-border/50 p-2">
+                  <div className="text-[11px] text-muted-foreground">{t("profile.nodeEarningsLabel")}</div>
+                  <div className="text-xs font-bold text-neon-value">${nodeEarnings.toFixed(2)}</div>
+                </div>
+                <div className="rounded-md bg-card/80 border border-border/50 p-2">
+                  <div className="text-[11px] text-muted-foreground">{t("profile.vaultEarningsLabel")}</div>
+                  <div className="text-xs font-bold text-neon-value">${vaultYield.toFixed(2)}</div>
+                </div>
+                <div className="rounded-md bg-card/80 border border-border/50 p-2">
+                  <div className="text-[11px] text-muted-foreground">{t("profile.brokerEarningsLabel")}</div>
+                  <div className="text-xs font-bold text-neon-value">${referralEarnings.toFixed(2)}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {!isConnected && (
         <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.1s both" }}>

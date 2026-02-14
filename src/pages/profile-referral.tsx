@@ -4,12 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
-import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards } from "lucide-react";
+import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards, Layers, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { getProfile, getReferralTree } from "@/lib/api";
-import type { Profile } from "@shared/types";
+import { getProfile, getReferralTree, getCommissionRecords } from "@/lib/api";
+import type { Profile, CommissionSummary } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
 interface ReferralData {
@@ -52,6 +52,16 @@ export default function ProfileReferralPage() {
     queryFn: () => getReferralTree(walletAddr),
     enabled: isConnected,
   });
+
+  const { data: commission, isLoading: commissionLoading } = useQuery<CommissionSummary>({
+    queryKey: ["commission", walletAddr],
+    queryFn: () => getCommissionRecords(walletAddr),
+    enabled: isConnected,
+  });
+
+  const totalCommission = Number(commission?.totalCommission || 0);
+  const directTotal = Number(commission?.directReferralTotal || 0);
+  const diffTotal = Number(commission?.differentialTotal || 0);
 
   const refCode = profile?.refCode;
   const referralLink = refCode ? `${window.location.origin}?ref=${refCode}` : "--";
@@ -208,6 +218,131 @@ export default function ProfileReferralPage() {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.25s both" }}>
+        <h3 className="text-sm font-bold mb-3">{t("profile.brokerEarnings")}</h3>
+        {!isConnected ? (
+          <Card className="border-border bg-card">
+            <CardContent className="p-6 text-center">
+              <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">{t("profile.connectToViewCommission")}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <Card className="border-border bg-card">
+                <CardContent className="p-3 text-center">
+                  <UserPlus className="h-4 w-4 text-primary mx-auto mb-1" />
+                  {commissionLoading ? (
+                    <Skeleton className="h-5 w-16 mx-auto" />
+                  ) : (
+                    <div className="text-sm font-bold text-neon-value" data-testid="text-direct-total">
+                      ${formatCompact(directTotal)}
+                    </div>
+                  )}
+                  <div className="text-[12px] text-muted-foreground">{t("profile.directReferralBonus")}</div>
+                </CardContent>
+              </Card>
+              <Card className="border-border bg-card">
+                <CardContent className="p-3 text-center">
+                  <Layers className="h-4 w-4 text-primary mx-auto mb-1" />
+                  {commissionLoading ? (
+                    <Skeleton className="h-5 w-16 mx-auto" />
+                  ) : (
+                    <div className="text-sm font-bold text-neon-value" data-testid="text-diff-total">
+                      ${formatCompact(diffTotal)}
+                    </div>
+                  )}
+                  <div className="text-[12px] text-muted-foreground">{t("profile.differentialCommission")}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <h4 className="text-xs font-semibold text-muted-foreground mb-2">{t("profile.commissionRecords")}</h4>
+            {commissionLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-md" />
+                ))}
+              </div>
+            ) : !commission?.records.length ? (
+              <Card className="border-border bg-card">
+                <CardContent className="p-6 text-center">
+                  <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground" data-testid="text-no-commission">
+                    {t("profile.noCommissionRecords")}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-2" data-testid="commission-list">
+                {commission.records.map((record) => {
+                  const isDirectRef = record.details?.type === "direct_referral";
+                  const amount = Number(record.amount || 0);
+                  const depth = record.details?.depth || 0;
+                  const rate = record.details?.rate;
+                  const createdAt = record.createdAt
+                    ? new Date(record.createdAt).toLocaleDateString(undefined, {
+                        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                      })
+                    : "--";
+
+                  return (
+                    <Card key={record.id} className="border-border bg-card">
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${
+                              isDirectRef ? "bg-primary/15" : "bg-amber-500/15"
+                            }`}>
+                              {isDirectRef ? (
+                                <UserPlus className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Layers className="h-4 w-4 text-amber-500" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0"
+                                >
+                                  {isDirectRef ? t("profile.directRef") : t("profile.differential")}
+                                </Badge>
+                                <span className="text-[10px] text-muted-foreground">
+                                  L{depth}
+                                </span>
+                                {rate !== undefined && !isDirectRef && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {(rate * 100).toFixed(0)}%
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                                {t("profile.from")}: {record.sourceWallet ? shortenAddress(record.sourceWallet) : "--"}
+                                {record.sourceRank && (
+                                  <span className="ml-1 text-[10px]">({record.sourceRank})</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-sm font-bold text-neon-value">
+                              +${amount.toFixed(2)}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground">{createdAt}</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
