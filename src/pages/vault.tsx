@@ -161,6 +161,7 @@ export default function Vault() {
       queryClient.invalidateQueries({ queryKey: ["vault-positions", walletAddress] });
       queryClient.invalidateQueries({ queryKey: ["vault-overview"] });
       queryClient.invalidateQueries({ queryKey: ["transactions", walletAddress] });
+      queryClient.invalidateQueries({ queryKey: ["profile", walletAddress] });
       setDepositOpen(false);
       setDepositAmount("");
       payment.reset();
@@ -188,6 +189,7 @@ export default function Vault() {
       queryClient.invalidateQueries({ queryKey: ["vault-positions", walletAddress] });
       queryClient.invalidateQueries({ queryKey: ["vault-overview"] });
       queryClient.invalidateQueries({ queryKey: ["transactions", walletAddress] });
+      queryClient.invalidateQueries({ queryKey: ["profile", walletAddress] });
       setRedeemOpen(false);
       setSelectedPositionId("");
     },
@@ -367,9 +369,78 @@ export default function Vault() {
               </Card>
             )}
           </TabsContent>
-          <TabsContent value="yield" className="mt-3">
+          <TabsContent value="yield" className="mt-3 space-y-3">
             {walletAddress ? (
-              <TransactionTable walletAddress={walletAddress} type="YIELD" />
+              <>
+                {/* Per-position daily yield breakdown */}
+                <Card className="border-border bg-card">
+                  <CardContent className="p-4">
+                    <h4 className="text-sm font-semibold mb-3">{t("vault.dailyYieldDetails")}</h4>
+                    {activePositions.length === 0 ? (
+                      <div className="text-center py-4 text-sm text-muted-foreground">
+                        {t("vault.noPositionsYet")}
+                      </div>
+                    ) : (
+                      <>
+                        {/* Total daily yield summary */}
+                        <div className="flex items-center justify-between bg-primary/10 rounded-md px-3 py-2 mb-3">
+                          <span className="text-xs font-medium">{t("vault.totalDailyYield")}</span>
+                          <span className="text-sm font-bold text-neon-value">
+                            {formatUSD(activePositions.reduce((sum, p) => sum + Number(p.principal) * Number(p.dailyRate || 0), 0))}
+                          </span>
+                        </div>
+                        {/* Per-position cards */}
+                        <div className="space-y-2">
+                          {activePositions.map((pos, idx) => {
+                            const principal = Number(pos.principal);
+                            const dailyRate = Number(pos.dailyRate || 0);
+                            const start = new Date(pos.startDate!);
+                            const now = new Date();
+                            const daysElapsed = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+                            const dailyYield = principal * dailyRate;
+                            const accumulatedYield = dailyYield * daysElapsed;
+                            const planConfig = VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS];
+
+                            return (
+                              <div
+                                key={pos.id}
+                                className="bg-muted/30 rounded-md p-3 text-xs space-y-1.5"
+                                style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.08}s both` }}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium text-sm">{planConfig?.label || pos.planType}</span>
+                                  <Badge className="text-[10px] bg-primary/15 text-primary no-default-hover-elevate no-default-active-elevate">
+                                    {(dailyRate * 100).toFixed(1)}%/day
+                                  </Badge>
+                                </div>
+                                <div className="flex justify-between gap-2">
+                                  <span className="text-muted-foreground">{t("vault.principal")}</span>
+                                  <span>{formatUSD(principal)}</span>
+                                </div>
+                                <div className="flex justify-between gap-2">
+                                  <span className="text-muted-foreground">{t("vault.daysElapsed")}</span>
+                                  <span>{daysElapsed}d</span>
+                                </div>
+                                <div className="flex justify-between gap-2">
+                                  <span className="text-muted-foreground">{t("vault.dailyEarnings")}</span>
+                                  <span className="text-neon-value">{formatUSD(dailyYield)}</span>
+                                </div>
+                                <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
+                                  <span className="text-muted-foreground">{t("vault.accumulatedYield")}</span>
+                                  <span className="text-neon-value font-medium">{formatUSD(accumulatedYield)}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+                {/* Historical YIELD transactions */}
+                <h4 className="text-sm font-semibold">{t("vault.yieldHistory")}</h4>
+                <TransactionTable walletAddress={walletAddress} type="YIELD" />
+              </>
             ) : (
               <Card className="border-border bg-card">
                 <CardContent className="p-4 text-center py-6 text-sm text-muted-foreground">{t("common.connectWalletToView")}</CardContent>
