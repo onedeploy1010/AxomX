@@ -21,8 +21,8 @@ export function AssetsOverview() {
 
   const deposited = Number(profile?.totalDeposited || 0);
   const withdrawn = Number(profile?.totalWithdrawn || 0);
-  const net = deposited - withdrawn;
   const referralEarnings = Number(profile?.referralEarnings || 0);
+  const net = deposited - withdrawn + referralEarnings;
 
   return (
     <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>

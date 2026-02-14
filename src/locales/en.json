@@ -154,7 +154,12 @@
     "confirmRedemption": "Confirm Redemption",
     "withdrawalSuccess": "Withdrawal successful",
     "withdrawnTotal": "Withdrawn ${{total}} (Yield: ${{yield}})",
-    "withdrawalFailed": "Withdrawal failed"
+    "withdrawalFailed": "Withdrawal failed",
+    "dailyYieldDetails": "Daily Yield Details",
+    "dailyEarnings": "Daily Earnings",
+    "totalDailyYield": "Total Daily Yield",
+    "daysElapsed": "Days Elapsed",
+    "yieldHistory": "Yield History"
   },
   "strategy": {
     "aiStrategies": "AI Strategies",
@@ -397,7 +402,20 @@
     "rankUnlock": "Unlocks {{rank}}",
     "poolDividendDesc": "Revenue pool dividends distributed to MAX node holders",
     "nodePurchaseSuccess": "Node purchased successfully",
-    "nodeDepositSuccess": "Node deposit placed — complete milestones to unlock earnings"
+    "nodeDepositSuccess": "Node deposit placed — complete milestones to unlock earnings",
+    "brokerEarnings": "Broker Earnings",
+    "brokerEarningsDesc": "Commission records & withdrawal",
+    "totalBrokerEarnings": "Total Broker Earnings",
+    "directReferralBonus": "Direct Referral",
+    "differentialCommission": "Differential",
+    "commissionRecords": "Commission Records",
+    "connectToViewCommission": "Connect wallet to view commission",
+    "noCommissionRecords": "No commission records yet. Invite team members to earn!",
+    "withdrawCommission": "Withdraw Commission",
+    "withdrawCommissionDesc": "Commission withdrawal request submitted",
+    "directRef": "Direct",
+    "differential": "Diff.",
+    "from": "From"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

@@ -154,7 +154,12 @@
     "confirmRedemption": "确认赎回",
     "withdrawalSuccess": "提取成功",
     "withdrawnTotal": "已提取 ${{total}} (收益：${{yield}})",
-    "withdrawalFailed": "提取失败"
+    "withdrawalFailed": "提取失败",
+    "dailyYieldDetails": "每日收益详情",
+    "dailyEarnings": "每日收益",
+    "totalDailyYield": "每日总收益",
+    "daysElapsed": "已过天数",
+    "yieldHistory": "收益记录"
   },
   "strategy": {
     "aiStrategies": "AI 策略",
@@ -397,7 +402,20 @@
     "rankUnlock": "解锁 {{rank}}",
     "poolDividendDesc": "收入池分红分配给 MAX 节点持有者",
     "nodePurchaseSuccess": "节点购买成功",
-    "nodeDepositSuccess": "节点押金已支付 — 完成里程碑以解锁收益"
+    "nodeDepositSuccess": "节点押金已支付 — 完成里程碑以解锁收益",
+    "brokerEarnings": "经纪人收益",
+    "brokerEarningsDesc": "佣金记录与提取",
+    "totalBrokerEarnings": "经纪人总收益",
+    "directReferralBonus": "直推奖励",
+    "differentialCommission": "差级佣金",
+    "commissionRecords": "佣金记录",
+    "connectToViewCommission": "连接钱包查看佣金",
+    "noCommissionRecords": "暂无佣金记录。邀请团队成员开始赚取！",
+    "withdrawCommission": "提取佣金",
+    "withdrawCommissionDesc": "佣金提取申请已提交",
+    "directRef": "直推",
+    "differential": "差级",
+    "from": "来自"
   },
   "market": {
     "marketAnalysis": "市场分析",

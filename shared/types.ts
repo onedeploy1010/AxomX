@@ -188,6 +188,31 @@ export interface PredictionBet {
   createdAt: string | null;
 }
 
+export interface CommissionRecord {
+  id: string;
+  userId: string;
+  rewardType: string;
+  amount: string;
+  details: {
+    type: string;
+    sourceUser: string;
+    depth: number;
+    rate?: number;
+    uplineRate?: number;
+    prevRate?: number;
+  };
+  createdAt: string | null;
+  sourceWallet?: string;
+  sourceRank?: string;
+}
+
+export interface CommissionSummary {
+  totalCommission: string;
+  directReferralTotal: string;
+  differentialTotal: string;
+  records: CommissionRecord[];
+}
+
 export interface SystemConfig {
   key: string;
   value: string;

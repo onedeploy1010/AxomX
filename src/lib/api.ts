@@ -323,6 +323,63 @@ export async function getInsurancePool() {
   return toCamel(data);
 }
 
+export async function getCommissionRecords(walletAddress: string) {
+  const profile = await getProfile(walletAddress);
+  if (!profile) return { totalCommission: "0", directReferralTotal: "0", differentialTotal: "0", records: [] };
+
+  const { data, error } = await supabase
+    .from("node_rewards")
+    .select("*")
+    .eq("user_id", profile.id)
+    .eq("reward_type", "TEAM_COMMISSION")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const records = (data ?? []).map((r: any) => {
+    const rec = toCamel(r);
+    rec.details = r.details || {};
+    return rec;
+  });
+
+  let directTotal = 0;
+  let diffTotal = 0;
+  for (const r of records) {
+    const amt = Number(r.amount || 0);
+    if (r.details?.type === "direct_referral") directTotal += amt;
+    else diffTotal += amt;
+  }
+
+  // Enrich with source user wallet addresses
+  const sourceIds = Array.from(new Set(records.map((r: any) => r.details?.source_user || r.details?.sourceUser).filter(Boolean)));
+  let sourceMap: Record<string, { wallet: string; rank: string }> = {};
+  if (sourceIds.length > 0) {
+    const { data: sources } = await supabase
+      .from("profiles")
+      .select("id, wallet_address, rank")
+      .in("id", sourceIds);
+    if (sources) {
+      for (const s of sources) {
+        sourceMap[s.id] = { wallet: s.wallet_address, rank: s.rank };
+      }
+    }
+  }
+
+  for (const r of records) {
+    const sid = r.details?.source_user || r.details?.sourceUser;
+    if (sid && sourceMap[sid]) {
+      r.sourceWallet = sourceMap[sid].wallet;
+      r.sourceRank = sourceMap[sid].rank;
+    }
+  }
+
+  return {
+    totalCommission: (directTotal + diffTotal).toFixed(6),
+    directReferralTotal: directTotal.toFixed(6),
+    differentialTotal: diffTotal.toFixed(6),
+    records,
+  };
+}
+
 export async function getReferralTree(walletAddress: string) {
   const { data, error } = await supabase.rpc("get_referral_tree", {
     addr: walletAddress,

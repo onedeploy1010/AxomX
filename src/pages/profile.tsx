@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
-import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server } from "lucide-react";
+import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, subscribeVip } from "@/lib/api";
@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 
 const MENU_ITEMS = [
   { labelKey: "profile.nodeManagement", icon: Server, path: "/profile/nodes", descKey: "profile.nodeManagementDesc" },
+  { labelKey: "profile.brokerEarnings", icon: TrendingUp, path: "/profile/commission", descKey: "profile.brokerEarningsDesc" },
   { labelKey: "profile.referralTeam", icon: GitBranch, path: "/profile/referral", descKey: "profile.referralTeamDesc" },
   { labelKey: "profile.transactionHistory", icon: History, path: "/profile/transactions", descKey: "profile.transactionHistoryDesc" },
   { labelKey: "profile.notifications", icon: Bell, path: "/profile/notifications", descKey: "profile.notificationsDesc" },
@@ -70,8 +71,8 @@ export default function ProfilePage() {
 
   const deposited = Number(profile?.totalDeposited || 0);
   const withdrawn = Number(profile?.totalWithdrawn || 0);
-  const net = deposited - withdrawn;
   const referralEarnings = Number(profile?.referralEarnings || 0);
+  const net = deposited - withdrawn + referralEarnings;
 
   return (
     <div className="space-y-4 pb-24" data-testid="page-profile">
