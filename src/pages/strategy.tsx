@@ -342,40 +342,11 @@ export default function StrategyPage() {
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   {strategies.map((s, i) => (
-                    <StrategyCard key={s.id} strategy={s} index={i} onSubscribe={handleSubscribeClick} />
+                    <StrategyCard key={s.id} strategy={s} index={i} isVip={profile?.isVip} onSubscribe={handleSubscribeClick} />
                   ))}
                 </div>
               )}
             </div>
-
-            {walletAddr && subscriptions.length > 0 && (
-              <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.2s both" }}>
-                <h3 className="text-sm font-bold mb-3" data-testid="text-subscriptions-title">{t("strategy.mySubscriptions")}</h3>
-                <div className="space-y-2">
-                  {subscriptions.map((sub) => (
-                    <Card key={sub.id} className="border-border bg-card" data-testid={`subscription-card-${sub.id}`}>
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs font-semibold truncate">{getStrategyName(sub.strategyId)}</div>
-                            <div className="text-[12px] text-muted-foreground mt-0.5">
-                              {t("strategy.capital")}: {formatCompact(Number(sub.allocatedCapital))}
-                            </div>
-                          </div>
-                          <Badge
-                            variant={sub.status === "ACTIVE" ? "default" : "secondary"}
-                            className="text-[11px] no-default-hover-elevate no-default-active-elevate shrink-0"
-                            data-testid={`badge-sub-status-${sub.id}`}
-                          >
-                            {sub.status}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {walletAddr && !profile?.isVip && (
               <div style={{ animation: "fadeSlideIn 0.4s ease-out 0.3s both" }}>
@@ -1087,6 +1058,44 @@ export default function StrategyPage() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {walletAddr && subscriptions.length > 0 && (
+                  <Card className="border-border bg-background">
+                    <CardContent className="p-3">
+                      <h4 className="text-xs font-bold mb-2 flex items-center gap-1.5" data-testid="text-my-subs-title">
+                        <Copy className="h-3.5 w-3.5 text-emerald-400" />
+                        {t("strategy.mySubscriptions")}
+                      </h4>
+                      <div className="space-y-2">
+                        {subscriptions.map((sub) => (
+                          <div
+                            key={sub.id}
+                            className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/30 border border-border/30"
+                            data-testid={`inv-sub-${sub.id}`}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-medium truncate">
+                                {sub.strategyName || getStrategyName(sub.strategyId)}
+                              </div>
+                              <div className="text-[11px] text-muted-foreground">
+                                {formatUSD(Number(sub.allocatedCapital || 0))}
+                              </div>
+                            </div>
+                            <Badge
+                              className={`text-[10px] shrink-0 ${
+                                sub.status === "ACTIVE"
+                                  ? "bg-emerald-500/15 text-emerald-400"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {sub.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="calendar" className="mt-0">

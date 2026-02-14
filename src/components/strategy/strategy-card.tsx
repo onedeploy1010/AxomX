@@ -12,10 +12,11 @@ import { useTranslation } from "react-i18next";
 interface StrategyCardProps {
   strategy: Strategy;
   index: number;
+  isVip?: boolean;
   onSubscribe: (strategy: Strategy) => void;
 }
 
-export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps) {
+export function StrategyCard({ strategy, index, isVip, onSubscribe }: StrategyCardProps) {
   const { t } = useTranslation();
   const returnVal = Number(strategy.monthlyReturn) || 0;
   const winRate = Number(strategy.winRate || 0);
@@ -31,7 +32,7 @@ export function StrategyCard({ strategy, index, onSubscribe }: StrategyCardProps
       data-testid={`strategy-card-${strategy.id}`}
       style={{ animation: `fadeSlideIn 0.4s ease-out ${index * 0.08}s both` }}
     >
-      {strategy.isVipOnly && (
+      {strategy.isVipOnly && !isVip && (
         <div className="absolute inset-0 z-10 rounded-md bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
           <Lock className="h-6 w-6 text-primary" />
           <Badge className="bg-primary/20 text-primary text-[12px] no-default-hover-elevate no-default-active-elevate">
