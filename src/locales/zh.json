@@ -421,7 +421,11 @@
     "vaultEarningsLabel": "金库",
     "brokerEarningsLabel": "经纪人",
     "withdrawEarnings": "提取收益",
-    "withdrawEarningsDesc": "收益提取申请已提交"
+    "withdrawEarningsDesc": "收益提取申请已提交",
+    "nodeEarningsDetail": "节点收益详情",
+    "viewEarningsDetail": "查看收益详情",
+    "earningsRecords": "收益记录",
+    "noEarningsRecords": "暂无收益记录"
   },
   "market": {
     "marketAnalysis": "市场分析",

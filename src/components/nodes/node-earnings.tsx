@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, Coins, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, Coins, Users, ChevronRight } from "lucide-react";
 import { formatCompact } from "@/lib/constants";
 import type { NodeRewardsSummary } from "@shared/types";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "wouter";
 
 interface NodeEarningsProps {
   rewards: NodeRewardsSummary;
@@ -10,6 +12,7 @@ interface NodeEarningsProps {
 
 export function NodeEarnings({ rewards }: NodeEarningsProps) {
   const { t } = useTranslation();
+  const [, navigate] = useLocation();
   const fixedYield = Number(rewards.fixedYield || 0);
   const poolDividend = Number(rewards.poolDividend || 0);
   const teamCommission = Number(rewards.teamCommission || 0);
@@ -45,6 +48,15 @@ export function NodeEarnings({ rewards }: NodeEarningsProps) {
             <span className="font-medium">{formatCompact(teamCommission)}</span>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full mt-1 text-xs text-muted-foreground"
+          onClick={() => navigate("/profile/nodes/earnings")}
+          data-testid="button-view-earnings-detail"
+        >
+          {t("profile.viewEarningsDetail")} <ChevronRight className="ml-1 h-3 w-3" />
+        </Button>
       </CardContent>
     </Card>
   );

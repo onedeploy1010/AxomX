@@ -380,6 +380,25 @@ export async function getCommissionRecords(walletAddress: string) {
   };
 }
 
+export async function getNodeEarningsRecords(walletAddress: string) {
+  const profile = await getProfile(walletAddress);
+  if (!profile) return [];
+
+  const { data, error } = await supabase
+    .from("node_rewards")
+    .select("*")
+    .eq("user_id", profile.id)
+    .in("reward_type", ["FIXED_YIELD", "POOL_DIVIDEND"])
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  return (data ?? []).map((r: any) => {
+    const rec = toCamel(r);
+    rec.details = r.details || {};
+    return rec;
+  });
+}
+
 export async function getReferralTree(walletAddress: string) {
   const { data, error } = await supabase.rpc("get_referral_tree", {
     addr: walletAddress,

@@ -113,6 +113,15 @@ export interface NodeOverview {
   pool: NodePoolInfo;
 }
 
+export interface NodeEarningsRecord {
+  id: string;
+  userId: string;
+  rewardType: string;
+  amount: string;
+  details: Record<string, any>;
+  createdAt: string | null;
+}
+
 export interface Transaction {
   id: string;
   userId: string;

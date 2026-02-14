@@ -421,7 +421,11 @@
     "vaultEarningsLabel": "Vault",
     "brokerEarningsLabel": "Broker",
     "withdrawEarnings": "Withdraw Earnings",
-    "withdrawEarningsDesc": "Earnings withdrawal request submitted"
+    "withdrawEarningsDesc": "Earnings withdrawal request submitted",
+    "nodeEarningsDetail": "Node Earnings Detail",
+    "viewEarningsDetail": "View Earnings Detail",
+    "earningsRecords": "Earnings Records",
+    "noEarningsRecords": "No earnings records yet"
   },
   "market": {
     "marketAnalysis": "Market Analysis",
