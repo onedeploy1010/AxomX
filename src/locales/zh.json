@@ -150,6 +150,7 @@
     "principal": "本金",
     "yieldDays": "收益 ({{days}}天)",
     "total": "总计",
+    "earlyPenalty": "提前赎回罚金",
     "earlyWithdrawal": "提前提取 - 锁仓期未满",
     "confirmRedemption": "确认赎回",
     "withdrawalSuccess": "提取成功",

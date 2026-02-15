@@ -150,6 +150,7 @@
     "principal": "Principal",
     "yieldDays": "Yield ({{days}}d)",
     "total": "Total",
+    "earlyPenalty": "Early redemption penalty",
     "earlyWithdrawal": "Early withdrawal - lock period not complete",
     "confirmRedemption": "Confirm Redemption",
     "withdrawalSuccess": "Withdrawal successful",

@@ -591,28 +591,36 @@ export default function Vault() {
                   const now = new Date();
                   const start = new Date(pos.startDate!);
                   const days = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
-                  const yieldAmt = Number(pos.principal) * Number(pos.dailyRate) * days;
-                  const total = Number(pos.principal) + yieldAmt;
+                  const principal = Number(pos.principal);
+                  const yieldAmt = principal * Number(pos.dailyRate) * days;
                   const isEarly = pos.endDate && now < new Date(pos.endDate);
+                  const penalty = isEarly ? principal * 0.1 : 0;
+                  const netPrincipal = principal - penalty;
                   return (
                     <div className="bg-muted/30 rounded-md p-3 text-xs space-y-1">
                       <div className="flex justify-between gap-2">
                         <span className="text-muted-foreground">{t("vault.principal")}</span>
-                        <span>${Number(pos.principal).toFixed(2)}</span>
+                        <span>${principal.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between gap-2">
                         <span className="text-muted-foreground">{t("vault.yieldDays", { days })}</span>
                         <span className="text-neon-value">{formatAR(yieldAmt)}</span>
                       </div>
+                      {isEarly && (
+                        <>
+                          <div className="flex justify-between gap-2 text-red-400">
+                            <span>{t("vault.earlyPenalty")}</span>
+                            <span>-${penalty.toFixed(2)} (10%)</span>
+                          </div>
+                          <div className="text-yellow-400 text-[12px]">
+                            {t("vault.earlyWithdrawal")}
+                          </div>
+                        </>
+                      )}
                       <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
                         <span className="text-muted-foreground">{t("vault.total")}</span>
-                        <span className="font-medium">${Number(pos.principal).toFixed(2)} + {formatAR(yieldAmt)}</span>
+                        <span className="font-medium">${netPrincipal.toFixed(2)} + {formatAR(yieldAmt)}</span>
                       </div>
-                      {isEarly && (
-                        <div className="text-yellow-400 text-[12px] mt-1">
-                          {t("vault.earlyWithdrawal")}
-                        </div>
-                      )}
                     </div>
                   );
                 })()}
