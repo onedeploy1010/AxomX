@@ -41,7 +41,7 @@ function WalletSync() {
     const urlParams = new URLSearchParams(window.location.search);
     const urlRef = urlParams.get("ref");
     if (urlRef) {
-      sessionStorage.setItem("axomx_ref_code", urlRef);
+      sessionStorage.setItem("nexai_ref_code", urlRef);
       urlParams.delete("ref");
       const newUrl = urlParams.toString()
         ? `${window.location.pathname}?${urlParams.toString()}`
@@ -53,9 +53,9 @@ function WalletSync() {
   // Auth wallet with ref code when wallet connects
   useEffect(() => {
     if (account?.address) {
-      const refCode = sessionStorage.getItem("axomx_ref_code");
+      const refCode = sessionStorage.getItem("nexai_ref_code");
       authWallet(account.address, refCode || undefined)
-        .then(() => { if (refCode) sessionStorage.removeItem("axomx_ref_code"); })
+        .then(() => { if (refCode) sessionStorage.removeItem("nexai_ref_code"); })
         .catch(console.error);
     }
   }, [account?.address]);

@@ -10,5 +10,6 @@
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <text x="32" y="46" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="38" fill="url(#fg)">A</text>
+  <text x="32" y="42" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="26" fill="url(#fg)">N</text>
+  <text x="32" y="56" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="600" font-size="11" fill="#2dd4bf" opacity="0.7">AI</text>
 </svg>
