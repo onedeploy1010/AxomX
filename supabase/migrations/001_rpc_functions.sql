@@ -272,13 +272,16 @@ END;
 $$;
 
 -- purchase_node: create membership, update profile, create transaction
-CREATE OR REPLACE FUNCTION purchase_node(addr TEXT, node_type_param TEXT)
+CREATE OR REPLACE FUNCTION purchase_node(addr TEXT, node_type_param TEXT, tx_hash TEXT DEFAULT NULL, payment_mode_param TEXT DEFAULT 'FULL')
 RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
 AS $$
 DECLARE
   profile_row profiles%ROWTYPE;
   node_price NUMERIC;
+  node_duration INT;
+  node_rank TEXT;
+  charge_amount NUMERIC;
   membership node_memberships%ROWTYPE;
 BEGIN
   SELECT * INTO profile_row FROM profiles WHERE wallet_address = addr;
@@ -286,18 +289,33 @@ BEGIN
     RAISE EXCEPTION 'Profile not found';
   END IF;
 
-  IF node_type_param = 'MAX' THEN node_price := 1000;
-  ELSE node_price := 500;
+  IF node_type_param = 'MAX' THEN
+    node_price := 6000;
+    node_duration := 120;
+    node_rank := 'V6';
+  ELSE
+    node_price := 1000;
+    node_duration := 90;
+    node_rank := 'V4';
   END IF;
 
-  INSERT INTO node_memberships (user_id, node_type, price, status)
-  VALUES (profile_row.id, node_type_param, node_price, 'ACTIVE')
+  IF payment_mode_param = 'DEPOSIT' THEN
+    charge_amount := node_price * 0.1;
+  ELSE
+    charge_amount := node_price;
+  END IF;
+
+  INSERT INTO node_memberships (user_id, node_type, price, status, start_date, end_date)
+  VALUES (profile_row.id, node_type_param, node_price,
+    CASE WHEN payment_mode_param = 'DEPOSIT' THEN 'PENDING_MILESTONES' ELSE 'ACTIVE' END,
+    NOW(), NOW() + (node_duration || ' days')::INTERVAL)
   RETURNING * INTO membership;
 
-  UPDATE profiles SET node_type = node_type_param WHERE id = profile_row.id;
+  UPDATE profiles SET node_type = node_type_param, rank = node_rank
+  WHERE id = profile_row.id;
 
-  INSERT INTO transactions (user_id, type, token, amount, status)
-  VALUES (profile_row.id, 'NODE_PURCHASE', 'USDT', node_price, 'CONFIRMED');
+  INSERT INTO transactions (user_id, type, token, amount, tx_hash, status)
+  VALUES (profile_row.id, 'NODE_PURCHASE', 'USDC', charge_amount, tx_hash, 'CONFIRMED');
 
   RETURN to_jsonb(membership);
 END;
