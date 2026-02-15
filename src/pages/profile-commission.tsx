@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompactAR } from "@/lib/constants";
+import { shortenAddress, formatCompactAR, usdcToAR } from "@/lib/constants";
 import { ArrowLeft, TrendingUp, Users, UserPlus, ArrowUpFromLine, WalletCards, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -194,7 +194,7 @@ export default function ProfileCommissionPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-sm font-bold text-neon-value">
-                          +{amount.toFixed(2)} AR
+                          +{usdcToAR(amount).toFixed(2)} AR
                         </div>
                         <div className="text-[10px] text-muted-foreground">{createdAt}</div>
                       </div>

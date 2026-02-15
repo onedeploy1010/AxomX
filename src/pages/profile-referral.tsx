@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompact, formatCompactAR } from "@/lib/constants";
+import { shortenAddress, formatCompact, formatCompactAR, usdcToAR } from "@/lib/constants";
 import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards, Layers, TrendingUp, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -388,7 +388,7 @@ export default function ProfileReferralPage() {
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-sm font-bold text-neon-value">
-                              +{amount.toFixed(2)} AR
+                              +{usdcToAR(amount).toFixed(2)} AR
                             </div>
                             <div className="text-[10px] text-muted-foreground">{createdAt}</div>
                           </div>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { formatCompactAR } from "@/lib/constants";
+import { formatCompactAR, usdcToAR } from "@/lib/constants";
 import { ArrowLeft, TrendingUp, Coins, WalletCards } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -159,7 +159,7 @@ export default function ProfileNodeEarningsPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-sm font-bold text-neon-value">
-                          +{amount.toFixed(2)} AR
+                          +{usdcToAR(amount).toFixed(2)} AR
                         </div>
                         <div className="text-[10px] text-muted-foreground">{createdAt}</div>
                       </div>

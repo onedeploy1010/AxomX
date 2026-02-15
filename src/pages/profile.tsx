@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompact } from "@/lib/constants";
+import { shortenAddress, formatCompact, formatAR, formatCompactAR, usdcToAR } from "@/lib/constants";
 import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMemo } from "react";
@@ -163,7 +163,7 @@ export default function ProfilePage() {
               ) : profileLoading ? (
                 <Skeleton className="h-5 w-16" />
               ) : (
-                <div className="text-sm font-bold text-neon-value" data-testid="text-referral-earnings">{formatCompact(referralEarnings)}</div>
+                <div className="text-sm font-bold text-neon-value" data-testid="text-referral-earnings">{formatCompactAR(referralEarnings)}</div>
               )}
             </CardContent>
           </Card>
@@ -185,7 +185,7 @@ export default function ProfilePage() {
                       <Skeleton className="h-6 w-20" />
                     ) : (
                       <div className="text-lg font-bold text-neon-value" data-testid="text-total-earnings">
-                        ${totalEarnings.toFixed(2)}
+                        {formatAR(totalEarnings)}
                       </div>
                     )}
                   </div>
@@ -204,15 +204,15 @@ export default function ProfilePage() {
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-md bg-card/80 border border-border/50 p-2">
                   <div className="text-[11px] text-muted-foreground">{t("profile.nodeEarningsLabel")}</div>
-                  <div className="text-xs font-bold text-neon-value">${nodeEarnings.toFixed(2)}</div>
+                  <div className="text-xs font-bold text-neon-value">{formatCompactAR(nodeEarnings)}</div>
                 </div>
                 <div className="rounded-md bg-card/80 border border-border/50 p-2">
                   <div className="text-[11px] text-muted-foreground">{t("profile.vaultEarningsLabel")}</div>
-                  <div className="text-xs font-bold text-neon-value">${vaultYield.toFixed(2)}</div>
+                  <div className="text-xs font-bold text-neon-value">{formatCompactAR(vaultYield)}</div>
                 </div>
                 <div className="rounded-md bg-card/80 border border-border/50 p-2">
                   <div className="text-[11px] text-muted-foreground">{t("profile.brokerEarningsLabel")}</div>
-                  <div className="text-xs font-bold text-neon-value">${referralEarnings.toFixed(2)}</div>
+                  <div className="text-xs font-bold text-neon-value">{formatCompactAR(referralEarnings)}</div>
                 </div>
               </div>
             </CardContent>

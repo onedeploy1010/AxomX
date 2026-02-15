@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VAULT_PLANS } from "@/lib/data";
 import { VAULT_CONTRACT_ADDRESS } from "@/lib/contracts";
-import { formatUSD, formatAR, shortenAddress } from "@/lib/constants";
+import { formatUSD, formatAR, shortenAddress, usdcToAR } from "@/lib/constants";
 import type { VaultPosition, Transaction } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
@@ -70,7 +70,7 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
               data-testid={`row-tx-${tx.id}`}
             >
               <span className="font-medium">{tx.token}</span>
-              <span className="text-neon-value">{type === "YIELD" ? `${Number(tx.amount).toFixed(2)} AR` : `$${Number(tx.amount).toFixed(2)}`}</span>
+              <span className="text-neon-value">{type === "YIELD" ? `${usdcToAR(Number(tx.amount)).toFixed(2)} AR` : `$${Number(tx.amount).toFixed(2)}`}</span>
               <span className="text-blue-400 text-[11px]">Base</span>
               <span className="text-muted-foreground truncate">
                 {tx.txHash ? (
@@ -522,7 +522,7 @@ export default function Vault() {
                   <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
                     <span className="text-muted-foreground">{t("vault.estTotalYield")}</span>
                     <span className="text-neon-value font-medium">
-                      {(parseFloat(depositAmount) * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.dailyRate * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.days).toFixed(2)} AR
+                      {usdcToAR(parseFloat(depositAmount) * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.dailyRate * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.days).toFixed(2)} AR
                     </span>
                   </div>
                 )}
