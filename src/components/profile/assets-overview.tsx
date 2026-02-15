@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Users } from "lucide-react";
 import { useActiveAccount } from "thirdweb/react";
 import { useQuery } from "@tanstack/react-query";
-import { formatCompact } from "@/lib/constants";
+import { formatCompact, formatCompactAR } from "@/lib/constants";
 import type { Profile } from "@shared/types";
 import { getProfile } from "@/lib/api";
 import { useTranslation } from "react-i18next";
@@ -77,7 +77,7 @@ export function AssetsOverview() {
             {isLoading ? (
               <Skeleton className="h-5 w-16" />
             ) : (
-              <div className="text-sm font-bold" data-testid="text-referral-earnings">{formatCompact(referralEarnings)}</div>
+              <div className="text-sm font-bold" data-testid="text-referral-earnings">{formatCompactAR(referralEarnings)}</div>
             )}
           </CardContent>
         </Card>

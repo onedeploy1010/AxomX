@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompact } from "@/lib/constants";
+import { shortenAddress, formatCompactAR } from "@/lib/constants";
 import { ArrowLeft, TrendingUp, Users, UserPlus, ArrowUpFromLine, WalletCards, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -66,7 +66,7 @@ export default function ProfileCommissionPage() {
                       <Skeleton className="h-8 w-24" />
                     ) : (
                       <div className="text-2xl font-bold text-neon-value" data-testid="text-total-commission">
-                        ${formatCompact(availableToWithdraw)}
+                        {formatCompactAR(availableToWithdraw)}
                       </div>
                     )}
                   </div>
@@ -92,7 +92,7 @@ export default function ProfileCommissionPage() {
                     <Skeleton className="h-5 w-16 mx-auto" />
                   ) : (
                     <div className="text-sm font-bold text-neon-value" data-testid="text-direct-total">
-                      ${formatCompact(directTotal)}
+                      {formatCompactAR(directTotal)}
                     </div>
                   )}
                   <div className="text-[12px] text-muted-foreground">{t("profile.directReferralBonus")}</div>
@@ -105,7 +105,7 @@ export default function ProfileCommissionPage() {
                     <Skeleton className="h-5 w-16 mx-auto" />
                   ) : (
                     <div className="text-sm font-bold text-neon-value" data-testid="text-diff-total">
-                      ${formatCompact(diffTotal)}
+                      {formatCompactAR(diffTotal)}
                     </div>
                   )}
                   <div className="text-[12px] text-muted-foreground">{t("profile.differentialCommission")}</div>
@@ -194,7 +194,7 @@ export default function ProfileCommissionPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-sm font-bold text-neon-value">
-                          +${amount.toFixed(2)}
+                          +{amount.toFixed(2)} AR
                         </div>
                         <div className="text-[10px] text-muted-foreground">{createdAt}</div>
                       </div>

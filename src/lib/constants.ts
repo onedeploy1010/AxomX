@@ -30,6 +30,16 @@ export function formatCompact(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
+export function formatAR(value: number): string {
+  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} AR`;
+}
+
+export function formatCompactAR(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M AR`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K AR`;
+  return `${value.toFixed(2)} AR`;
+}
+
 export function shortenAddress(address: string): string {
   if (!address) return "";
   return `${address.slice(0, 6)}...${address.slice(-4)}`;

@@ -74,7 +74,7 @@ function Header() {
           <span className="font-display text-sm font-bold text-primary drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]">A</span>
         </div>
         <span className="font-display text-sm font-bold tracking-widest text-foreground">
-          Axom<span className="text-primary drop-shadow-[0_0_6px_rgba(0,188,165,0.5)]">X</span>
+          Axio<span className="text-primary drop-shadow-[0_0_6px_rgba(0,188,165,0.5)]">m</span>
         </span>
       </Link>
       {isLoading || !client ? (

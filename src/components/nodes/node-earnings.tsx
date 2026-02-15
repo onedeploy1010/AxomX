@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Coins, Users, ChevronRight } from "lucide-react";
-import { formatCompact } from "@/lib/constants";
+import { formatCompactAR } from "@/lib/constants";
 import type { NodeRewardsSummary } from "@shared/types";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
@@ -23,7 +23,7 @@ export function NodeEarnings({ rewards }: NodeEarningsProps) {
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h4 className="text-sm font-bold">{t("profile.nodeEarnings")}</h4>
-          <span className="text-lg font-bold text-neon-value">{formatCompact(total)}</span>
+          <span className="text-lg font-bold text-neon-value">{formatCompactAR(total)}</span>
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-[12px]">
@@ -31,21 +31,21 @@ export function NodeEarnings({ rewards }: NodeEarningsProps) {
               <TrendingUp className="h-3 w-3 text-primary" />
               {t("profile.fixedYield")}
             </div>
-            <span className="font-medium">{formatCompact(fixedYield)}</span>
+            <span className="font-medium">{formatCompactAR(fixedYield)}</span>
           </div>
           <div className="flex items-center justify-between text-[12px]">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Coins className="h-3 w-3 text-blue-400" />
               {t("profile.poolDividend")}
             </div>
-            <span className="font-medium">{formatCompact(poolDividend)}</span>
+            <span className="font-medium">{formatCompactAR(poolDividend)}</span>
           </div>
           <div className="flex items-center justify-between text-[12px]">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Users className="h-3 w-3 text-purple-400" />
               {t("profile.teamCommission")}
             </div>
-            <span className="font-medium">{formatCompact(teamCommission)}</span>
+            <span className="font-medium">{formatCompactAR(teamCommission)}</span>
           </div>
         </div>
         <Button

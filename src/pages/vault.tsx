@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VAULT_PLANS } from "@/lib/data";
 import { VAULT_CONTRACT_ADDRESS } from "@/lib/contracts";
-import { formatUSD, shortenAddress } from "@/lib/constants";
+import { formatUSD, formatAR, shortenAddress } from "@/lib/constants";
 import type { VaultPosition, Transaction } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
@@ -70,7 +70,7 @@ function TransactionTable({ walletAddress, type }: { walletAddress: string; type
               data-testid={`row-tx-${tx.id}`}
             >
               <span className="font-medium">{tx.token}</span>
-              <span className="text-neon-value">${Number(tx.amount).toFixed(2)}</span>
+              <span className="text-neon-value">{type === "YIELD" ? `${Number(tx.amount).toFixed(2)} AR` : `$${Number(tx.amount).toFixed(2)}`}</span>
               <span className="text-blue-400 text-[11px]">Base</span>
               <span className="text-muted-foreground truncate">
                 {tx.txHash ? (
@@ -247,7 +247,7 @@ export default function Vault() {
               <div>
                 <div className="text-[12px] text-muted-foreground">{t("vault.accumulatedYield")}</div>
                 <div className="text-2xl font-bold text-neon-value" data-testid="text-my-yield">
-                  {walletAddress ? formatUSD(totalYield) : "$0.00"}
+                  {walletAddress ? formatAR(totalYield) : "0.00 AR"}
                 </div>
               </div>
             </div>
@@ -386,7 +386,7 @@ export default function Vault() {
                         <div className="flex items-center justify-between bg-primary/10 rounded-md px-3 py-2 mb-3">
                           <span className="text-xs font-medium">{t("vault.totalDailyYield")}</span>
                           <span className="text-sm font-bold text-neon-value">
-                            {formatUSD(activePositions.reduce((sum, p) => sum + Number(p.principal) * Number(p.dailyRate || 0), 0))}
+                            {formatAR(activePositions.reduce((sum, p) => sum + Number(p.principal) * Number(p.dailyRate || 0), 0))}
                           </span>
                         </div>
                         {/* Per-position cards */}
@@ -423,11 +423,11 @@ export default function Vault() {
                                 </div>
                                 <div className="flex justify-between gap-2">
                                   <span className="text-muted-foreground">{t("vault.dailyEarnings")}</span>
-                                  <span className="text-neon-value">{formatUSD(dailyYield)}</span>
+                                  <span className="text-neon-value">{formatAR(dailyYield)}</span>
                                 </div>
                                 <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
                                   <span className="text-muted-foreground">{t("vault.accumulatedYield")}</span>
-                                  <span className="text-neon-value font-medium">{formatUSD(accumulatedYield)}</span>
+                                  <span className="text-neon-value font-medium">{formatAR(accumulatedYield)}</span>
                                 </div>
                               </div>
                             );
@@ -522,7 +522,7 @@ export default function Vault() {
                   <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
                     <span className="text-muted-foreground">{t("vault.estTotalYield")}</span>
                     <span className="text-neon-value font-medium">
-                      ${(parseFloat(depositAmount) * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.dailyRate * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.days).toFixed(2)}
+                      {(parseFloat(depositAmount) * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.dailyRate * VAULT_PLANS[selectedPlan as keyof typeof VAULT_PLANS]?.days).toFixed(2)} AR
                     </span>
                   </div>
                 )}

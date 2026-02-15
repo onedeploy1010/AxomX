@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Coins } from "lucide-react";
-import { formatCompact } from "@/lib/constants";
+import { formatCompactAR } from "@/lib/constants";
 import type { NodePoolInfo } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +28,7 @@ export function DividendPoolCard({ pool }: DividendPoolCardProps) {
         </div>
         <div className="flex items-center justify-between text-[12px]">
           <span className="text-muted-foreground">{t("profile.poolBalance")}</span>
-          <span className="text-sm font-bold text-neon-value">{formatCompact(balance)}</span>
+          <span className="text-sm font-bold text-neon-value">{formatCompactAR(balance)}</span>
         </div>
         {pool.updatedAt && (
           <div className="text-[11px] text-muted-foreground text-right">

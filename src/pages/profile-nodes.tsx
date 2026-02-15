@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { formatCompact } from "@/lib/constants";
+import { formatCompactAR } from "@/lib/constants";
 import { ArrowLeft, Server, WalletCards } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -59,7 +59,7 @@ export default function ProfileNodesPage() {
                 {isLoading ? (
                   <Skeleton className="h-5 w-12" />
                 ) : (
-                  <div className="text-sm font-bold text-neon-value">{formatCompact(totalEarnings)}</div>
+                  <div className="text-sm font-bold text-neon-value">{formatCompactAR(totalEarnings)}</div>
                 )}
               </CardContent>
             </Card>
@@ -69,7 +69,7 @@ export default function ProfileNodesPage() {
                 {isLoading ? (
                   <Skeleton className="h-5 w-12" />
                 ) : (
-                  <div className="text-sm font-bold text-neon-value">{formatCompact(poolBalance)}</div>
+                  <div className="text-sm font-bold text-neon-value">{formatCompactAR(poolBalance)}</div>
                 )}
               </CardContent>
             </Card>

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompact } from "@/lib/constants";
+import { shortenAddress, formatCompact, formatCompactAR } from "@/lib/constants";
 import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards, Layers, TrendingUp, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -297,7 +297,7 @@ export default function ProfileReferralPage() {
                     <Skeleton className="h-5 w-16 mx-auto" />
                   ) : (
                     <div className="text-sm font-bold text-neon-value" data-testid="text-direct-total">
-                      ${formatCompact(directTotal)}
+                      {formatCompactAR(directTotal)}
                     </div>
                   )}
                   <div className="text-[12px] text-muted-foreground">{t("profile.directReferralBonus")}</div>
@@ -310,7 +310,7 @@ export default function ProfileReferralPage() {
                     <Skeleton className="h-5 w-16 mx-auto" />
                   ) : (
                     <div className="text-sm font-bold text-neon-value" data-testid="text-diff-total">
-                      ${formatCompact(diffTotal)}
+                      {formatCompactAR(diffTotal)}
                     </div>
                   )}
                   <div className="text-[12px] text-muted-foreground">{t("profile.differentialCommission")}</div>
@@ -388,7 +388,7 @@ export default function ProfileReferralPage() {
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-sm font-bold text-neon-value">
-                              +${amount.toFixed(2)}
+                              +{amount.toFixed(2)} AR
                             </div>
                             <div className="text-[10px] text-muted-foreground">{createdAt}</div>
                           </div>

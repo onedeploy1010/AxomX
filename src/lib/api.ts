@@ -508,16 +508,26 @@ export async function fetchPolymarkets() {
     return (markets || [])
       .filter((m: any) => m.active && !m.closed)
       .slice(0, 15)
-      .map((m: any) => ({
-        id: m.id || m.conditionId,
-        question: m.question,
-        yesPrice: parseFloat(m.outcomePrices?.[0] || m.bestAsk || "0.5"),
-        noPrice: parseFloat(m.outcomePrices?.[1] || m.bestBid || "0.5"),
-        volume: parseFloat(m.volume24hr || m.volume || "0"),
-        endDate: m.endDate || m.expirationDate,
-        image: m.image,
-        category: "crypto",
-      }));
+      .map((m: any) => {
+        let prices: string[] = [];
+        try {
+          prices = typeof m.outcomePrices === "string" ? JSON.parse(m.outcomePrices) : m.outcomePrices || [];
+        } catch { prices = []; }
+        const yesRaw = parseFloat(prices[0] || m.bestAsk || "0.5");
+        const noRaw = parseFloat(prices[1] || m.bestBid || "0.5");
+        return {
+          id: m.id || m.conditionId,
+          question: m.question,
+          yesPrice: isNaN(yesRaw) ? 0.5 : yesRaw,
+          noPrice: isNaN(noRaw) ? 0.5 : noRaw,
+          volume: parseFloat(m.volume24hr || m.volume || "0") || 0,
+          liquidity: parseFloat(m.liquidity || "0") || 0,
+          endDate: m.endDate || m.expirationDate,
+          image: m.image,
+          category: "crypto",
+          slug: m.slug || m.conditionId || m.id,
+        };
+      });
   } catch {
     return [];
   }

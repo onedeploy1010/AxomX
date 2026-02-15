@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { formatCompact } from "@/lib/constants";
+import { formatCompactAR } from "@/lib/constants";
 import { ArrowLeft, TrendingUp, Coins, WalletCards } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -57,7 +57,7 @@ export default function ProfileNodeEarningsPage() {
               <CardContent className="p-4">
                 <div className="text-[12px] text-muted-foreground mb-1">{t("profile.totalEarnings")}</div>
                 <div className="text-2xl font-bold text-neon-value" data-testid="text-node-total-earnings">
-                  ${formatCompact(total)}
+                  {formatCompactAR(total)}
                 </div>
               </CardContent>
             </Card>
@@ -66,7 +66,7 @@ export default function ProfileNodeEarningsPage() {
                 <CardContent className="p-3 text-center">
                   <TrendingUp className="h-4 w-4 text-primary mx-auto mb-1" />
                   <div className="text-sm font-bold text-neon-value" data-testid="text-fixed-yield">
-                    ${formatCompact(fixedYield)}
+                    {formatCompactAR(fixedYield)}
                   </div>
                   <div className="text-[12px] text-muted-foreground">{t("profile.fixedYield")}</div>
                 </CardContent>
@@ -75,7 +75,7 @@ export default function ProfileNodeEarningsPage() {
                 <CardContent className="p-3 text-center">
                   <Coins className="h-4 w-4 text-blue-400 mx-auto mb-1" />
                   <div className="text-sm font-bold text-neon-value" data-testid="text-pool-dividend">
-                    ${formatCompact(poolDividend)}
+                    {formatCompactAR(poolDividend)}
                   </div>
                   <div className="text-[12px] text-muted-foreground">{t("profile.poolDividend")}</div>
                 </CardContent>
@@ -159,7 +159,7 @@ export default function ProfileNodeEarningsPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-sm font-bold text-neon-value">
-                          +${amount.toFixed(2)}
+                          +{amount.toFixed(2)} AR
                         </div>
                         <div className="text-[10px] text-muted-foreground">{createdAt}</div>
                       </div>
