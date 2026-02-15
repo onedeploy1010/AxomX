@@ -600,11 +600,11 @@ export default function Vault() {
                       </div>
                       <div className="flex justify-between gap-2">
                         <span className="text-muted-foreground">{t("vault.yieldDays", { days })}</span>
-                        <span className="text-neon-value">${yieldAmt.toFixed(2)}</span>
+                        <span className="text-neon-value">{formatAR(yieldAmt)}</span>
                       </div>
                       <div className="flex justify-between gap-2 pt-1 border-t border-border/30">
                         <span className="text-muted-foreground">{t("vault.total")}</span>
-                        <span className="font-medium">${total.toFixed(2)}</span>
+                        <span className="font-medium">${Number(pos.principal).toFixed(2)} + {formatAR(yieldAmt)}</span>
                       </div>
                       {isEarly && (
                         <div className="text-yellow-400 text-[12px] mt-1">
