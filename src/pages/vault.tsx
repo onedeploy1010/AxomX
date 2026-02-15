@@ -450,22 +450,24 @@ export default function Vault() {
         </Tabs>
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-md px-4 py-3">
-        <div className="mx-auto max-w-lg flex gap-3">
+      <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3">
+        <div className="mx-auto max-w-lg flex gap-2 sm:gap-3">
           <Button
-            className="flex-1 bg-cyan-600 text-white border-cyan-700"
+            className="flex-1 min-w-0 bg-cyan-600 text-white border-cyan-700 text-xs sm:text-sm px-2 sm:px-4 h-9 sm:h-10"
             onClick={() => setDepositOpen(true)}
             data-testid="button-deposit-vault"
           >
-            <ArrowDownToLine className="mr-2 h-4 w-4" /> {t("vault.depositToVault")}
+            <ArrowDownToLine className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="truncate">{t("vault.depositToVault")}</span>
           </Button>
           <Button
             variant="secondary"
-            className="flex-1"
+            className="flex-1 min-w-0 text-xs sm:text-sm px-2 sm:px-4 h-9 sm:h-10"
             onClick={() => setRedeemOpen(true)}
             data-testid="button-redeem-vault"
           >
-            <ArrowUpFromLine className="mr-2 h-4 w-4" /> {t("vault.redeemFromVault")}
+            <ArrowUpFromLine className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="truncate">{t("vault.redeemFromVault")}</span>
           </Button>
         </div>
       </div>
