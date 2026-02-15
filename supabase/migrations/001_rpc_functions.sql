@@ -233,8 +233,8 @@ BEGIN
     INSERT INTO profiles (wallet_address) VALUES (addr) RETURNING * INTO profile_row;
   END IF;
 
-  INSERT INTO hedge_positions (user_id, amount, purchase_amount, status)
-  VALUES (profile_row.id, hedge_amount, hedge_amount, 'ACTIVE')
+  INSERT INTO hedge_positions (user_id, amount, purchase_amount, current_pnl, status)
+  VALUES (profile_row.id, hedge_amount, 0, 0, 'ACTIVE')
   RETURNING * INTO hedge;
 
   INSERT INTO insurance_purchases (user_id, amount, status)

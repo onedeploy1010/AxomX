@@ -269,7 +269,9 @@ export default function StrategyPage() {
 
   const totalPremium = hedgePositions.reduce((sum, h) => sum + Number(h.amount || 0), 0);
   const totalPayout = hedgePositions.reduce((sum, h) => sum + Number(h.purchaseAmount || 0), 0);
-  const totalPnl = hedgePositions.reduce((sum, h) => sum + Number(h.currentPnl || 0), 0);
+  const avgPnl = hedgePositions.length > 0
+    ? hedgePositions.reduce((sum, h) => sum + Number(h.currentPnl || 0), 0) / hedgePositions.length
+    : 0;
 
   const handleInvestmentClick = () => {
     setInvestmentOpen(true);
@@ -417,11 +419,11 @@ export default function StrategyPage() {
                       <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
                         <Shield className="h-3 w-3" /> {t("strategy.currentPnl")}
                       </div>
-                      <div className={`text-lg font-bold ${totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}
-                        style={{ textShadow: totalPnl >= 0 ? "0 0 6px rgba(16,185,129,0.4)" : "0 0 6px rgba(239,68,68,0.4)" }}
+                      <div className={`text-lg font-bold ${avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                        style={{ textShadow: avgPnl >= 0 ? "0 0 6px rgba(16,185,129,0.4)" : "0 0 6px rgba(239,68,68,0.4)" }}
                         data-testid="text-hedge-pnl"
                       >
-                        {totalPnl.toFixed(2)}%
+                        {avgPnl.toFixed(2)}%
                       </div>
                     </CardContent>
                   </Card>
