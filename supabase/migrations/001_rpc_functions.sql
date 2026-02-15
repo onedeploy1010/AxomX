@@ -410,13 +410,13 @@ BEGIN
   INTO pool_size, total_policies
   FROM insurance_purchases WHERE status = 'ACTIVE';
 
-  total_paid := pool_size * 0.05; -- estimate 5% payout rate
+  -- total_paid = sum of actual payouts (purchase_amount) from hedge_positions
+  SELECT COALESCE(SUM(purchase_amount), 0) INTO total_paid FROM hedge_positions WHERE status = 'ACTIVE';
 
   RETURN jsonb_build_object(
     'poolSize', pool_size::TEXT,
     'totalPolicies', total_policies,
-    'totalPaid', total_paid::TEXT,
-    'payoutRate', '5.0%'
+    'totalPaid', total_paid::TEXT
   );
 END;
 $$;

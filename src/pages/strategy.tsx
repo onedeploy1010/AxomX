@@ -399,10 +399,7 @@ export default function StrategyPage() {
                 <Card className="border-border bg-background mb-3">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div>
-                        <div className="text-[12px] text-muted-foreground">{t("strategy.premiumPaid", { amount: formatUSD(totalPremium) })}</div>
-                        <div className="text-[12px] text-muted-foreground mt-0.5">{t("strategy.premiumPlusPayout")}</div>
-                      </div>
+                      <div className="text-[12px] text-muted-foreground">{t("strategy.premiumPaid", { amount: formatUSD(totalPremium) })}</div>
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-2 flex-wrap">
                       <div className="text-xs font-bold">{t("strategy.payoutBalance", { amount: formatUSD(totalPayout) })}</div>
@@ -413,17 +410,17 @@ export default function StrategyPage() {
                   </CardContent>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <Card className="border-border bg-background">
                     <CardContent className="p-3">
                       <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
-                        <Shield className="h-3 w-3" /> {t("strategy.currentPnl")}
+                        <Shield className="h-3 w-3" /> {t("strategy.maxPayout")}
                       </div>
-                      <div className={`text-lg font-bold ${avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}
-                        style={{ textShadow: avgPnl >= 0 ? "0 0 6px rgba(16,185,129,0.4)" : "0 0 6px rgba(239,68,68,0.4)" }}
-                        data-testid="text-hedge-pnl"
+                      <div className="text-lg font-bold text-emerald-400"
+                        style={{ textShadow: "0 0 6px rgba(16,185,129,0.4)" }}
+                        data-testid="text-hedge-max-payout"
                       >
-                        {avgPnl.toFixed(2)}%
+                        {formatUSD(totalPremium * 4)}
                       </div>
                     </CardContent>
                   </Card>
@@ -433,7 +430,17 @@ export default function StrategyPage() {
                         <Wallet className="h-3 w-3" /> {t("strategy.purchaseAmount")}
                       </div>
                       <div className="text-lg font-bold" data-testid="text-hedge-purchase-total">
-                        {formatUSD(totalPremium)} USDT
+                        {formatUSD(totalPremium)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-border bg-background">
+                    <CardContent className="p-3">
+                      <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
+                        <Shield className="h-3 w-3" /> {t("strategy.payoutMultiplier")}
+                      </div>
+                      <div className="text-lg font-bold text-primary" data-testid="text-hedge-multiplier">
+                        4x
                       </div>
                     </CardContent>
                   </Card>
@@ -475,10 +482,10 @@ export default function StrategyPage() {
                 <h3 className="text-sm font-bold mb-3">{t("strategy.insurancePool")}</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: t("strategy.coverage"), value: insurancePool?.poolSize || "--", color: "text-emerald-400" },
+                    { label: t("strategy.coverage"), value: insurancePool?.poolSize ? formatUSD(Number(insurancePool.poolSize)) : "--", color: "text-emerald-400" },
                     { label: t("strategy.claims"), value: insurancePool?.totalPolicies?.toString() || "--", color: "text-emerald-400" },
-                    { label: t("strategy.paidOut"), value: insurancePool?.totalPaid || "--", color: "text-emerald-400" },
-                    { label: t("strategy.payoutRate"), value: insurancePool?.payoutRate || "--", color: "text-emerald-400" },
+                    { label: t("strategy.paidOut"), value: insurancePool?.totalPaid ? formatUSD(Number(insurancePool.totalPaid)) : "--", color: "text-emerald-400" },
+                    { label: t("strategy.payoutMultiplier"), value: "4x", color: "text-primary" },
                   ].map((item) => (
                     <Card key={item.label} className="border-border bg-background">
                       <CardContent className="p-3 text-center">
