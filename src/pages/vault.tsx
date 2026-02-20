@@ -461,6 +461,8 @@ export default function Vault() {
                         {vaultRewards.map((r, idx) => {
                           const pos = (positions || []).find(p => p.id === r.positionId);
                           const planConfig = pos ? VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS] : null;
+                          const principal = pos ? Number(pos.principal) : 0;
+                          const rate = planConfig ? (planConfig.dailyRate * 100).toFixed(1) : null;
                           return (
                             <div
                               key={r.id}
@@ -468,8 +470,16 @@ export default function Vault() {
                               style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.05}s both` }}
                             >
                               <div className="flex-1 min-w-0">
-                                <div className="text-xs font-medium">{planConfig?.label || t("vault.dailyYield")}</div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-medium">{planConfig?.label || t("vault.dailyYield")}</span>
+                                  {rate && (
+                                    <Badge className="text-[9px] bg-primary/15 text-primary px-1 py-0 no-default-hover-elevate no-default-active-elevate">
+                                      {rate}%/d
+                                    </Badge>
+                                  )}
+                                </div>
                                 <div className="text-[11px] text-muted-foreground">
+                                  {principal > 0 && <span>{formatUSD(principal)} · </span>}
                                   {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "--"}
                                 </div>
                               </div>
