@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Lock, ArrowDownToLine, ArrowUpFromLine, Sparkles, AlertCircle, Loader2 } from "lucide-react";
+import { Lock, ArrowDownToLine, ArrowUpFromLine, Sparkles, AlertCircle, Loader2, ChevronRight } from "lucide-react";
 import { VaultChart } from "@/components/vault/vault-chart";
 import { VaultStats } from "@/components/vault/vault-stats";
 import { VaultPlans } from "@/components/vault/vault-plans";
@@ -119,6 +119,7 @@ export default function Vault() {
   const [selectedPlan, setSelectedPlan] = useState<string>("5_DAYS");
   const [depositAmount, setDepositAmount] = useState("");
   const [selectedPositionId, setSelectedPositionId] = useState<string>("");
+  const [yieldDetailPosId, setYieldDetailPosId] = useState<string | null>(null);
 
   const { data: positions, isLoading: positionsLoading } = useQuery<VaultPosition[]>({
     queryKey: ["vault-positions", walletAddress],
@@ -381,10 +382,10 @@ export default function Vault() {
           <TabsContent value="yield" className="mt-3 space-y-3">
             {walletAddress ? (
               <>
-                {/* Per-position daily yield breakdown */}
+                {/* Per-position yield details */}
                 <Card className="border-border bg-card">
                   <CardContent className="p-4">
-                    <h4 className="text-sm font-semibold mb-3">{t("vault.dailyYieldDetails")}</h4>
+                    <h4 className="text-sm font-semibold mb-3">{t("vault.yieldDetails")}</h4>
                     {activePositions.length === 0 ? (
                       <div className="text-center py-4 text-sm text-muted-foreground">
                         {t("vault.noPositionsYet")}
@@ -409,6 +410,7 @@ export default function Vault() {
                             const dailyYield = principal * dailyRate;
                             const accumulatedYield = dailyYield * daysElapsed;
                             const planConfig = VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS];
+                            const posRewards = vaultRewards.filter(r => r.positionId === pos.id);
 
                             return (
                               <div
@@ -438,64 +440,20 @@ export default function Vault() {
                                   <span className="text-muted-foreground">{t("vault.accumulatedYield")}</span>
                                   <span className="text-neon-value font-medium">{formatAR(accumulatedYield)}</span>
                                 </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full mt-1.5 text-[11px] h-7"
+                                  onClick={() => setYieldDetailPosId(pos.id)}
+                                >
+                                  {t("vault.yieldHistory")} ({posRewards.length})
+                                  <ChevronRight className="h-3 w-3 ml-auto" />
+                                </Button>
                               </div>
                             );
                           })}
                         </div>
                       </>
-                    )}
-                  </CardContent>
-                </Card>
-                {/* Historical vault rewards */}
-                <Card className="border-border bg-card">
-                  <CardContent className="p-4">
-                    <h4 className="text-sm font-semibold mb-3">{t("vault.yieldHistory")}</h4>
-                    {rewardsLoading ? (
-                      <div className="space-y-2">
-                        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-8 w-full" />)}
-                      </div>
-                    ) : vaultRewards.length === 0 ? (
-                      <div className="text-center py-6">
-                        <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-                        <div className="text-sm text-muted-foreground">{t("common.noRecords")}</div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {vaultRewards.map((r, idx) => {
-                          const pos = (positions || []).find(p => p.id === r.positionId);
-                          const planConfig = pos ? VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS] : null;
-                          const principal = pos ? Number(pos.principal) : 0;
-                          const rate = planConfig ? (planConfig.dailyRate * 100).toFixed(1) : null;
-                          const arAmt = r.arAmount ? Number(r.arAmount) : usdcToAR(Number(r.amount));
-                          const usedPrice = r.arPrice ? Number(r.arPrice) : null;
-                          return (
-                            <div
-                              key={r.id}
-                              className="flex items-center justify-between gap-2 p-2.5 rounded-md bg-muted/30 border border-border/30"
-                              style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.05}s both` }}
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-medium">{planConfig?.label || t("vault.dailyYield")}</span>
-                                  {rate && (
-                                    <Badge className="text-[9px] bg-primary/15 text-primary px-1 py-0 no-default-hover-elevate no-default-active-elevate">
-                                      {rate}%/d
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="text-[11px] text-muted-foreground">
-                                  {principal > 0 && <span>{formatUSD(principal)} · </span>}
-                                  {usedPrice != null && <span>@${usedPrice} · </span>}
-                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "--"}
-                                </div>
-                              </div>
-                              <span className="text-sm font-bold text-neon-value shrink-0">
-                                +{arAmt.toFixed(2)} AR
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -696,6 +654,62 @@ export default function Vault() {
               {withdrawMutation.isPending ? t("common.processing") : t("vault.confirmRedemption")}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Yield detail dialog per position */}
+      <Dialog open={yieldDetailPosId !== null} onOpenChange={(open) => { if (!open) setYieldDetailPosId(null); }}>
+        <DialogContent className="bg-card border-border max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">{t("vault.yieldHistory")}</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              {(() => {
+                const pos = (positions || []).find(p => p.id === yieldDetailPosId);
+                const cfg = pos ? VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS] : null;
+                return pos ? `${cfg?.label || pos.planType} · ${formatUSD(Number(pos.principal))}` : "";
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-y-auto flex-1 -mx-1 px-1 space-y-2">
+            {rewardsLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+              </div>
+            ) : (() => {
+              const posRewards = vaultRewards.filter(r => r.positionId === yieldDetailPosId);
+              if (posRewards.length === 0) {
+                return (
+                  <div className="text-center py-8">
+                    <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                    <div className="text-sm text-muted-foreground">{t("common.noRecords")}</div>
+                  </div>
+                );
+              }
+              return posRewards.map((r, idx) => {
+                const arAmt = r.arAmount ? Number(r.arAmount) : usdcToAR(Number(r.amount));
+                const usedPrice = r.arPrice ? Number(r.arPrice) : null;
+                return (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between gap-2 p-2.5 rounded-md bg-muted/30 border border-border/30"
+                    style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.04}s both` }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium">{t("vault.dailyYield")}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {usedPrice != null && <span>@${usedPrice} · </span>}
+                        {r.createdAt ? new Date(r.createdAt).toLocaleString() : "--"}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-sm font-bold text-neon-value">+{arAmt.toFixed(2)} AR</div>
+                      <div className="text-[10px] text-muted-foreground">{formatUSD(Number(r.amount))}</div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

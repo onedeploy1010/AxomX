@@ -156,6 +156,7 @@
     "withdrawalSuccess": "提取成功",
     "withdrawnTotal": "已提取 ${{total}} (收益：${{yield}})",
     "withdrawalFailed": "提取失败",
+    "yieldDetails": "收益详情",
     "dailyYieldDetails": "每日收益详情",
     "dailyEarnings": "每日收益",
     "totalDailyYield": "每日总收益",
