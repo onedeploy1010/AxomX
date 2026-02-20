@@ -78,6 +78,19 @@ export async function getVaultPositions(walletAddress: string) {
   return toCamel(data ?? []);
 }
 
+export async function getVaultRewards(walletAddress: string) {
+  const profile = await getProfile(walletAddress);
+  if (!profile) return [];
+  const { data, error } = await supabase
+    .from("vault_rewards")
+    .select("*")
+    .eq("user_id", profile.id)
+    .eq("reward_type", "DAILY_YIELD")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return toCamel(data ?? []);
+}
+
 export async function getTransactions(walletAddress: string, type?: string) {
   const profile = await getProfile(walletAddress);
   if (!profile) return [];

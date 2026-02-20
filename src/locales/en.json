@@ -160,7 +160,8 @@
     "dailyEarnings": "Daily Earnings",
     "totalDailyYield": "Total Daily Yield",
     "daysElapsed": "Days Elapsed",
-    "yieldHistory": "Yield History"
+    "yieldHistory": "Yield History",
+    "dailyYield": "Daily Yield"
   },
   "strategy": {
     "aiStrategies": "AI Strategies",

@@ -160,7 +160,8 @@
     "dailyEarnings": "每日收益",
     "totalDailyYield": "每日总收益",
     "daysElapsed": "已过天数",
-    "yieldHistory": "收益记录"
+    "yieldHistory": "收益记录",
+    "dailyYield": "每日收益"
   },
   "strategy": {
     "aiStrategies": "AI 策略",

@@ -122,6 +122,15 @@ export interface NodeEarningsRecord {
   createdAt: string | null;
 }
 
+export interface VaultReward {
+  id: string;
+  userId: string;
+  positionId: string;
+  rewardType: string;
+  amount: string;
+  createdAt: string | null;
+}
+
 export interface Transaction {
   id: string;
   userId: string;

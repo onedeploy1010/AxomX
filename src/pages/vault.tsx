@@ -13,14 +13,14 @@ import { VaultStats } from "@/components/vault/vault-stats";
 import { VaultPlans } from "@/components/vault/vault-plans";
 import { useActiveAccount } from "thirdweb/react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getVaultPositions, getTransactions, vaultDeposit, vaultWithdraw } from "@/lib/api";
+import { getVaultPositions, getTransactions, getVaultRewards, vaultDeposit, vaultWithdraw } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VAULT_PLANS } from "@/lib/data";
 import { VAULT_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { formatUSD, formatAR, shortenAddress, usdcToAR } from "@/lib/constants";
-import type { VaultPosition, Transaction } from "@shared/types";
+import type { VaultPosition, Transaction, VaultReward } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
 function TransactionTable({ walletAddress, type }: { walletAddress: string; type: string }) {
@@ -120,6 +120,12 @@ export default function Vault() {
   const { data: positions, isLoading: positionsLoading } = useQuery<VaultPosition[]>({
     queryKey: ["vault-positions", walletAddress],
     queryFn: () => getVaultPositions(walletAddress),
+    enabled: !!walletAddress,
+  });
+
+  const { data: vaultRewards = [], isLoading: rewardsLoading } = useQuery<VaultReward[]>({
+    queryKey: ["vault-rewards", walletAddress],
+    queryFn: () => getVaultRewards(walletAddress),
     enabled: !!walletAddress,
   });
 
@@ -437,9 +443,46 @@ export default function Vault() {
                     )}
                   </CardContent>
                 </Card>
-                {/* Historical YIELD transactions */}
-                <h4 className="text-sm font-semibold">{t("vault.yieldHistory")}</h4>
-                <TransactionTable walletAddress={walletAddress} type="YIELD" />
+                {/* Historical vault rewards */}
+                <Card className="border-border bg-card">
+                  <CardContent className="p-4">
+                    <h4 className="text-sm font-semibold mb-3">{t("vault.yieldHistory")}</h4>
+                    {rewardsLoading ? (
+                      <div className="space-y-2">
+                        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-8 w-full" />)}
+                      </div>
+                    ) : vaultRewards.length === 0 ? (
+                      <div className="text-center py-6">
+                        <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                        <div className="text-sm text-muted-foreground">{t("common.noRecords")}</div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {vaultRewards.map((r, idx) => {
+                          const pos = (positions || []).find(p => p.id === r.positionId);
+                          const planConfig = pos ? VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS] : null;
+                          return (
+                            <div
+                              key={r.id}
+                              className="flex items-center justify-between gap-2 p-2.5 rounded-md bg-muted/30 border border-border/30"
+                              style={{ animation: `fadeSlideIn 0.3s ease-out ${idx * 0.05}s both` }}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-medium">{planConfig?.label || t("vault.dailyYield")}</div>
+                                <div className="text-[11px] text-muted-foreground">
+                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "--"}
+                                </div>
+                              </div>
+                              <span className="text-sm font-bold text-neon-value shrink-0">
+                                +{formatAR(Number(r.amount))}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </>
             ) : (
               <Card className="border-border bg-card">
