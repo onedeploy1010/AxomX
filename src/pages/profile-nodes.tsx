@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { formatCompactAR } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import { ArrowLeft, Server, WalletCards } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 export default function ProfileNodesPage() {
   const { t } = useTranslation();
   const account = useActiveAccount();
+  const { formatCompactAR } = useArPrice();
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;

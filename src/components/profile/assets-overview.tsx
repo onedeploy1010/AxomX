@@ -3,7 +3,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Users } from "lucide-react";
 import { useActiveAccount } from "thirdweb/react";
 import { useQuery } from "@tanstack/react-query";
-import { formatCompact, formatCompactAR } from "@/lib/constants";
+import { formatCompact } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import type { Profile } from "@shared/types";
 import { getProfile } from "@/lib/api";
 import { useTranslation } from "react-i18next";
@@ -11,6 +12,7 @@ import { useTranslation } from "react-i18next";
 export function AssetsOverview() {
   const { t } = useTranslation();
   const account = useActiveAccount();
+  const { formatCompactAR } = useArPrice();
   const walletAddr = account?.address || "";
 
   const { data: profile, isLoading } = useQuery<Profile>({

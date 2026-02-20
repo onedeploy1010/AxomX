@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS vault_rewards (
   position_id VARCHAR REFERENCES vault_positions(id) NOT NULL,
   reward_type TEXT NOT NULL,  -- 'DAILY_YIELD', 'PLATFORM_FEE'
   amount NUMERIC NOT NULL,
+  ar_price NUMERIC,           -- AR token price at settlement time (USD)
+  ar_amount NUMERIC,          -- Reward amount in AR tokens (= amount / ar_price)
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -555,6 +557,8 @@ END;
 $$;
 
 -- settle_vault_daily: daily yield settlement for vault positions
+-- Reads AR_TOKEN_PRICE from system_config to convert USDC yields into AR token amounts.
+-- TODO: When LP pool is live, replace AR_TOKEN_PRICE with Uniswap V3 TWAP or Chainlink oracle feed.
 CREATE OR REPLACE FUNCTION settle_vault_daily()
 RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
@@ -562,15 +566,20 @@ AS $$
 DECLARE
   pos RECORD;
   platform_fee_rate NUMERIC;
+  ar_token_price NUMERIC;
   gross_profit NUMERIC;
   platform_fee NUMERIC;
   user_profit NUMERIC;
+  user_ar_amount NUMERIC;
   total_user_profit NUMERIC := 0;
   total_platform_fees NUMERIC := 0;
   positions_processed INT := 0;
 BEGIN
   -- Get platform fee rate from config
   SELECT COALESCE(value::NUMERIC, 0.10) INTO platform_fee_rate FROM system_config WHERE key = 'VAULT_PLATFORM_FEE';
+
+  -- Get AR token price (default 0.1 USD if LP pool not yet live)
+  SELECT COALESCE(value::NUMERIC, 0.10) INTO ar_token_price FROM system_config WHERE key = 'AR_TOKEN_PRICE';
 
   FOR pos IN
     SELECT vp.*, p.id AS profile_id
@@ -582,18 +591,19 @@ BEGIN
     gross_profit := pos.principal * pos.daily_rate;
     platform_fee := gross_profit * platform_fee_rate;
     user_profit := gross_profit - platform_fee;
+    user_ar_amount := user_profit / ar_token_price;
 
-    -- Record user yield
-    INSERT INTO vault_rewards (user_id, position_id, reward_type, amount)
-    VALUES (pos.user_id, pos.id, 'DAILY_YIELD', user_profit);
+    -- Record user yield with AR price snapshot
+    INSERT INTO vault_rewards (user_id, position_id, reward_type, amount, ar_price, ar_amount)
+    VALUES (pos.user_id, pos.id, 'DAILY_YIELD', user_profit, ar_token_price, user_ar_amount);
 
     -- Record platform fee as revenue event
     INSERT INTO revenue_events (source, amount)
     VALUES ('vault_mgmt_fee', platform_fee);
 
     -- Also record fee in vault_rewards for tracking
-    INSERT INTO vault_rewards (user_id, position_id, reward_type, amount)
-    VALUES (pos.user_id, pos.id, 'PLATFORM_FEE', platform_fee);
+    INSERT INTO vault_rewards (user_id, position_id, reward_type, amount, ar_price, ar_amount)
+    VALUES (pos.user_id, pos.id, 'PLATFORM_FEE', platform_fee, ar_token_price, platform_fee / ar_token_price);
 
     total_user_profit := total_user_profit + user_profit;
     total_platform_fees := total_platform_fees + platform_fee;
@@ -606,7 +616,8 @@ BEGIN
   RETURN jsonb_build_object(
     'positionsProcessed', positions_processed,
     'totalUserProfit', ROUND(total_user_profit, 6)::TEXT,
-    'totalPlatformFees', ROUND(total_platform_fees, 6)::TEXT
+    'totalPlatformFees', ROUND(total_platform_fees, 6)::TEXT,
+    'arPrice', ar_token_price::TEXT
   );
 END;
 $$;

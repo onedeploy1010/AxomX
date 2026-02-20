@@ -19,12 +19,14 @@ import { useToast } from "@/hooks/use-toast";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { VAULT_PLANS } from "@/lib/data";
 import { VAULT_CONTRACT_ADDRESS } from "@/lib/contracts";
-import { formatUSD, formatAR, shortenAddress, usdcToAR } from "@/lib/constants";
+import { formatUSD, shortenAddress } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import type { VaultPosition, Transaction, VaultReward } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
 function TransactionTable({ walletAddress, type }: { walletAddress: string; type: string }) {
   const { t } = useTranslation();
+  const { usdcToAR } = useArPrice();
   const { data: txs, isLoading } = useQuery<Transaction[]>({
     queryKey: ["transactions", walletAddress, type],
     queryFn: () => getTransactions(walletAddress, type),
@@ -110,6 +112,7 @@ export default function Vault() {
   const account = useActiveAccount();
   const walletAddress = account?.address || "";
   const { toast } = useToast();
+  const { formatAR, usdcToAR } = useArPrice();
 
   const [depositOpen, setDepositOpen] = useState(false);
   const [redeemOpen, setRedeemOpen] = useState(false);
@@ -463,6 +466,8 @@ export default function Vault() {
                           const planConfig = pos ? VAULT_PLANS[pos.planType as keyof typeof VAULT_PLANS] : null;
                           const principal = pos ? Number(pos.principal) : 0;
                           const rate = planConfig ? (planConfig.dailyRate * 100).toFixed(1) : null;
+                          const arAmt = r.arAmount ? Number(r.arAmount) : usdcToAR(Number(r.amount));
+                          const usedPrice = r.arPrice ? Number(r.arPrice) : null;
                           return (
                             <div
                               key={r.id}
@@ -480,11 +485,12 @@ export default function Vault() {
                                 </div>
                                 <div className="text-[11px] text-muted-foreground">
                                   {principal > 0 && <span>{formatUSD(principal)} · </span>}
+                                  {usedPrice != null && <span>@${usedPrice} · </span>}
                                   {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "--"}
                                 </div>
                               </div>
                               <span className="text-sm font-bold text-neon-value shrink-0">
-                                +{formatAR(Number(r.amount))}
+                                +{arAmt.toFixed(2)} AR
                               </span>
                             </div>
                           );

@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompactAR, usdcToAR } from "@/lib/constants";
+import { shortenAddress } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import { ArrowLeft, TrendingUp, Users, UserPlus, ArrowUpFromLine, WalletCards, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ export default function ProfileCommissionPage() {
   const { t } = useTranslation();
   const account = useActiveAccount();
   const { toast } = useToast();
+  const { formatCompactAR, usdcToAR } = useArPrice();
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;

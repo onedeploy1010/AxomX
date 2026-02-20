@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Coins } from "lucide-react";
-import { formatCompactAR } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import type { NodePoolInfo } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
@@ -10,6 +10,7 @@ interface DividendPoolCardProps {
 
 export function DividendPoolCard({ pool }: DividendPoolCardProps) {
   const { t } = useTranslation();
+  const { formatCompactAR } = useArPrice();
   const balance = Number(pool.balance || 0);
 
   return (

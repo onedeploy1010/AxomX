@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { shortenAddress, formatCompact, formatAR, formatCompactAR, usdcToAR } from "@/lib/constants";
+import { shortenAddress, formatCompact } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import { Copy, Crown, WalletCards, Wallet, ArrowDownToLine, ArrowUpFromLine, Users, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMemo } from "react";
@@ -31,6 +32,7 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const account = useActiveAccount();
   const { toast } = useToast();
+  const { formatAR, formatCompactAR } = useArPrice();
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;

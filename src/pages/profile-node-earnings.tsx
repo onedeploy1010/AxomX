@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { formatCompactAR, usdcToAR } from "@/lib/constants";
+import { useArPrice } from "@/hooks/use-ar-price";
 import { ArrowLeft, TrendingUp, Coins, WalletCards } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 export default function ProfileNodeEarningsPage() {
   const { t } = useTranslation();
   const account = useActiveAccount();
+  const { formatCompactAR, usdcToAR } = useArPrice();
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;

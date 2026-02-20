@@ -128,6 +128,8 @@ export interface VaultReward {
   positionId: string;
   rewardType: string;
   amount: string;
+  arPrice: string | null;
+  arAmount: string | null;
   createdAt: string | null;
 }
 
