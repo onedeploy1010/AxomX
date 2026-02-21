@@ -410,20 +410,7 @@ export default function StrategyPage() {
                   </CardContent>
                 </Card>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <Card className="border-border bg-background">
-                    <CardContent className="p-3">
-                      <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
-                        <Shield className="h-3 w-3" /> {t("strategy.maxPayout")}
-                      </div>
-                      <div className="text-lg font-bold text-emerald-400"
-                        style={{ textShadow: "0 0 6px rgba(16,185,129,0.4)" }}
-                        data-testid="text-hedge-max-payout"
-                      >
-                        {formatUSD(totalPremium * 4)}
-                      </div>
-                    </CardContent>
-                  </Card>
+                <div className="grid grid-cols-2 gap-3">
                   <Card className="border-border bg-background">
                     <CardContent className="p-3">
                       <div className="text-[12px] text-muted-foreground mb-1 flex items-center gap-1">
@@ -440,10 +427,14 @@ export default function StrategyPage() {
                         <Shield className="h-3 w-3" /> {t("strategy.payoutMultiplier")}
                       </div>
                       <div className="text-lg font-bold text-primary" data-testid="text-hedge-multiplier">
-                        4x
+                        3x~4x
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+                <div className="bg-muted/30 rounded-md p-2.5 mt-3 text-[11px] text-muted-foreground space-y-1">
+                  <div className="flex justify-between"><span>{t("strategy.lossBelow10")}</span><span className="text-emerald-400 font-medium">3x {t("strategy.payout")}</span></div>
+                  <div className="flex justify-between"><span>{t("strategy.lossAbove10")}</span><span className="text-emerald-400 font-medium">4x {t("strategy.payout")}</span></div>
                 </div>
               </CardContent>
             </Card>
@@ -485,7 +476,7 @@ export default function StrategyPage() {
                     { label: t("strategy.coverage"), value: insurancePool?.poolSize ? formatUSD(Number(insurancePool.poolSize)) : "--", color: "text-emerald-400" },
                     { label: t("strategy.claims"), value: insurancePool?.totalPolicies?.toString() || "--", color: "text-emerald-400" },
                     { label: t("strategy.paidOut"), value: insurancePool?.totalPaid ? formatUSD(Number(insurancePool.totalPaid)) : "--", color: "text-emerald-400" },
-                    { label: t("strategy.payoutMultiplier"), value: "4x", color: "text-primary" },
+                    { label: t("strategy.payoutMultiplier"), value: "3x~4x", color: "text-primary" },
                   ].map((item) => (
                     <Card key={item.label} className="border-border bg-background">
                       <CardContent className="p-3 text-center">

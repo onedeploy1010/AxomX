@@ -182,7 +182,7 @@
     "vipBenefit2": "更高杠杆选项",
     "vipBenefit3": "优先支持与洞察",
     "vipBenefit4": "增强推荐奖励",
-    "upgradeVipPrice": "升级 VIP - $69/月",
+    "upgradeVipPrice": "升级 VIP - $39/月",
     "vipActivated": "VIP 已激活",
     "vipActivatedDesc": "欢迎成为VIP会员",
     "vipRequired": "需要 VIP",
@@ -306,7 +306,12 @@
     "hot": "热门",
     "overviewTab": "概览",
     "calendarTab": "日历",
-    "recordsTab": "记录"
+    "recordsTab": "记录",
+    "lossBelow10": "当月亏损 ≤10%",
+    "lossAbove10": "当月亏损 >10%",
+    "payout": "赔付",
+    "assetPackage": "权益资产包",
+    "dailyYieldAmount": "每日收益"
   },
   "profile": {
     "assetsOverview": "资产概览",
@@ -317,7 +322,7 @@
     "connectedWallet": "已连接钱包",
     "vipActive": "VIP 生效中",
     "upgradeToVip": "升级 VIP",
-    "subscribeVip": "订阅 $69/月",
+    "subscribeVip": "订阅 $39/月",
     "nodeMembership": "节点会员",
     "becomeNodeOperator": "成为节点运营商",
     "connectToViewNodePlans": "连接钱包查看节点方案",

@@ -47,10 +47,12 @@ BEGIN
     INSERT INTO profiles (wallet_address) VALUES (addr) RETURNING * INTO profile_row;
   END IF;
 
-  IF plan_type = '5_DAYS' THEN plan_days := 5; plan_rate := 0.005;
-  ELSIF plan_type = '15_DAYS' THEN plan_days := 15; plan_rate := 0.007;
-  ELSIF plan_type = '45_DAYS' THEN plan_days := 45; plan_rate := 0.009;
-  ELSE plan_days := 5; plan_rate := 0.005;
+  IF plan_type = '7_DAYS' THEN plan_days := 7; plan_rate := 0.005;
+  ELSIF plan_type = '30_DAYS' THEN plan_days := 30; plan_rate := 0.007;
+  ELSIF plan_type = '90_DAYS' THEN plan_days := 90; plan_rate := 0.009;
+  ELSIF plan_type = '180_DAYS' THEN plan_days := 180; plan_rate := 0.012;
+  ELSIF plan_type = '360_DAYS' THEN plan_days := 360; plan_rate := 0.015;
+  ELSE plan_days := 7; plan_rate := 0.005;
   END IF;
 
   end_dt := NOW() + (plan_days || ' days')::INTERVAL;
@@ -289,14 +291,13 @@ BEGIN
     RAISE EXCEPTION 'Profile not found';
   END IF;
 
+  -- New pricing: MINI=100 USDC, MAX=1000 USDC
   IF node_type_param = 'MAX' THEN
-    node_price := 6000;
-    node_duration := 120;
-    node_rank := 'V6';
-  ELSE
     node_price := 1000;
+    node_duration := 120;
+  ELSE
+    node_price := 100;
     node_duration := 90;
-    node_rank := 'V4';
   END IF;
 
   IF payment_mode_param = 'DEPOSIT' THEN
@@ -311,7 +312,8 @@ BEGIN
     NOW(), NOW() + (node_duration || ' days')::INTERVAL)
   RETURNING * INTO membership;
 
-  UPDATE profiles SET node_type = node_type_param, rank = node_rank
+  -- Don't auto-set rank on purchase; rank is evaluated separately
+  UPDATE profiles SET node_type = node_type_param
   WHERE id = profile_row.id;
 
   INSERT INTO transactions (user_id, type, token, amount, tx_hash, status)

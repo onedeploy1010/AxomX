@@ -107,15 +107,15 @@ export function NodePurchaseSection({ walletAddr }: NodePurchaseSectionProps) {
               <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                   <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                  <span>{t("profile.fixedReturn", { rate: plan.fixedReturn * 100 })}</span>
+                  <span>{t("strategy.assetPackage")}: ${plan.assetPackage.toLocaleString()} USDC</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                  <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
+                  <span>{t("strategy.dailyYieldAmount")}: {plan.dailyYield} USDC ({(plan.dailyRate * 100).toFixed(1)}%)</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                   <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
                   <span>{t("profile.duration", { days: plan.durationDays })}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                  <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                  <span>{t("profile.rankUnlock", { rank: plan.rankUnlock })}</span>
                 </div>
                 {key === "MAX" && (
                   <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">

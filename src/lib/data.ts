@@ -23,50 +23,49 @@ export const PREDICTION_GRID_CONFIG = {
 };
 
 export const VAULT_PLANS = {
-  "5_DAYS": { days: 5, dailyRate: 0.005, label: "5 Days", apr: "36.5%", minAmount: 50, platformFee: 0.10 },
-  "15_DAYS": { days: 15, dailyRate: 0.007, label: "15 Days", apr: "51.1%", minAmount: 50, platformFee: 0.10 },
-  "45_DAYS": { days: 45, dailyRate: 0.009, label: "45 Days", apr: "65.7%", minAmount: 50, platformFee: 0.10 },
+  "7_DAYS": { days: 7, dailyRate: 0.005, label: "7 Days", apr: "182.5%", minAmount: 50, platformFee: 0.10 },
+  "30_DAYS": { days: 30, dailyRate: 0.007, label: "30 Days", apr: "255.5%", minAmount: 50, platformFee: 0.10 },
+  "90_DAYS": { days: 90, dailyRate: 0.009, label: "90 Days", apr: "328.5%", minAmount: 50, platformFee: 0.10 },
+  "180_DAYS": { days: 180, dailyRate: 0.012, label: "180 Days", apr: "438%", minAmount: 50, platformFee: 0.10 },
+  "360_DAYS": { days: 360, dailyRate: 0.015, label: "360 Days", apr: "547.5%", minAmount: 50, platformFee: 0.10 },
 } as const;
 
 export const EARLY_BIRD_DEPOSIT_RATE = 0.10;
 
 export const NODE_PLANS = {
   MINI: {
-    price: 1000, label: "Mini Node", durationDays: 90, fixedReturn: 0.10,
-    rankUnlock: "V4", weightMultiplier: 1.0, revenuePoolShare: 0,
+    price: 100, label: "Mini Node", assetPackage: 1000, dailyRate: 0.005, dailyYield: 5,
+    durationDays: 90, slots: 2000, weightMultiplier: 1.0, revenuePoolShare: 0,
     referralBonus: "5%", features: ["basicStrategies", "communityAccess"],
   },
   MAX: {
-    price: 6000, label: "Max Node", durationDays: 120, fixedReturn: 0.10,
-    rankUnlock: "V6", weightMultiplier: 1.5, revenuePoolShare: 0.50,
+    price: 1000, label: "Max Node", assetPackage: 10000, dailyRate: 0.009, dailyYield: 90,
+    durationDays: 120, slots: 1000, weightMultiplier: 1.5, revenuePoolShare: 0.50,
     referralBonus: "10%", features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"],
   },
 } as const;
 
 export const NODE_MILESTONES = {
   MINI: [
-    { rank: "V1", days: 10 },
-    { rank: "V2", days: 30 },
-    { rank: "V3", days: 60 },
-    { rank: "V4", days: 90 },
+    { rank: "V2", days: 60, unlocks: "earnings" },
+    { rank: "V3", days: 90, unlocks: "earnings_and_package" },
   ],
   MAX: [
-    { rank: "V1", days: 20 },
-    { rank: "V2", days: 40 },
-    { rank: "V3", days: 60 },
-    { rank: "V4", days: 80 },
-    { rank: "V5", days: 100 },
-    { rank: "V6", days: 120 },
+    { rank: "V1", days: 15, unlocks: "earnings" },
+    { rank: "V2", days: 30, unlocks: "earnings" },
+    { rank: "V3", days: 60, unlocks: "earnings" },
+    { rank: "V4", days: 90, unlocks: "earnings" },
+    { rank: "V6", days: 120, unlocks: "earnings_and_package" },
   ],
 } as const;
 
 export const RANKS = [
-  { level: "V1", commission: 0.06 },
-  { level: "V2", commission: 0.10 },
-  { level: "V3", commission: 0.15 },
-  { level: "V4", commission: 0.20 },
-  { level: "V5", commission: 0.25 },
-  { level: "V6", commission: 0.30 },
+  { level: "V1", commission: 0.10 },
+  { level: "V2", commission: 0.15 },
+  { level: "V3", commission: 0.20 },
+  { level: "V4", commission: 0.25 },
+  { level: "V5", commission: 0.30 },
+  { level: "V6", commission: 0.40 },
   { level: "V7", commission: 0.50 },
 ] as const;
 
@@ -84,9 +83,27 @@ export const HEDGE_CONFIG = {
 } as const;
 
 export const VIP_PLANS = {
-  monthly: { price: 69, label: "monthly", period: "1 month" },
-  yearly: { price: 899, label: "yearly", period: "1 year" },
+  monthly: { price: 39, label: "monthly", period: "1 month" },
+  semiannual: { price: 198, label: "semiannual", period: "6 months" },
 } as const;
+
+export const WITHDRAW_BURN_RATES = [
+  { days: 0, burn: 0.20, label: "Immediate" },
+  { days: 7, burn: 0.15, label: "7 days" },
+  { days: 15, burn: 0.10, label: "15 days" },
+  { days: 30, burn: 0.05, label: "30 days" },
+  { days: 60, burn: 0.00, label: "60 days" },
+] as const;
+
+export const RANK_CONDITIONS = [
+  { level: "V1", threeGenCount: 100, smallTeamVolume: 5000 },
+  { level: "V2", requiredSubRanks: 2, subRankLevel: "V1", personalHolding: 500, differentLines: true },
+  { level: "V3", requiredSubRanks: 2, subRankLevel: "V2", personalHolding: 1000, differentLines: true },
+  { level: "V4", requiredSubRanks: 2, subRankLevel: "V3", personalHolding: 5000, differentLines: true, airdrop: 5000 },
+  { level: "V5", requiredSubRanks: 2, subRankLevel: "V4", personalHolding: 10000, differentLines: true, airdrop: 20000 },
+  { level: "V6", requiredSubRanks: 2, subRankLevel: "V5", personalHolding: 50000, differentLines: true, airdrop: 100000 },
+  { level: "V7", requiredSubRanks: 2, subRankLevel: "V6", personalHolding: 100000, differentLines: true, airdrop: 200000 },
+] as const;
 
 export const EXCHANGES = [
   { name: "Aster", tag: "Aster" },

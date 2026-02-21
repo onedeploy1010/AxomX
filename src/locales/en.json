@@ -182,7 +182,7 @@
     "vipBenefit2": "Higher leverage options",
     "vipBenefit3": "Priority support and insights",
     "vipBenefit4": "Enhanced referral rewards",
-    "upgradeVipPrice": "Upgrade to VIP - $69/mo",
+    "upgradeVipPrice": "Upgrade to VIP - $39/mo",
     "vipActivated": "VIP Activated",
     "vipActivatedDesc": "Welcome to VIP membership",
     "vipRequired": "VIP Required",
@@ -306,7 +306,12 @@
     "hot": "Hot",
     "overviewTab": "Overview",
     "calendarTab": "Calendar",
-    "recordsTab": "Records"
+    "recordsTab": "Records",
+    "lossBelow10": "Monthly loss ≤10%",
+    "lossAbove10": "Monthly loss >10%",
+    "payout": "payout",
+    "assetPackage": "Asset Package",
+    "dailyYieldAmount": "Daily Yield"
   },
   "profile": {
     "assetsOverview": "Assets Overview",
@@ -317,7 +322,7 @@
     "connectedWallet": "Connected Wallet",
     "vipActive": "VIP Active",
     "upgradeToVip": "Upgrade to VIP",
-    "subscribeVip": "Subscribe $69/mo",
+    "subscribeVip": "Subscribe $39/mo",
     "nodeMembership": "Node Membership",
     "becomeNodeOperator": "Become a Node Operator",
     "connectToViewNodePlans": "Connect wallet to view node plans",

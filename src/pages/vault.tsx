@@ -611,7 +611,7 @@ export default function Vault() {
                   const principal = Number(pos.principal);
                   const yieldAmt = principal * Number(pos.dailyRate) * days;
                   const isEarly = pos.endDate && now < new Date(pos.endDate);
-                  const penalty = isEarly ? principal * 0.1 : 0;
+                  const penalty = isEarly ? principal * 0.2 : 0;
                   const netPrincipal = principal - penalty;
                   return (
                     <div className="bg-muted/30 rounded-md p-3 text-xs space-y-1">
@@ -627,7 +627,7 @@ export default function Vault() {
                         <>
                           <div className="flex justify-between gap-2 text-red-400">
                             <span>{t("vault.earlyPenalty")}</span>
-                            <span>-${penalty.toFixed(2)} (10%)</span>
+                            <span>-${penalty.toFixed(2)} (20%)</span>
                           </div>
                           <div className="text-yellow-400 text-[12px]">
                             {t("vault.earlyWithdrawal")}
