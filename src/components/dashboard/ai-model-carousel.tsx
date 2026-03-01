@@ -151,7 +151,7 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-2.5 overflow-x-auto scrollbar-hide px-0.5 pt-3 pb-1 snap-x snap-mandatory"
+          className="flex gap-2.5 overflow-x-auto scrollbar-hide px-0.5 pb-1 snap-x snap-mandatory"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {forecasts.map((f, idx) => {
@@ -166,7 +166,7 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
               <button
                 key={f.model}
                 className={`
-                  relative min-w-[170px] max-w-[190px] rounded-xl p-2.5 text-left shrink-0 snap-start
+                  relative min-w-[170px] max-w-[190px] rounded-xl ${isBest ? "pt-5 px-2.5 pb-2.5" : "p-2.5"} text-left shrink-0 snap-start
                   transition-all duration-300 border
                   ${isActive
                     ? "border-[var(--accent)] shadow-[0_0_12px_var(--glow)] scale-[1.02]"
@@ -182,7 +182,7 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
               >
                 {/* Best badge */}
                 {isBest && (
-                  <div className="absolute -top-1.5 right-2.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <div className="absolute top-1.5 right-2.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                     <Crown className="h-2 w-2" />
                     TOP
                   </div>
