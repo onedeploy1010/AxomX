@@ -28,21 +28,35 @@ export interface ChartDataPoint {
   timestamp: number;
 }
 
-export type ChartTimeframe = "1m" | "10m" | "30m" | "1H" | "4H" | "1D" | "7D";
+export interface OhlcDataPoint {
+  timestamp: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  time: string;
+}
+
+export type ChartTimeframe = "1m" | "5m" | "15m" | "30m" | "1H" | "4H" | "1D" | "1W";
 
 const BINANCE_INTERVALS: Record<ChartTimeframe, { interval: string; limit: number }> = {
-  "1m": { interval: "1m", limit: 60 },
-  "10m": { interval: "1m", limit: 120 },
-  "30m": { interval: "1m", limit: 180 },
-  "1H": { interval: "5m", limit: 72 },
-  "4H": { interval: "15m", limit: 96 },
-  "1D": { interval: "1h", limit: 24 },
-  "7D": { interval: "4h", limit: 42 },
+  "1m": { interval: "1m", limit: 120 },
+  "5m": { interval: "5m", limit: 120 },
+  "15m": { interval: "15m", limit: 120 },
+  "30m": { interval: "30m", limit: 120 },
+  "1H": { interval: "1h", limit: 120 },
+  "4H": { interval: "4h", limit: 120 },
+  "1D": { interval: "1d", limit: 120 },
+  "1W": { interval: "1w", limit: 52 },
 };
 
 function formatTimeLabel(ts: number, tf: ChartTimeframe): string {
   const d = new Date(ts);
-  if (tf === "7D" || tf === "1D") {
+  if (tf === "1W" || tf === "1D") {
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+  if (tf === "4H") {
     return d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -79,35 +93,55 @@ export function usePriceChart(coinId: string, days: number = 1) {
   });
 }
 
+function parseKlines(raw: any[], tf: ChartTimeframe): OhlcDataPoint[] {
+  return raw.map((k: any) => ({
+    timestamp: k[0],
+    open: parseFloat(k[1]),
+    high: parseFloat(k[2]),
+    low: parseFloat(k[3]),
+    close: parseFloat(k[4]),
+    volume: parseFloat(k[5]),
+    time: formatTimeLabel(k[0], tf),
+  }));
+}
+
+async function fetchBinanceKlines(symbol: string, timeframe: ChartTimeframe): Promise<OhlcDataPoint[]> {
+  const pair = symbol === "DOGE" ? "DOGEUSDT" : `${symbol}USDT`;
+  const cfg = BINANCE_INTERVALS[timeframe];
+  const res = await fetch(
+    `https://api.binance.us/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
+  );
+  if (!res.ok) {
+    const fallbackRes = await fetch(
+      `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
+    );
+    if (!fallbackRes.ok) throw new Error("Failed to fetch klines");
+    return parseKlines(await fallbackRes.json(), timeframe);
+  }
+  return parseKlines(await res.json(), timeframe);
+}
+
 export function useBinanceChart(symbol: string, timeframe: ChartTimeframe) {
   return useQuery<ChartDataPoint[]>({
     queryKey: ["binance-chart", symbol, timeframe],
     queryFn: async () => {
-      const pair = symbol === "DOGE" ? "DOGEUSDT" : `${symbol}USDT`;
-      const cfg = BINANCE_INTERVALS[timeframe];
-      const res = await fetch(
-        `https://api.binance.us/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
-      );
-      if (!res.ok) {
-        const fallbackRes = await fetch(
-          `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
-        );
-        if (!fallbackRes.ok) throw new Error("Failed to fetch klines");
-        const fallbackData = await fallbackRes.json();
-        return (fallbackData as any[]).map((k: any) => ({
-          timestamp: k[0],
-          time: formatTimeLabel(k[0], timeframe),
-          price: parseFloat(k[4]),
-        }));
-      }
-      const data = await res.json();
-      return (data as any[]).map((k: any) => ({
-        timestamp: k[0],
-        time: formatTimeLabel(k[0], timeframe),
-        price: parseFloat(k[4]),
+      const ohlc = await fetchBinanceKlines(symbol, timeframe);
+      return ohlc.map(k => ({
+        timestamp: k.timestamp,
+        time: k.time,
+        price: k.close,
       }));
     },
-    refetchInterval: timeframe === "1m" ? 10000 : timeframe === "10m" ? 15000 : 30000,
+    refetchInterval: timeframe === "1m" ? 10000 : timeframe === "5m" ? 15000 : 30000,
+    staleTime: timeframe === "1m" ? 5000 : 15000,
+  });
+}
+
+export function useBinanceKlines(symbol: string, timeframe: ChartTimeframe) {
+  return useQuery<OhlcDataPoint[]>({
+    queryKey: ["binance-klines", symbol, timeframe],
+    queryFn: () => fetchBinanceKlines(symbol, timeframe),
+    refetchInterval: timeframe === "1m" ? 10000 : timeframe === "5m" ? 15000 : 30000,
     staleTime: timeframe === "1m" ? 5000 : 15000,
   });
 }

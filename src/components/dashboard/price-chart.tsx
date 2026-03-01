@@ -1,15 +1,24 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  ComposedChart, Area, Line, XAxis, YAxis, ResponsiveContainer, Tooltip,
-  ReferenceLine, CartesianGrid,
-} from "recharts";
+  createChart,
+  ColorType,
+  CrosshairMode,
+  LineStyle,
+  type IChartApi,
+  type ISeriesApi,
+  type CandlestickData,
+  type LineData,
+  type HistogramData,
+  type UTCTimestamp,
+} from "lightweight-charts";
 import { formatUSD } from "@/lib/constants";
-import type { ChartDataPoint, ChartTimeframe } from "@/hooks/use-crypto-price";
+import type { ChartDataPoint, ChartTimeframe, OhlcDataPoint } from "@/hooks/use-crypto-price";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import { Sparkles, CandlestickChart, LineChart, AreaChart, BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+type ChartType = "candle" | "line" | "area" | "bar";
 
 interface ForecastData {
   direction: string;
@@ -21,85 +30,72 @@ interface ForecastData {
 }
 
 interface PriceChartProps {
-  data: ChartDataPoint[] | undefined;
+  data?: ChartDataPoint[] | undefined;
+  ohlcData?: OhlcDataPoint[] | undefined;
   isLoading: boolean;
   color?: string;
   forecast?: ForecastData | null;
   forecastLoading?: boolean;
   selectedTimeframe?: ChartTimeframe;
   onTimeframeChange?: (tf: ChartTimeframe) => void;
+  activeModel?: string;
 }
 
 const TIMEFRAMES: { key: ChartTimeframe; label: string }[] = [
   { key: "1m", label: "1m" },
-  { key: "10m", label: "10m" },
+  { key: "5m", label: "5m" },
+  { key: "15m", label: "15m" },
   { key: "30m", label: "30m" },
   { key: "1H", label: "1H" },
   { key: "4H", label: "4H" },
   { key: "1D", label: "1D" },
-  { key: "7D", label: "7D" },
+  { key: "1W", label: "1W" },
 ];
+
+const CHART_TYPES: { key: ChartType; icon: typeof CandlestickChart; label: string }[] = [
+  { key: "candle", icon: CandlestickChart, label: "K" },
+  { key: "line", icon: LineChart, label: "Line" },
+  { key: "area", icon: AreaChart, label: "Area" },
+  { key: "bar", icon: BarChart3, label: "OHLC" },
+];
+
+const UP_COLOR = "#00e7a0";
+const DOWN_COLOR = "#ff4976";
+const GRID_COLOR = "rgba(255, 255, 255, 0.03)";
+const TEXT_COLOR = "rgba(180, 195, 190, 0.65)";
+const CROSSHAIR_COLOR = "rgba(0, 231, 160, 0.3)";
+const BG_COLOR = "transparent";
+
+function toUTC(ts: number): UTCTimestamp {
+  return Math.floor(ts / 1000) as UTCTimestamp;
+}
 
 export function PriceChart({
   data,
+  ohlcData,
   isLoading,
   color = "hsl(174, 72%, 46%)",
   forecast,
   forecastLoading,
   selectedTimeframe,
   onTimeframeChange,
+  activeModel,
 }: PriceChartProps) {
   const { t } = useTranslation();
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  const mainSeriesRef = useRef<ISeriesApi<any> | null>(null);
+  const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const forecastSeriesRef = useRef<ISeriesApi<any> | null>(null);
+  const [chartType, setChartType] = useState<ChartType>("candle");
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const timer = setTimeout(() => setVisible(true), 50);
-      return () => clearTimeout(timer);
-    }
-    setVisible(false);
-  }, [data]);
-
-  const mergedData = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    const maxPoints = 80;
-    const step = Math.max(1, Math.floor(data.length / maxPoints));
-    const sampled = data.filter((_, i) => i % step === 0 || i === data.length - 1);
-    const historicalPoints = sampled.map(d => ({
-      time: d.time,
-      timestamp: d.timestamp,
-      price: d.price,
-      forecastPrice: null as number | null,
-    }));
-
-    if (forecast?.forecastPoints?.length) {
-      const lastHistorical = historicalPoints[historicalPoints.length - 1];
-      historicalPoints[historicalPoints.length - 1] = {
-        ...lastHistorical,
-        forecastPrice: lastHistorical.price,
-      };
-
-      for (const fp of forecast.forecastPoints) {
-        historicalPoints.push({
-          time: fp.time,
-          timestamp: fp.timestamp,
-          price: null as any,
-          forecastPrice: fp.price,
-        });
-      }
-    }
-
-    return historicalPoints;
-  }, [data, forecast]);
+  const hasOhlc = ohlcData && ohlcData.length > 0;
+  const hasData = hasOhlc || (data && data.length > 0);
 
   const direction = forecast?.direction || "NEUTRAL";
   const confidence = forecast?.confidence || 0;
   const targetPrice = forecast?.targetPrice || null;
-
-  const directionIcon =
-    direction === "BULLISH" ? <TrendingUp className="mr-1 h-3 w-3" /> :
-    direction === "BEARISH" ? <TrendingDown className="mr-1 h-3 w-3" /> :
-    <Minus className="mr-1 h-3 w-3" />;
 
   const directionColor =
     direction === "BULLISH" ? "bg-primary/15 text-neon-value" :
@@ -111,167 +107,427 @@ export function PriceChart({
     direction === "BEARISH" ? "#ef4444" :
     "#eab308";
 
-  const formatYAxis = (v: number) => {
-    if (v >= 1000) return `${(v / 1000).toFixed(1)}K`;
-    if (v >= 1) return v.toFixed(2);
-    return v.toFixed(4);
-  };
+  useEffect(() => {
+    if (hasData) {
+      const timer = setTimeout(() => setVisible(true), 80);
+      return () => clearTimeout(timer);
+    }
+    setVisible(false);
+  }, [hasData]);
+
+  const buildChart = useCallback(() => {
+    const container = chartContainerRef.current;
+    if (!container) return;
+
+    if (chartRef.current) {
+      chartRef.current.remove();
+      chartRef.current = null;
+      mainSeriesRef.current = null;
+      volumeSeriesRef.current = null;
+      forecastSeriesRef.current = null;
+    }
+
+    const chart = createChart(container, {
+      width: container.clientWidth,
+      height: 280,
+      layout: {
+        background: { type: ColorType.Solid, color: BG_COLOR },
+        textColor: TEXT_COLOR,
+        fontSize: 10,
+        fontFamily: "'Inter', 'SF Pro', system-ui, sans-serif",
+      },
+      grid: {
+        vertLines: { color: GRID_COLOR },
+        horzLines: { color: GRID_COLOR },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: {
+          color: CROSSHAIR_COLOR,
+          width: 1,
+          style: LineStyle.Dashed,
+          labelBackgroundColor: "rgba(0, 231, 160, 0.85)",
+        },
+        horzLine: {
+          color: CROSSHAIR_COLOR,
+          width: 1,
+          style: LineStyle.Dashed,
+          labelBackgroundColor: "rgba(0, 231, 160, 0.85)",
+        },
+      },
+      rightPriceScale: {
+        borderColor: "rgba(255, 255, 255, 0.06)",
+        scaleMargins: { top: 0.08, bottom: 0.22 },
+      },
+      timeScale: {
+        borderColor: "rgba(255, 255, 255, 0.06)",
+        timeVisible: true,
+        secondsVisible: false,
+        rightOffset: 5,
+        barSpacing: 8,
+        fixLeftEdge: true,
+        fixRightEdge: false,
+      },
+      handleScroll: { vertTouchDrag: false },
+    });
+
+    chartRef.current = chart;
+
+    // Main series
+    let mainSeries: ISeriesApi<any>;
+
+    if (hasOhlc && (chartType === "candle" || chartType === "bar")) {
+      if (chartType === "candle") {
+        mainSeries = chart.addCandlestickSeries({
+          upColor: UP_COLOR,
+          downColor: DOWN_COLOR,
+          borderUpColor: UP_COLOR,
+          borderDownColor: DOWN_COLOR,
+          wickUpColor: UP_COLOR,
+          wickDownColor: DOWN_COLOR,
+        });
+      } else {
+        mainSeries = chart.addBarSeries({
+          upColor: UP_COLOR,
+          downColor: DOWN_COLOR,
+          thinBars: false,
+        });
+      }
+
+      const candleData: CandlestickData[] = ohlcData!.map(d => ({
+        time: toUTC(d.timestamp),
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      }));
+      mainSeries.setData(candleData);
+    } else if (hasOhlc && chartType === "area") {
+      mainSeries = chart.addAreaSeries({
+        topColor: "rgba(0, 231, 160, 0.25)",
+        bottomColor: "rgba(0, 231, 160, 0.01)",
+        lineColor: UP_COLOR,
+        lineWidth: 2,
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBorderColor: UP_COLOR,
+        crosshairMarkerBackgroundColor: "#0a0f0d",
+      });
+      const lineData: LineData[] = ohlcData!.map(d => ({
+        time: toUTC(d.timestamp),
+        value: d.close,
+      }));
+      mainSeries.setData(lineData);
+    } else if (hasOhlc && chartType === "line") {
+      mainSeries = chart.addLineSeries({
+        color: UP_COLOR,
+        lineWidth: 2,
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBorderColor: UP_COLOR,
+        crosshairMarkerBackgroundColor: "#0a0f0d",
+      });
+      const lineData: LineData[] = ohlcData!.map(d => ({
+        time: toUTC(d.timestamp),
+        value: d.close,
+      }));
+      mainSeries.setData(lineData);
+    } else if (data && data.length > 0) {
+      mainSeries = chart.addAreaSeries({
+        topColor: "rgba(0, 231, 160, 0.25)",
+        bottomColor: "rgba(0, 231, 160, 0.01)",
+        lineColor: UP_COLOR,
+        lineWidth: 2,
+      });
+      const lineData: LineData[] = data.map(d => ({
+        time: toUTC(d.timestamp),
+        value: d.price,
+      }));
+      mainSeries.setData(lineData);
+    } else {
+      return;
+    }
+
+    mainSeriesRef.current = mainSeries;
+
+    // Volume histogram
+    if (hasOhlc) {
+      const volumeSeries = chart.addHistogramSeries({
+        priceFormat: { type: "volume" },
+        priceScaleId: "volume",
+      });
+
+      chart.priceScale("volume").applyOptions({
+        scaleMargins: { top: 0.82, bottom: 0 },
+      });
+
+      const volData: HistogramData[] = ohlcData!.map(d => ({
+        time: toUTC(d.timestamp),
+        value: d.volume,
+        color: d.close >= d.open ? "rgba(0, 231, 160, 0.18)" : "rgba(255, 73, 118, 0.18)",
+      }));
+      volumeSeries.setData(volData);
+      volumeSeriesRef.current = volumeSeries;
+    }
+
+    // AI forecast overlay
+    if (forecast?.forecastPoints?.length && hasOhlc) {
+      const lastCandle = ohlcData![ohlcData!.length - 1];
+      const prevPrice = lastCandle.close;
+
+      // Build price sequence: [lastClose, fp1, fp2, ...]
+      const priceSeq = [prevPrice, ...forecast.forecastPoints.map(fp => fp.price)];
+
+      const isCandleMode = chartType === "candle" || chartType === "bar";
+
+      if (isCandleMode) {
+        // Render predicted candles with semi-transparent forecast colors
+        const fcUpColor = direction === "BEARISH" ? "rgba(255, 73, 118, 0.45)" : "rgba(0, 231, 160, 0.45)";
+        const fcDownColor = direction === "BEARISH" ? "rgba(255, 73, 118, 0.45)" : "rgba(0, 231, 160, 0.45)";
+        const fcUpBorder = direction === "BEARISH" ? "rgba(255, 73, 118, 0.7)" : "rgba(0, 231, 160, 0.7)";
+        const fcDownBorder = direction === "BEARISH" ? "rgba(255, 73, 118, 0.7)" : "rgba(0, 231, 160, 0.7)";
+
+        const forecastCandleSeries = chart.addCandlestickSeries({
+          upColor: fcUpColor,
+          downColor: fcDownColor,
+          borderUpColor: fcUpBorder,
+          borderDownColor: fcDownBorder,
+          wickUpColor: fcUpBorder,
+          wickDownColor: fcDownBorder,
+        });
+
+        const forecastCandles: CandlestickData[] = forecast.forecastPoints.map((fp, i) => {
+          const openPrice = priceSeq[i];
+          const closePrice = fp.price;
+          const diff = Math.abs(closePrice - openPrice);
+          const wickExt = diff * (0.2 + Math.random() * 0.3);
+          const high = Math.max(openPrice, closePrice) + wickExt;
+          const low = Math.min(openPrice, closePrice) - wickExt;
+          return {
+            time: toUTC(fp.timestamp),
+            open: openPrice,
+            high,
+            low,
+            close: closePrice,
+          };
+        });
+        forecastCandleSeries.setData(forecastCandles);
+        forecastSeriesRef.current = forecastCandleSeries;
+
+        // Mark first and last forecast candles
+        forecastCandleSeries.setMarkers([
+          {
+            time: toUTC(forecast.forecastPoints[0].timestamp) as UTCTimestamp,
+            position: "aboveBar" as const,
+            color: forecastLineColor,
+            shape: "arrowDown" as const,
+            text: "AI",
+            size: 1,
+          },
+          {
+            time: toUTC(forecast.forecastPoints[forecast.forecastPoints.length - 1].timestamp) as UTCTimestamp,
+            position: "aboveBar" as const,
+            color: forecastLineColor,
+            shape: "circle" as const,
+            text: formatUSD(forecast.forecastPoints[forecast.forecastPoints.length - 1].price),
+            size: 1.5,
+          },
+        ]);
+      } else {
+        // Line/area modes: render as dashed line
+        const forecastLineSeries = chart.addLineSeries({
+          color: forecastLineColor,
+          lineWidth: 2,
+          lineStyle: LineStyle.Dashed,
+          crosshairMarkerRadius: 5,
+          crosshairMarkerBorderColor: forecastLineColor,
+          crosshairMarkerBackgroundColor: "#0a0f0d",
+          lastValueVisible: true,
+          priceLineVisible: false,
+        });
+
+        const fPoints: LineData[] = [
+          { time: toUTC(lastCandle.timestamp), value: lastCandle.close },
+          ...forecast.forecastPoints.map(fp => ({
+            time: toUTC(fp.timestamp),
+            value: fp.price,
+          })),
+        ];
+        forecastLineSeries.setData(fPoints);
+        forecastSeriesRef.current = forecastLineSeries;
+
+        forecastLineSeries.setMarkers(
+          forecast.forecastPoints.map((fp, i) => ({
+            time: toUTC(fp.timestamp) as UTCTimestamp,
+            position: "aboveBar" as const,
+            color: forecastLineColor,
+            shape: "circle" as const,
+            text: i === forecast.forecastPoints.length - 1 ? formatUSD(fp.price) : "",
+            size: i === forecast.forecastPoints.length - 1 ? 1.5 : 0.5,
+          })),
+        );
+      }
+    }
+
+    // Target price line
+    if (targetPrice && mainSeries) {
+      mainSeries.createPriceLine({
+        price: targetPrice,
+        color: forecastLineColor,
+        lineWidth: 1,
+        lineStyle: LineStyle.SparseDotted,
+        axisLabelVisible: true,
+        title: `AI ${t("dashboard.target")}`,
+      });
+    }
+
+    chart.timeScale().fitContent();
+
+    // Resize handler
+    const handleResize = () => {
+      if (chartRef.current && container) {
+        chartRef.current.applyOptions({ width: container.clientWidth });
+      }
+    };
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [ohlcData, data, chartType, forecast, targetPrice, forecastLineColor, hasOhlc, t]);
+
+  useEffect(() => {
+    const cleanup = buildChart();
+    return () => {
+      cleanup?.();
+      if (chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+      }
+    };
+  }, [buildChart]);
+
+  // OHLC info display
+  const lastCandle = hasOhlc ? ohlcData![ohlcData!.length - 1] : null;
+  const priceChange = lastCandle ? lastCandle.close - lastCandle.open : 0;
+  const priceChangePercent = lastCandle && lastCandle.open ? ((priceChange / lastCandle.open) * 100) : 0;
 
   return (
     <div data-testid="chart-price-container">
+      {/* Toolbar row */}
       {onTimeframeChange && (
-      <div className="flex items-center gap-1 mb-2 flex-wrap" data-testid="timeframe-selector">
-        {TIMEFRAMES.map(tf => (
-          <Button
-            key={tf.key}
-            variant={selectedTimeframe === tf.key ? "default" : "ghost"}
-            size="sm"
-            className={`text-[12px] ${selectedTimeframe === tf.key ? "font-bold" : "text-muted-foreground"}`}
-            onClick={() => onTimeframeChange(tf.key)}
-            data-testid={`button-tf-${tf.key}`}
-          >
-            {tf.label}
-          </Button>
-        ))}
-        {forecast && (
-          <Badge
-            className={`ml-auto text-[11px] shrink-0 ${directionColor} no-default-hover-elevate no-default-active-elevate`}
-            data-testid="badge-forecast-direction"
-          >
-            <Sparkles className="mr-1 h-2.5 w-2.5" />
-            AI {direction} {confidence}%
-          </Badge>
-        )}
-        {forecastLoading && !forecast && (
-          <Badge className="ml-auto text-[11px] shrink-0 bg-muted/30 text-muted-foreground no-default-hover-elevate no-default-active-elevate animate-pulse">
-            <Sparkles className="mr-1 h-2.5 w-2.5" />
-            {t("common.loading")}
-          </Badge>
-        )}
-      </div>
+        <div className="flex items-center gap-0.5 mb-1.5 flex-wrap" data-testid="timeframe-selector">
+          {/* Timeframes */}
+          {TIMEFRAMES.map(tf => (
+            <button
+              key={tf.key}
+              className={`px-2 py-1 rounded text-[11px] font-medium transition-all duration-200 ${
+                selectedTimeframe === tf.key
+                  ? "bg-[rgba(0,231,160,0.15)] text-[#00e7a0] shadow-[0_0_8px_rgba(0,231,160,0.15)]"
+                  : "text-[rgba(180,195,190,0.5)] hover:text-[rgba(180,195,190,0.8)] hover:bg-white/[0.03]"
+              }`}
+              onClick={() => onTimeframeChange(tf.key)}
+              data-testid={`button-tf-${tf.key}`}
+            >
+              {tf.label}
+            </button>
+          ))}
+
+          {/* Separator */}
+          <div className="w-px h-4 bg-white/10 mx-1" />
+
+          {/* Chart type buttons */}
+          {hasOhlc && CHART_TYPES.map(ct => {
+            const Icon = ct.icon;
+            return (
+              <button
+                key={ct.key}
+                className={`p-1 rounded transition-all duration-200 ${
+                  chartType === ct.key
+                    ? "bg-[rgba(0,231,160,0.15)] text-[#00e7a0]"
+                    : "text-[rgba(180,195,190,0.4)] hover:text-[rgba(180,195,190,0.7)] hover:bg-white/[0.03]"
+                }`}
+                onClick={() => setChartType(ct.key)}
+                title={ct.label}
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </button>
+            );
+          })}
+
+          {/* AI forecast badge */}
+          {forecast && (
+            <Badge
+              className={`ml-auto text-[10px] shrink-0 ${directionColor} no-default-hover-elevate no-default-active-elevate border-0`}
+              data-testid="badge-forecast-direction"
+            >
+              <Sparkles className="mr-1 h-2.5 w-2.5" />
+              {activeModel || "AI"} {direction} {confidence}%
+            </Badge>
+          )}
+          {forecastLoading && !forecast && (
+            <Badge className="ml-auto text-[10px] shrink-0 bg-muted/30 text-muted-foreground no-default-hover-elevate no-default-active-elevate animate-pulse border-0">
+              <Sparkles className="mr-1 h-2.5 w-2.5" />
+              {t("common.loading")}
+            </Badge>
+          )}
+        </div>
       )}
 
-      {isLoading || !data || data.length === 0 ? (
-        <Skeleton className="h-52 w-full rounded-md" />
+      {/* OHLC info bar */}
+      {hasOhlc && lastCandle && onTimeframeChange && (
+        <div className="flex items-center gap-3 mb-1 text-[10px] font-mono px-0.5">
+          <span className="text-[rgba(180,195,190,0.45)]">O <span className="text-[rgba(220,235,230,0.8)]">{formatUSD(lastCandle.open)}</span></span>
+          <span className="text-[rgba(180,195,190,0.45)]">H <span className="text-[rgba(220,235,230,0.8)]">{formatUSD(lastCandle.high)}</span></span>
+          <span className="text-[rgba(180,195,190,0.45)]">L <span className="text-[rgba(220,235,230,0.8)]">{formatUSD(lastCandle.low)}</span></span>
+          <span className="text-[rgba(180,195,190,0.45)]">C <span className="text-[rgba(220,235,230,0.8)]">{formatUSD(lastCandle.close)}</span></span>
+          <span className={`font-semibold ${priceChange >= 0 ? "text-[#00e7a0]" : "text-[#ff4976]"}`}>
+            {priceChange >= 0 ? "+" : ""}{priceChangePercent.toFixed(2)}%
+          </span>
+        </div>
+      )}
+
+      {/* Chart */}
+      {isLoading || !hasData ? (
+        <Skeleton className="h-[280px] w-full rounded-lg" />
       ) : (
         <div
-          className="relative w-full transition-opacity duration-700 ease-out"
-          style={{ opacity: visible ? 1 : 0, height: 210 }}
+          className="relative w-full transition-opacity duration-500 ease-out rounded-lg overflow-hidden"
+          style={{
+            opacity: visible ? 1 : 0,
+            background: "linear-gradient(180deg, rgba(10,18,14,0.5) 0%, rgba(8,14,11,0.8) 100%)",
+            border: "1px solid rgba(0,231,160,0.06)",
+          }}
           data-testid="chart-price"
         >
+          {/* AI target overlay */}
           {forecast && targetPrice && (
             <div
-              className="absolute top-1 right-1 z-10 text-right"
+              className="absolute top-2 right-2 z-10"
               style={{ animation: "fadeSlideIn 0.5s ease-out" }}
               data-testid="forecast-target-label"
             >
               <div
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[12px] font-bold border"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold backdrop-blur-sm"
                 style={{
-                  backgroundColor: direction === "BULLISH" ? "rgba(34,197,94,0.15)" : direction === "BEARISH" ? "rgba(239,68,68,0.15)" : "rgba(234,179,8,0.15)",
-                  borderColor: direction === "BULLISH" ? "rgba(34,197,94,0.3)" : direction === "BEARISH" ? "rgba(239,68,68,0.3)" : "rgba(234,179,8,0.3)",
+                  backgroundColor: direction === "BULLISH" ? "rgba(0,231,160,0.1)" : direction === "BEARISH" ? "rgba(255,73,118,0.1)" : "rgba(234,179,8,0.1)",
+                  border: `1px solid ${direction === "BULLISH" ? "rgba(0,231,160,0.2)" : direction === "BEARISH" ? "rgba(255,73,118,0.2)" : "rgba(234,179,8,0.2)"}`,
                   color: forecastLineColor,
                 }}
               >
-                {directionIcon}
+                <Sparkles className="h-2.5 w-2.5" />
                 {t("dashboard.target")}: {formatUSD(targetPrice)}
               </div>
             </div>
           )}
 
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={mergedData} margin={{ top: 24, right: 4, left: -8, bottom: 0 }}>
-              <defs>
-                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={color} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={forecastLineColor} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={forecastLineColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis
-                dataKey="time"
-                tick={{ fontSize: 9, fill: "hsl(150, 5%, 50%)" }}
-                tickLine={false}
-                axisLine={false}
-                interval={Math.floor(mergedData.length / 6)}
-              />
-              <YAxis
-                domain={["dataMin", "dataMax"]}
-                tick={{ fontSize: 9, fill: "hsl(150, 5%, 50%)" }}
-                tickLine={false}
-                axisLine={false}
-                orientation="right"
-                width={55}
-                tickFormatter={formatYAxis}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(150, 8%, 12%)",
-                  border: "1px solid hsl(150, 8%, 20%)",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  color: "hsl(150, 5%, 95%)",
-                }}
-                formatter={(value: any, name: string) => {
-                  if (value === null || value === undefined) return ["-", ""];
-                  const label = name === "forecastPrice" ? t("dashboard.aiForecast") : t("common.price");
-                  return [formatUSD(Number(value)), label];
-                }}
-              />
-              {targetPrice && (
-                <ReferenceLine
-                  y={targetPrice}
-                  stroke={forecastLineColor}
-                  strokeDasharray="6 4"
-                  strokeWidth={1}
-                  strokeOpacity={0.5}
-                />
-              )}
-              <Area
-                type="monotone"
-                dataKey="price"
-                stroke={color}
-                strokeWidth={2}
-                fill="url(#priceGradient)"
-                connectNulls={false}
-                dot={false}
-              />
-              {forecast && (
-                <Area
-                  type="monotone"
-                  dataKey="forecastPrice"
-                  stroke={forecastLineColor}
-                  strokeWidth={2}
-                  strokeDasharray="6 3"
-                  fill="url(#forecastGradient)"
-                  connectNulls={true}
-                  dot={(props: any) => {
-                    if (!props.payload?.forecastPrice || props.payload?.price !== null) return <></>;
-                    const isLast = props.index === mergedData.length - 1;
-                    if (!isLast) return <></>;
-                    return (
-                      <g>
-                        <circle cx={props.cx} cy={props.cy} r={4} fill={forecastLineColor} stroke="white" strokeWidth={1.5} />
-                        <text x={props.cx - 4} y={props.cy - 10} fill={forecastLineColor} fontSize={9} fontWeight="bold">
-                          {formatUSD(props.payload.forecastPrice)}
-                        </text>
-                      </g>
-                    );
-                  }}
-                />
-              )}
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div ref={chartContainerRef} className="w-full" style={{ height: 280 }} />
         </div>
       )}
 
+      {/* AI reasoning */}
       {forecast?.reasoning && (
-        <div className="mt-1.5 px-1" data-testid="text-forecast-reasoning">
-          <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-2">
+        <div className="mt-1.5 px-0.5" data-testid="text-forecast-reasoning">
+          <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
             <Sparkles className="inline h-2.5 w-2.5 mr-1 text-amber-400" />
             {forecast.reasoning}
           </p>

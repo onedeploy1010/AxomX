@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { ASSET_IDS } from "@/lib/constants";
-import { fetchExchangeDepth, getAiForecast } from "@/lib/api";
-import { useCryptoPrices, useBinanceChart, useOrderBook } from "@/hooks/use-crypto-price";
+import { fetchExchangeDepth, getAiForecastMulti } from "@/lib/api";
+import { useCryptoPrices, useBinanceKlines, useOrderBook } from "@/hooks/use-crypto-price";
 import type { ChartTimeframe } from "@/hooks/use-crypto-price";
 import { PriceHeader } from "@/components/dashboard/price-header";
 import { PriceChart } from "@/components/dashboard/price-chart";
@@ -11,11 +11,12 @@ import { AssetTabs } from "@/components/dashboard/asset-tabs";
 import { DepthBar } from "@/components/dashboard/depth-bar";
 import { TrendingFeed } from "@/components/dashboard/trending-feed";
 import { ExchangeDepth } from "@/components/dashboard/exchange-depth";
-import { AiPredictionGrid } from "@/components/dashboard/ai-prediction-grid";
+import { AiModelCarousel } from "@/components/dashboard/ai-model-carousel";
 import { Button } from "@/components/ui/button";
 import { BarChart3 } from "lucide-react";
 
 interface ForecastResponse {
+  model: string;
   asset: string;
   timeframe: string;
   direction: string;
@@ -26,14 +27,19 @@ interface ForecastResponse {
   forecastPoints: { timestamp: number; time: string; price: number; predicted: boolean }[];
 }
 
+interface MultiForecastResponse {
+  forecasts: ForecastResponse[];
+}
+
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const [selectedTimeframe, setSelectedTimeframe] = useState<ChartTimeframe>("1H");
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const coinId = ASSET_IDS[selectedAsset] || "bitcoin";
 
   const { data: prices, isLoading: pricesLoading } = useCryptoPrices();
-  const { data: chartData, isLoading: chartLoading } = useBinanceChart(selectedAsset, selectedTimeframe);
+  const { data: klineData, isLoading: chartLoading } = useBinanceKlines(selectedAsset, selectedTimeframe);
   const { data: orderBook, isLoading: bookLoading } = useOrderBook(selectedAsset);
 
   const { data: exchangeData, isLoading: exchangeLoading } = useQuery<{
@@ -62,12 +68,28 @@ export default function Dashboard() {
     refetchInterval: 60_000,
   });
 
-  const { data: forecast, isLoading: forecastLoading } = useQuery<ForecastResponse>({
-    queryKey: ["ai-forecast", selectedAsset, selectedTimeframe],
-    queryFn: () => getAiForecast(selectedAsset, selectedTimeframe),
+  const { data: multiResult, isLoading: forecastLoading } = useQuery<MultiForecastResponse>({
+    queryKey: ["ai-forecast-multi", selectedAsset, selectedTimeframe],
+    queryFn: () => getAiForecastMulti(selectedAsset, selectedTimeframe),
     staleTime: 3 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
   });
+
+  const allForecasts = multiResult?.forecasts || [];
+
+  // Determine which forecast to display on chart
+  const activeForecast = useMemo(() => {
+    if (!allForecasts.length) return null;
+    if (selectedModel) {
+      const found = allForecasts.find(f => f.model === selectedModel);
+      if (found) return found;
+    }
+    // Default: highest confidence (already sorted by backend)
+    return allForecasts[0];
+  }, [allForecasts, selectedModel]);
+
+  // Auto-select best model when data arrives
+  const activeModelName = activeForecast?.model || selectedModel;
 
   const selectedCoin = prices?.find(
     (p) => p.symbol.toUpperCase() === selectedAsset
@@ -95,12 +117,23 @@ export default function Dashboard() {
           </Button>
         </div>
         <PriceChart
-          data={chartData}
+          ohlcData={klineData}
           isLoading={chartLoading}
-          forecast={forecast || null}
+          forecast={activeForecast || null}
           forecastLoading={forecastLoading}
           selectedTimeframe={selectedTimeframe}
           onTimeframeChange={setSelectedTimeframe}
+          activeModel={activeModelName || undefined}
+        />
+      </div>
+
+      {/* AI Model Carousel */}
+      <div className="px-4" style={{ animation: "fadeSlideIn 0.55s ease-out" }}>
+        <AiModelCarousel
+          forecasts={allForecasts}
+          isLoading={forecastLoading}
+          activeModel={activeModelName || null}
+          onSelectModel={setSelectedModel}
         />
       </div>
 
@@ -116,10 +149,6 @@ export default function Dashboard() {
           fearGreedIndex={exchangeData?.fearGreedIndex}
           fearGreedLabel={exchangeData?.fearGreedLabel}
         />
-      </div>
-
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.8s ease-out" }}>
-        <AiPredictionGrid asset={selectedAsset} currentPrice={selectedCoin?.current_price || null} />
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.85s ease-out" }}>

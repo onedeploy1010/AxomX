@@ -30,8 +30,9 @@ async function fetchCurrentPrice(asset: string): Promise<number> {
 }
 
 const TIMEFRAME_LABELS: Record<string, string> = {
-  "5M": "5-minute", "15M": "15-minute", "30M": "30-minute",
-  "1H": "1-hour", "4H": "4-hour", "1D": "1-day", "1W": "1-week",
+  "1m": "1-minute", "5m": "5-minute", "5M": "5-minute", "15m": "15-minute", "15M": "15-minute",
+  "30m": "30-minute", "30M": "30-minute", "1H": "1-hour", "4H": "4-hour",
+  "1D": "1-day", "1W": "1-week",
 };
 
 serve(async (req) => {
@@ -71,7 +72,7 @@ serve(async (req) => {
     const confidence = Number(parsed.confidence) || 50;
 
     const tfMinutes: Record<string, number> = {
-      "1m": 1, "10m": 10, "30m": 30, "1H": 60, "4H": 240, "1D": 1440, "7D": 10080,
+      "1m": 1, "5m": 5, "10m": 10, "15m": 15, "30m": 30, "1H": 60, "4H": 240, "1D": 1440, "1W": 10080, "7D": 10080,
     };
     const totalMinutes = tfMinutes[tf] || 60;
     const numPoints = 8;

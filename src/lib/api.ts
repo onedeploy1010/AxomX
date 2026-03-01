@@ -898,6 +898,14 @@ export async function getAiForecast(asset: string, timeframe: string) {
   return data;
 }
 
+export async function getAiForecastMulti(asset: string, timeframe: string) {
+  const { data, error } = await supabase.functions.invoke("ai-forecast-multi", {
+    body: { asset, timeframe },
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function getAiFearGreed() {
   const { data, error } = await supabase.functions.invoke("ai-fear-greed");
   if (error) throw error;
