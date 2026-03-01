@@ -424,3 +424,25 @@
     border-color: rgba(var(--neon-rgb), 0.4);
   }
 }
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+@keyframes barOscillate {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.02); }
+}
+
+@keyframes gaugeNeedleIn {
+  0% { transform: rotate(-90deg); opacity: 0; }
+  60% { opacity: 1; }
+  80% { transform: rotate(var(--needle-angle-overshoot)); }
+  100% { transform: rotate(var(--needle-angle)); }
+}
+
+@keyframes pulseCenter {
+  0%, 100% { opacity: 0.7; filter: drop-shadow(0 0 3px var(--gauge-color)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px var(--gauge-color)); }
+}

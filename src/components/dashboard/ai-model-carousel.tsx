@@ -151,7 +151,7 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-2.5 overflow-x-auto scrollbar-hide px-0.5 pb-1 snap-x snap-mandatory"
+          className="flex gap-2.5 overflow-x-auto scrollbar-hide px-0.5 pt-3 pb-1 snap-x snap-mandatory"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {forecasts.map((f, idx) => {

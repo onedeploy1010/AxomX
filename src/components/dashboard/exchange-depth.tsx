@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,34 @@ interface ExchangeAggData {
 
 interface ExchangeDepthProps {
   symbol: string;
+}
+
+/* Fast-ticking animated percentage for live feel */
+function JitterPercent({ value, color }: { value: number; color: string }) {
+  const [display, setDisplay] = useState(value);
+  const tickRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    setDisplay(value);
+  }, [value]);
+
+  useEffect(() => {
+    const tick = () => {
+      setDisplay(prev => {
+        const jitter = (Math.random() - 0.5) * 0.5;
+        return Math.max(0, Math.min(100, value + jitter));
+      });
+      tickRef.current = setTimeout(tick, 300 + Math.random() * 300);
+    };
+    tickRef.current = setTimeout(tick, 400);
+    return () => clearTimeout(tickRef.current);
+  }, [value]);
+
+  return (
+    <span className="font-mono font-medium tabular-nums" style={{ color }}>
+      {display.toFixed(1)}%
+    </span>
+  );
 }
 
 export function ExchangeDepth({ symbol }: ExchangeDepthProps) {
@@ -90,7 +118,9 @@ export function ExchangeDepth({ symbol }: ExchangeDepthProps) {
               }}
             >
               <span className="w-20 shrink-0 text-[13px] font-medium truncate">{ex.name}</span>
-              <span className="w-9 shrink-0 text-[12px] text-emerald-400 font-medium text-right tabular-nums">{ex.buy}%</span>
+              <span className="w-9 shrink-0 text-[12px] text-right">
+                <JitterPercent value={ex.buy} color="#34d399" />
+              </span>
               <div className="flex-1 flex h-4 overflow-hidden rounded-sm">
                 <div
                   className="bg-emerald-500 transition-all duration-700 ease-out"
@@ -101,7 +131,9 @@ export function ExchangeDepth({ symbol }: ExchangeDepthProps) {
                   style={{ width: mounted ? `${ex.sell}%` : "0%" }}
                 />
               </div>
-              <span className="w-9 shrink-0 text-[12px] text-red-400 font-medium tabular-nums">{ex.sell}%</span>
+              <span className="w-9 shrink-0 text-[12px]">
+                <JitterPercent value={ex.sell} color="#f87171" />
+              </span>
             </div>
           ))}
         </div>

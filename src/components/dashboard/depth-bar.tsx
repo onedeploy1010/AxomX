@@ -12,7 +12,7 @@ interface DepthBarProps {
   fearGreedLabel?: string;
 }
 
-/* Animated number that smoothly transitions and randomly "ticks" */
+/* Animated number that smoothly transitions and randomly "ticks" several times per second */
 function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color: string; suffix?: string }) {
   const [display, setDisplay] = useState(value);
   const prevRef = useRef(value);
@@ -38,15 +38,17 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
     }
   }, [value]);
 
-  // Small random fluctuations for "live" feel
+  // Fast random fluctuations for aggressive "live" feel (several ticks per second)
   useEffect(() => {
-    tickRef.current = setInterval(() => {
+    const tick = () => {
       setDisplay(prev => {
-        const jitter = (Math.random() - 0.5) * 0.3;
+        const jitter = (Math.random() - 0.5) * 0.6;
         return Math.max(0, Math.min(100, prev + jitter));
       });
-    }, 2000 + Math.random() * 1500);
-    return () => clearInterval(tickRef.current);
+      tickRef.current = setTimeout(tick, 300 + Math.random() * 300);
+    };
+    tickRef.current = setTimeout(tick, 300 + Math.random() * 300);
+    return () => clearTimeout(tickRef.current);
   }, []);
 
   return (
@@ -86,6 +88,49 @@ function AnimatedCounter({ value, color }: { value: number; color: string }) {
     >
       {display}
     </span>
+  );
+}
+
+/* Animated bar width with oscillation */
+function AnimatedBar({ baseWidth, color, gradientFrom, gradientTo, shimmerDelay = "0s" }: {
+  baseWidth: number; color: string; gradientFrom: string; gradientTo: string; shimmerDelay?: string;
+}) {
+  const [width, setWidth] = useState(baseWidth);
+  const tickRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    setWidth(baseWidth);
+  }, [baseWidth]);
+
+  // Oscillation: subtle left-right movement several times per second
+  useEffect(() => {
+    const oscillate = () => {
+      setWidth(prev => {
+        const jitter = (Math.random() - 0.5) * 1.8;
+        return Math.max(0.5, Math.min(99.5, baseWidth + jitter));
+      });
+      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
+    };
+    tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
+    return () => clearTimeout(tickRef.current);
+  }, [baseWidth]);
+
+  return (
+    <div
+      className={`bg-gradient-to-r ${gradientFrom} ${gradientTo} relative`}
+      style={{
+        width: `${width}%`,
+        transition: "width 0.2s ease-out",
+      }}
+    >
+      <div
+        className="absolute inset-0 opacity-50"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+          animation: `shimmer 1.5s ease-in-out infinite ${shimmerDelay}`,
+        }}
+      />
+    </div>
   );
 }
 
@@ -152,44 +197,26 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
               </div>
             </div>
 
-            {/* Animated depth bar */}
+            {/* Animated depth bar with oscillation */}
             <div className="flex h-3 overflow-hidden rounded-full bg-white/[0.03]" data-testid="bar-depth-ratio">
-              <div
-                className="bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-700 ease-out relative"
-                style={{ width: `${buyNum}%` }}
-              >
-                <div
-                  className="absolute inset-0 opacity-40"
-                  style={{
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
-                    animation: "shimmer 2s ease-in-out infinite",
-                  }}
-                />
-              </div>
-              <div
-                className="bg-gradient-to-r from-red-400 to-red-600 transition-all duration-700 ease-out relative"
-                style={{ width: `${sellNum}%` }}
-              >
-                <div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
-                    animation: "shimmer 2.5s ease-in-out infinite 0.5s",
-                  }}
-                />
-              </div>
+              <AnimatedBar
+                baseWidth={buyNum}
+                color="#00e7a0"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-emerald-400"
+                shimmerDelay="0s"
+              />
+              <AnimatedBar
+                baseWidth={sellNum}
+                color="#ef4444"
+                gradientFrom="from-red-400"
+                gradientTo="to-red-600"
+                shimmerDelay="0.3s"
+              />
             </div>
           </div>
         </div>
       </CardContent>
-
-      {/* Shimmer keyframes */}
-      <style>{`
-        @keyframes shimmer {
-          0%, 100% { transform: translateX(-100%); }
-          50% { transform: translateX(100%); }
-        }
-      `}</style>
     </Card>
   );
 }
