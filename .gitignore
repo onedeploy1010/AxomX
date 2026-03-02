@@ -15,3 +15,8 @@ vite.config.ts.*
 *.pem
 *.key
 attached_assets/
+
+# ignore pasted assets/secrets
+attached_assets/
+.env
+.env.*
