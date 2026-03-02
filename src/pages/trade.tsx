@@ -145,44 +145,58 @@ export default function Trade() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.1s both" }}>
-        <div className="rounded-lg overflow-hidden" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="rounded-lg overflow-hidden" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap px-4 pt-3 pb-2">
-            <div className="flex gap-1 flex-wrap">
-              <Button
-                size="sm"
-                variant={infoTab === "market" ? "default" : "ghost"}
-                className={infoTab === "market" ? "bg-primary/20 text-primary" : "text-muted-foreground"}
+            <div className="flex gap-2 flex-wrap">
+              <button
                 onClick={() => setInfoTab("market")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: infoTab === "market" ? "rgba(255,255,255,0.06)" : "transparent",
+                  color: infoTab === "market" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)",
+                }}
                 data-testid="button-market-tab"
               >
-                {t("trade.market")}
-              </Button>
-              <Button
-                size="sm"
-                variant={infoTab === "leaderboard" ? "default" : "ghost"}
-                className={infoTab === "leaderboard" ? "bg-primary/20 text-primary" : "text-muted-foreground"}
+                💰 {t("trade.market")}
+              </button>
+              <button
                 onClick={() => setInfoTab("leaderboard")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: infoTab === "leaderboard" ? "rgba(255,255,255,0.06)" : "transparent",
+                  color: infoTab === "leaderboard" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)",
+                }}
                 data-testid="button-leaderboard-tab"
               >
-                {t("trade.leaderboard")}
-              </Button>
+                🏆 {t("trade.leaderboard")}
+              </button>
             </div>
-            <span className="text-[12px] text-muted-foreground">{t("trade.sourcePolymarket")}</span>
+            <span className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              {t("trade.sourcePolymarket")}
+            </span>
           </div>
 
           {infoTab === "market" ? (
-            <div className="px-4 pb-3 space-y-2">
+            <div className="px-4 pb-4 space-y-2">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 {currentPrice !== null && (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xl font-bold text-neon-value" data-testid="text-current-price">
+                    <span
+                      className="text-xl font-bold tabular-nums font-mono"
+                      style={{ color: "rgba(255,255,255,0.95)" }}
+                      data-testid="text-current-price"
+                    >
                       {formatUSD(currentPrice)}
                     </span>
-                    <span className="text-[12px] text-muted-foreground">{selectedAsset}/USD</span>
                   </div>
                 )}
-                <div className="flex items-center gap-1 text-[12px] text-primary/70">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium"
+                  style={{ border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)" }}
+                >
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
                   {t("trade.live1s")}
                 </div>
               </div>
@@ -197,13 +211,13 @@ export default function Trade() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.15s both" }}>
-        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <StatsPanel stats={stats} isLoading={statsLoading && !!walletAddress} />
         </div>
       </div>
 
       <div className="px-4 space-y-2" style={{ animation: "fadeSlideIn 0.35s ease-out 0.2s both" }}>
-        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
             <span className="text-sm font-bold text-foreground">{t("trade.orders", { count: bets.length })}</span>
             <Button variant="ghost" size="sm" className="text-primary" data-testid="button-batch-claim">
