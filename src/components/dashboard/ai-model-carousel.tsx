@@ -80,7 +80,7 @@ function AnimatedGauge({ value, accent, glow, size = 64 }: { value: number; acce
       </svg>
       <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ${showValue ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
         <span className="text-[18px] font-black tabular-nums leading-none" style={{ color: accent, textShadow: `0 0 12px rgba(${glow},0.4)` }}>{value}</span>
-        <span className="text-[7px] font-semibold text-muted-foreground/50 mt-0.5 tracking-wider">CONF</span>
+        <span className="text-[7px] font-semibold text-muted-foreground/60 mt-0.5 tracking-wider">CONF</span>
       </div>
     </div>
   );
@@ -133,12 +133,12 @@ function FeaturedCard({
       onClick={onSelect}
       className="ai-featured-card w-full text-left relative overflow-hidden rounded-xl cursor-pointer active:scale-[0.985] transition-transform duration-200"
       style={{
-        background: `linear-gradient(160deg, rgba(${meta.glow},0.1) 0%, rgba(255,255,255,0.03) 40%, rgba(0,0,0,0.15) 100%)`,
+        background: `linear-gradient(160deg, rgba(${meta.glow},0.08) 0%, rgba(255,255,255,0.03) 40%, rgba(0,0,0,0.2) 100%)`,
         backdropFilter: 'blur(12px)',
-        border: `1px solid rgba(${meta.glow},${isActive ? '0.3' : '0.1'})`,
+        border: `1px solid rgba(255,255,255,${isActive ? '0.2' : '0.12'})`,
         boxShadow: isActive
-          ? `0 0 24px rgba(${meta.glow},0.1), inset 0 1px 0 rgba(255,255,255,0.06)`
-          : `inset 0 1px 0 rgba(255,255,255,0.04)`,
+          ? `0 0 24px rgba(${meta.glow},0.12), inset 0 1px 0 rgba(255,255,255,0.08)`
+          : `inset 0 1px 0 rgba(255,255,255,0.06)`,
       }}
     >
       <div className="ai-shimmer-sweep" style={{ '--shimmer-color': `rgba(${meta.glow},0.05)` } as React.CSSProperties} />
@@ -168,7 +168,7 @@ function FeaturedCard({
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[14px] font-bold text-foreground tracking-tight">{forecast.model}</span>
+                  <span className="text-[14px] font-bold text-foreground/95 tracking-tight">{forecast.model}</span>
                   <span className="ai-best-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[7px] font-extrabold uppercase tracking-widest"
                     style={{
                       background: 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.05))',
@@ -186,8 +186,8 @@ function FeaturedCard({
             <div className="flex items-center gap-2 mb-2.5">
               <div className="ai-direction-badge flex items-center gap-1 px-2 py-0.5 rounded-md"
                 style={{
-                  background: `rgba(${dirGlow},0.1)`,
-                  border: `1px solid rgba(${dirGlow},0.15)`,
+                  background: `rgba(${dirGlow},0.12)`,
+                  border: `1px solid rgba(${dirGlow},0.25)`,
                 }}
               >
                 {isBullish ? (
@@ -209,9 +209,9 @@ function FeaturedCard({
             </div>
 
             <div className="flex items-center gap-1.5">
-              <Target className="h-3 w-3 text-muted-foreground/40" />
-              <span className="text-[9px] text-muted-foreground/45 font-medium">{t("dashboard.target")}</span>
-              <span className="font-mono font-bold text-foreground/90 text-[15px] tracking-tight">
+              <Target className="h-3 w-3 text-muted-foreground/60" />
+              <span className="text-[9px] text-muted-foreground/60 font-medium">{t("dashboard.target")}</span>
+              <span className="font-mono font-bold text-foreground text-[15px] tracking-tight">
                 {formatUSD(forecast.targetPrice)}
               </span>
             </div>
@@ -221,16 +221,16 @@ function FeaturedCard({
         </div>
 
         {forecast.reasoning && (
-          <div className="mt-2.5 pt-2.5 relative" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="mt-2.5 pt-2.5 relative" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <div
               className="cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setReasonExpanded(prev => !prev); }}
             >
-              <p className={`text-[10px] text-muted-foreground/55 leading-relaxed ${reasonExpanded ? '' : 'line-clamp-2'}`}>
-                <Sparkles className="inline h-2.5 w-2.5 mr-1 text-amber-400/50 ai-sparkle-icon" />
+              <p className={`text-[11px] text-muted-foreground/70 leading-relaxed ${reasonExpanded ? '' : 'line-clamp-2'}`}>
+                <Sparkles className="inline h-2.5 w-2.5 mr-1 text-amber-400/60 ai-sparkle-icon" />
                 {forecast.reasoning}
               </p>
-              <span className="text-[8px] text-muted-foreground/30 mt-0.5 inline-block font-medium tracking-wide">
+              <span className="text-[9px] text-muted-foreground/45 mt-1 inline-block font-semibold tracking-wide uppercase">
                 {reasonExpanded ? 'SHOW LESS' : 'READ MORE'}
               </span>
             </div>
@@ -273,10 +273,10 @@ function CompactModelPill({
         width: 140,
         background: isActive
           ? `linear-gradient(150deg, rgba(${meta.glow},0.12) 0%, rgba(255,255,255,0.04) 100%)`
-          : 'rgba(255,255,255,0.02)',
+          : 'rgba(255,255,255,0.03)',
         backdropFilter: 'blur(8px)',
-        border: isActive ? `1px solid rgba(${meta.glow},0.25)` : '1px solid rgba(255,255,255,0.04)',
-        boxShadow: isActive ? `0 0 12px rgba(${meta.glow},0.08)` : 'none',
+        border: isActive ? `1px solid rgba(${meta.glow},0.3)` : '1px solid rgba(255,255,255,0.1)',
+        boxShadow: isActive ? `0 0 12px rgba(${meta.glow},0.1)` : 'none',
       }}
     >
       <div className="p-2">
@@ -293,7 +293,7 @@ function CompactModelPill({
             >
               {meta.icon}
             </div>
-            <span className={`text-[10px] font-bold truncate ${isActive ? 'text-foreground/90' : 'text-foreground/50'}`}>
+            <span className={`text-[10px] font-bold truncate ${isActive ? 'text-foreground' : 'text-foreground/65'}`}>
               {forecast.model}
             </span>
           </div>
@@ -395,11 +395,11 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
     <div
       className={`ai-wrapper-glass relative overflow-hidden rounded-2xl ${mounted ? 'ai-mounted' : ''}`}
       style={{
-        background: `linear-gradient(170deg, rgba(${consensusGlow},0.04) 0%, rgba(255,255,255,0.02) 30%, rgba(0,0,0,0.12) 100%)`,
+        background: `linear-gradient(170deg, rgba(${consensusGlow},0.06) 0%, rgba(255,255,255,0.02) 30%, rgba(0,0,0,0.2) 100%)`,
         backdropFilter: 'blur(20px) saturate(1.4)',
         WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        boxShadow: `0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
+        border: '1px solid rgba(255,255,255,0.18)',
+        boxShadow: `0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)`,
       }}
     >
       <div className="ai-header-scanline" style={{ '--scan-color': `rgba(${consensusGlow},0.3)` } as React.CSSProperties} />
@@ -413,38 +413,38 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
           <div className="flex items-center gap-2.5">
             <div className="relative h-8 w-8 rounded-xl flex items-center justify-center overflow-hidden ai-brain-icon"
               style={{
-                background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(139,92,246,0.05))',
-                border: '1px solid rgba(139,92,246,0.15)',
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(139,92,246,0.08))',
+                border: '1px solid rgba(139,92,246,0.3)',
               }}
             >
               <Brain className="h-4 w-4 text-violet-400" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[13px] font-bold text-foreground/95 tracking-tight">AI Analysis</span>
+                <span className="text-[14px] font-bold text-foreground tracking-tight">AI Analysis</span>
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-40" style={{ backgroundColor: consensusColor }} />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: consensusColor, boxShadow: `0 0 4px ${consensusColor}` }} />
                 </span>
               </div>
               <div className="flex items-center gap-1 mt-0.5">
-                <Activity className="h-2 w-2 text-muted-foreground/35" />
-                <span className="text-[9px] text-muted-foreground/40 font-medium">{sorted.length} models</span>
+                <Activity className="h-2.5 w-2.5 text-muted-foreground/50" />
+                <span className="text-[10px] text-muted-foreground/55 font-medium">{sorted.length} models</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
             style={{
-              background: `rgba(${consensusGlow},0.08)`,
-              border: `1px solid rgba(${consensusGlow},0.15)`,
+              background: `rgba(${consensusGlow},0.1)`,
+              border: `1px solid rgba(${consensusGlow},0.3)`,
             }}
           >
             {consensus === "BULLISH" ? <TrendingUp className="h-3 w-3" style={{ color: consensusColor }} /> : consensus === "BEARISH" ? <TrendingDown className="h-3 w-3" style={{ color: consensusColor }} /> : <Minus className="h-3 w-3" style={{ color: consensusColor }} />}
             <span className="text-[10px] font-extrabold" style={{ color: consensusColor }}>
               {consensus}
             </span>
-            <span className="text-[9px] font-bold text-muted-foreground/35 ml-0.5">{bullCount}/{sorted.length}</span>
+            <span className="text-[9px] font-bold text-muted-foreground/50 ml-0.5">{bullCount}/{sorted.length}</span>
           </div>
         </div>
       </div>
