@@ -145,14 +145,14 @@ export default function Trade() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.1s both" }}>
-        <div className="rounded-lg overflow-hidden" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div className="rounded-lg overflow-hidden" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap px-4 pt-3 pb-2">
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setInfoTab("market")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors"
                 style={{
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  border: "1px solid rgba(255,255,255,0.2)",
                   background: infoTab === "market" ? "rgba(255,255,255,0.06)" : "transparent",
                   color: infoTab === "market" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)",
                 }}
@@ -164,7 +164,7 @@ export default function Trade() {
                 onClick={() => setInfoTab("leaderboard")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors"
                 style={{
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  border: "1px solid rgba(255,255,255,0.2)",
                   background: infoTab === "leaderboard" ? "rgba(255,255,255,0.06)" : "transparent",
                   color: infoTab === "leaderboard" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)",
                 }}
@@ -211,13 +211,13 @@ export default function Trade() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.15s both" }}>
-        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <StatsPanel stats={stats} isLoading={statsLoading && !!walletAddress} />
         </div>
       </div>
 
       <div className="px-4 space-y-2" style={{ animation: "fadeSlideIn 0.35s ease-out 0.2s both" }}>
-        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
             <span className="text-sm font-bold text-foreground">{t("trade.orders", { count: bets.length })}</span>
             <Button variant="ghost" size="sm" className="text-primary" data-testid="button-batch-claim">
