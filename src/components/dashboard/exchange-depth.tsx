@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Diamond } from "lucide-react";
 import { fetchExchangeDepth } from "@/lib/api";
 import { useTranslation } from "react-i18next";
 
@@ -30,9 +29,7 @@ function JitterPercent({ value, color }: { value: number; color: string }) {
   const [display, setDisplay] = useState(value);
   const tickRef = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => {
-    setDisplay(value);
-  }, [value]);
+  useEffect(() => { setDisplay(value); }, [value]);
 
   useEffect(() => {
     const tick = () => {
@@ -47,58 +44,84 @@ function JitterPercent({ value, color }: { value: number; color: string }) {
   }, [value]);
 
   return (
-    <span className="font-mono font-semibold tabular-nums" style={{ color }}>
+    <span className="font-mono font-semibold tabular-nums text-[10px]" style={{ color }}>
       {display.toFixed(1)}%
     </span>
   );
 }
 
-const EXCHANGE_ICONS: Record<string, string> = {
-  "Binance": "₿",
-  "OKX": "◎",
-  "Bybit": "BY",
-  "Bitfinex": "bf",
-  "Kraken": "Kr",
-  "KuCoin": "KC",
-  "Gate.io": "Gt",
-  "MEXC": "MX",
-  "Huobi": "Hb",
-  "Coinbase": "CB",
-  "Bitstamp": "Bs",
-  "Gemini": "Gm",
-  "Crypto.com": "Cr",
-  "WhiteBIT": "WB",
-  "dYdX": "dX",
-  "Lighter": "Lt",
-  "BingX": "BX",
-  "Bitunix": "Bu",
-  "Deribit": "Db",
-  "Aster": "As",
-  "Bitmex": "Bm",
-};
-
-function getExchangeIcon(name: string) {
-  return EXCHANGE_ICONS[name] || name.substring(0, 2).toUpperCase();
+function GemIndicator({ position }: { position: number }) {
+  return (
+    <div
+      className="depth-gem-wrap absolute z-10 top-1/2"
+      style={{ left: `${position}%`, transform: 'translate(-50%, -50%)' }}
+    >
+      <svg width="10" height="14" viewBox="0 0 10 14" className="depth-gem-icon">
+        <path d="M5 0 L10 5 L5 14 L0 5 Z" fill="rgba(255,255,255,0.9)" />
+        <path d="M5 0 L10 5 L5 14 L0 5 Z" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
+        <path d="M0 5 L5 3 L10 5" fill="rgba(255,255,255,0.15)" />
+      </svg>
+    </div>
+  );
 }
 
-function DepthDiamond({ buyPercent }: { buyPercent: number }) {
-  const swayAmount = (buyPercent - 50) * 0.3;
+function DepthBarRow({ ex, mounted, index }: { ex: ExchangeRow; mounted: boolean; index: number }) {
+  const { t } = useTranslation();
+  const [buyWidth, setBuyWidth] = useState(ex.buy);
+  const tickRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => { setBuyWidth(ex.buy); }, [ex.buy]);
+
+  useEffect(() => {
+    const oscillate = () => {
+      setBuyWidth(() => {
+        const jitter = (Math.random() - 0.5) * 1.2;
+        return Math.max(1, Math.min(99, ex.buy + jitter));
+      });
+      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 300);
+    };
+    tickRef.current = setTimeout(oscillate, 300);
+    return () => clearTimeout(tickRef.current);
+  }, [ex.buy]);
+
+  const sellWidth = 100 - buyWidth;
 
   return (
     <div
-      className="depth-diamond-wrap absolute z-10"
+      className="depth-row flex items-center gap-1.5"
+      data-testid={`exchange-${ex.name.toLowerCase().replace(/\./g, "")}`}
       style={{
-        left: `${buyPercent}%`,
-        top: '50%',
-        transform: `translate(-50%, -50%)`,
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? "translateX(0)" : "translateX(-8px)",
+        transition: `opacity 0.4s ease ${index * 40}ms, transform 0.4s ease ${index * 40}ms`,
       }}
     >
-      <Diamond
-        className="depth-diamond-icon h-3.5 w-3.5"
-        style={{
-          '--sway-amount': `${swayAmount}deg`,
-        } as React.CSSProperties}
-      />
+      <span className="w-[60px] shrink-0 text-[11px] font-medium text-foreground/80 truncate">{ex.name}</span>
+      <span className="w-[14px] shrink-0 text-[9px] text-emerald-400/70 font-medium">{t("dashboard.buyLabel")}</span>
+      <span className="w-[36px] shrink-0 text-right"><JitterPercent value={ex.buy} color="#34d399" /></span>
+
+      <div className="flex-1 relative h-[18px] min-w-0">
+        <div className="absolute inset-0 flex h-full rounded-sm overflow-hidden">
+          <div
+            className="transition-[width] duration-200 ease-out"
+            style={{
+              width: mounted ? `${buyWidth}%` : "0%",
+              background: 'linear-gradient(90deg, rgba(16,185,129,0.5), rgba(16,185,129,0.8))',
+            }}
+          />
+          <div
+            className="transition-[width] duration-200 ease-out"
+            style={{
+              width: mounted ? `${sellWidth}%` : "0%",
+              background: 'linear-gradient(90deg, rgba(239,68,68,0.8), rgba(239,68,68,0.5))',
+            }}
+          />
+        </div>
+        {mounted && <GemIndicator position={buyWidth} />}
+      </div>
+
+      <span className="w-[36px] shrink-0"><JitterPercent value={ex.sell} color="#f87171" /></span>
+      <span className="w-[14px] shrink-0 text-[9px] text-red-400/70 font-medium text-right">{t("dashboard.sellLabel")}</span>
     </div>
   );
 }
@@ -152,70 +175,13 @@ export function ExchangeDepth({ symbol }: ExchangeDepthProps) {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 8 }, (_, i) => (
-            <Skeleton key={i} className="h-7 w-full rounded-md" />
+            <Skeleton key={i} className="h-6 w-full rounded-sm" />
           ))}
         </div>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {exchanges.map((ex, index) => (
-            <div
-              key={ex.name}
-              className="depth-row flex items-center gap-2"
-              data-testid={`exchange-${ex.name.toLowerCase().replace(/\./g, "")}`}
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "translateX(0)" : "translateX(-8px)",
-                transition: `opacity 0.4s ease ${index * 40}ms, transform 0.4s ease ${index * 40}ms`,
-              }}
-            >
-              <div className="flex items-center gap-1.5 w-[72px] shrink-0">
-                <div className="depth-exchange-icon h-5 w-5 rounded flex items-center justify-center text-[7px] font-black shrink-0"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    color: 'rgba(255,255,255,0.6)',
-                  }}
-                >
-                  {getExchangeIcon(ex.name)}
-                </div>
-                <span className="text-[11px] font-medium text-foreground/80 truncate">{ex.name}</span>
-              </div>
-
-              <span className="w-[28px] shrink-0 text-[10px] text-right text-emerald-400/80 font-medium">
-                {t("dashboard.buyLabel")}
-              </span>
-
-              <span className="w-[40px] shrink-0 text-[10px] text-right">
-                <JitterPercent value={ex.buy} color="#34d399" />
-              </span>
-
-              <div className="flex-1 relative h-5 overflow-visible">
-                <div className="absolute inset-0 flex h-full rounded overflow-hidden">
-                  <div
-                    className="depth-bar-buy transition-all duration-700 ease-out"
-                    style={{
-                      width: mounted ? `${ex.buy}%` : "0%",
-                      background: 'linear-gradient(90deg, rgba(16,185,129,0.6), rgba(16,185,129,0.85))',
-                    }}
-                  />
-                  <div
-                    className="depth-bar-sell transition-all duration-700 ease-out"
-                    style={{
-                      width: mounted ? `${ex.sell}%` : "0%",
-                      background: 'linear-gradient(90deg, rgba(239,68,68,0.85), rgba(239,68,68,0.6))',
-                    }}
-                  />
-                </div>
-                <DepthDiamond buyPercent={ex.buy} />
-              </div>
-
-              <span className="w-[40px] shrink-0 text-[10px]">
-                <JitterPercent value={ex.sell} color="#f87171" />
-              </span>
-
-              <span className="w-[28px] shrink-0 text-[10px] text-red-400/80 font-medium">
-                {t("dashboard.sellLabel")}
-              </span>
-            </div>
+            <DepthBarRow key={ex.name} ex={ex} mounted={mounted} index={index} />
           ))}
         </div>
       )}
