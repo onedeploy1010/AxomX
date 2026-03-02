@@ -31,11 +31,12 @@ A cryptocurrency trading and portfolio management web application built with Rea
 
 ## Bottom Navigation
 
-- Frosted glass bar with `backdrop-filter: blur(24px)` and slight transparency
-- Green and red animated glow bars at the top edge that bounce left-right
-- Center diamond icon (Vault) elevated above the bar with a sway animation
-- Left tabs: Home, Trade | Right tabs: Strategy, Profile
-- `prefers-reduced-motion` disables all animations
+- Floating pill-shaped bar centered at bottom with rounded capsule design
+- 5 icon-only tabs: Home, Trade, Vault (custom SVG coin icon), Strategy, Profile
+- Active tab gets dark inset pill background with green (#00e7a0) icon glow
+- Inactive icons are muted; no text labels
+- Glass effect: `backdrop-filter: blur(24px)`, gradient background, outer shadow
+- Responsive: slightly larger on desktop (sm: breakpoints)
 
 ## Configuration
 

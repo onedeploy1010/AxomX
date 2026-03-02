@@ -1,80 +1,65 @@
 import { useLocation, Link } from "wouter";
-import { Home, BarChart3, Vault, Brain, User, Diamond } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
+import { Home, BarChart3, Brain, User } from "lucide-react";
 
-const leftTabs = [
-  { path: "/", icon: Home, labelKey: "nav.home" },
-  { path: "/trade", icon: BarChart3, labelKey: "nav.trade" },
-];
-
-const rightTabs = [
-  { path: "/strategy", icon: Brain, labelKey: "nav.strategy" },
-  { path: "/profile", icon: User, labelKey: "nav.profile" },
+const tabs = [
+  { path: "/", icon: Home, id: "home" },
+  { path: "/trade", icon: BarChart3, id: "trade" },
+  {
+    path: "/vault",
+    id: "vault",
+    icon: () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[22px] w-[22px]">
+        <circle cx="12" cy="8" r="5" />
+        <circle cx="12" cy="8" r="2" />
+        <path d="M12 13v3" />
+        <path d="M8 21h8" />
+        <path d="M10 18h4" />
+      </svg>
+    ),
+  },
+  { path: "/strategy", icon: Brain, id: "strategy" },
+  { path: "/profile", icon: User, id: "profile" },
 ];
 
 export function BottomNav() {
   const [location] = useLocation();
-  const { t } = useTranslation();
-
-  const renderTab = (tab: { path: string; icon: React.ElementType; labelKey: string }) => {
-    const isActive = tab.path === "/" ? location === "/" : location.startsWith(tab.path);
-    const label = t(tab.labelKey);
-    return (
-      <Link key={tab.path} href={tab.path}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
-            isActive ? "text-primary" : "text-muted-foreground"
-          }`}
-          data-testid={`nav-${tab.path === "/" ? "home" : tab.path.slice(1)}`}
-        >
-          <tab.icon className={`h-5 w-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]" : ""}`} />
-          <span className="text-[12px] font-medium">{label}</span>
-        </Button>
-      </Link>
-    );
-  };
-
-  const vaultActive = location.startsWith("/vault");
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bnav-glass"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       data-testid="bottom-nav"
     >
-      <div className="bnav-glow-bar bnav-glow-green" />
-      <div className="bnav-glow-bar bnav-glow-red" />
-
-      <div className="absolute top-0 left-0 right-0 h-[1px]"
-        style={{ background: 'linear-gradient(90deg, rgba(0,231,160,0.15), rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.06) 60%, rgba(255,73,118,0.15))' }}
-      />
-
-      <div className="relative mx-auto flex max-w-lg items-center justify-around px-2 py-1">
-        <div className="flex items-center gap-1">
-          {leftTabs.map(renderTab)}
-        </div>
-
-        <Link href="/vault">
-          <button
-            className={`bnav-diamond-btn relative flex flex-col items-center -mt-5 ${vaultActive ? 'bnav-diamond-active' : ''}`}
-            data-testid="nav-vault"
-          >
-            <div className="bnav-diamond-wrap">
-              <div className="bnav-diamond-bg" />
-              <Diamond className="bnav-diamond-icon h-6 w-6 relative z-10" />
-            </div>
-            <span className={`text-[10px] font-semibold mt-1 ${vaultActive ? 'text-primary' : 'text-muted-foreground/70'}`}>
-              {t("nav.vault")}
-            </span>
-          </button>
-        </Link>
-
-        <div className="flex items-center gap-1">
-          {rightTabs.map(renderTab)}
-        </div>
+      <div
+        className="floating-nav pointer-events-auto flex items-center mx-4 mb-3 sm:mb-4 px-2 sm:px-3 py-2 sm:py-2.5 gap-1 sm:gap-2 w-[calc(100%-2rem)] max-w-md"
+      >
+        {tabs.map((tab) => {
+          const isActive = tab.path === "/" ? location === "/" : location.startsWith(tab.path);
+          const Icon = tab.icon;
+          return (
+            <Link key={tab.path} href={tab.path} className="flex-1 flex justify-center">
+              <button
+                className={`floating-nav-item relative flex items-center justify-center rounded-2xl transition-all duration-300 ${
+                  isActive ? "floating-nav-active" : ""
+                }`}
+                style={{
+                  width: isActive ? 52 : 44,
+                  height: isActive ? 44 : 40,
+                }}
+                data-testid={`nav-${tab.id}`}
+              >
+                <Icon
+                  className={`transition-all duration-300 ${
+                    isActive
+                      ? "h-[22px] w-[22px] text-[#00e7a0]"
+                      : "h-5 w-5 text-[rgba(180,195,190,0.5)]"
+                  }`}
+                  style={isActive ? { filter: "drop-shadow(0 0 8px rgba(0,231,160,0.5))" } : undefined}
+                />
+              </button>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
