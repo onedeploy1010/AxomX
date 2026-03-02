@@ -9,3 +9,9 @@ vite.config.ts.*
 .env
 .env.local
 .env.*.local
+# secrets / env
+.env
+.env.*
+*.pem
+*.key
+attached_assets/
