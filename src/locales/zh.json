@@ -469,7 +469,15 @@
     "mintedAsMA": "铸造MA发放",
     "milestoneSchedule": "考核时间节点",
     "dayN": "第{{n}}天",
-    "nodeFailureWarning": "未达标将停止收益、收回冻结资金并取消节点资格"
+    "nodeFailureWarning": "未达标将停止收益、收回冻结资金并取消节点资格",
+    "releasing": "释放中",
+    "pending": "待审核",
+    "locked": "锁仓中",
+    "startDate": "开始",
+    "endDate": "结束",
+    "poolDividend": "矿池分红",
+    "teamCommission": "团队佣金",
+    "earningsCapacity": "收益能力"
   },
   "market": {
     "marketAnalysis": "市场分析",

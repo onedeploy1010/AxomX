@@ -469,7 +469,15 @@
     "mintedAsMA": "minted as MA",
     "milestoneSchedule": "Milestone Schedule",
     "dayN": "Day {{n}}",
-    "nodeFailureWarning": "Failure to meet milestones will stop earnings, reclaim frozen funds and cancel node qualification"
+    "nodeFailureWarning": "Failure to meet milestones will stop earnings, reclaim frozen funds and cancel node qualification",
+    "releasing": "Releasing",
+    "pending": "Pending",
+    "locked": "Locked",
+    "startDate": "Start",
+    "endDate": "End",
+    "poolDividend": "Pool Dividend",
+    "teamCommission": "Team Commission",
+    "earningsCapacity": "Earnings Capacity"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

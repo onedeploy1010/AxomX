@@ -44,12 +44,21 @@ A cryptocurrency trading and portfolio management web application built with Rea
 - Environment variables prefixed with `VITE_` are exposed to the frontend
 - Key env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_THIRDWEB_CLIENT_ID`, contract addresses
 
+## Database (Supabase)
+
+- **Tables**: `profiles`, `node_memberships`, `node_milestones`, `node_rewards`, `vault_positions`, `vault_rewards`, `trade_bets`, `prediction_bets`, `transactions`, `strategies`, `strategy_subscriptions`, `hedge_positions`, `insurance_purchases`, `revenue_pools`, `revenue_events`, `system_config`, `ai_predictions`
+- **RPCs**: `auth_wallet`, `purchase_node`, `get_node_overview`, `check_node_milestones`, `settle_node_fixed_yield`, `settle_node_pool_dividend`, `vault_deposit`, `vault_withdraw`, `place_trade_bet`, `get_trade_stats`, `subscribe_strategy`, `purchase_hedge`, `subscribe_vip`, `place_prediction_bet`, `get_vault_overview`, `get_strategy_overview`, `get_insurance_pool`, `get_referral_tree`
+- **Edge Functions**: `api-proxy`, `ai-forecast`, `ai-forecast-multi`, `ai-prediction`, `news-predictions`, `ai-fear-greed`
+- **Migrations**: `supabase/migrations/001-007` (must be applied in order via Supabase CLI or dashboard)
+- All frontend data fetching goes through `src/lib/api.ts` using Supabase client; `toCamel()` converts snake_case DB columns to camelCase
+
 ## Node System
 
 - **Large Node**: $600 contribution (10%, non-refundable) + $6,000 USDC frozen. Daily 0.9% MA earnings. 120-day program with V1→V6 milestones (days 15/30/45/60/90/120). Success at V6 unlocks frozen funds as withdrawable balance.
 - **Small Node**: $100 contribution (10%, non-refundable) + $1,000 USDC frozen. Daily 0.5% MA earnings (locked until milestone met). Day 15: V2 unlocks earnings. Day 90: V4 unlocks frozen amount withdrawal.
 - Failure to meet milestones: earnings stopped, frozen funds reclaimed, node qualification cancelled.
 - On-chain payment = contribution + frozen amount (MINI: $1,100, MAX: $6,600)
+- Node data columns: `contribution_amount`, `frozen_amount`, `daily_rate`, `locked_earnings`, `released_earnings`, `available_balance`
 
 ## Running
 

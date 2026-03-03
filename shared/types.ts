@@ -72,6 +72,8 @@ export interface NodeMembership {
   userId: string;
   nodeType: string;
   price: string;
+  contributionAmount: string;
+  frozenAmount: string;
   startDate: string | null;
   endDate: string | null;
   status: string;
@@ -80,6 +82,7 @@ export interface NodeMembership {
   milestoneStage: number;
   totalMilestones: number;
   earningsCapacity: string;
+  dailyRate: string;
   milestones?: NodeMilestone[];
 }
 
@@ -111,6 +114,10 @@ export interface NodeOverview {
   nodes: NodeMembership[];
   rewards: NodeRewardsSummary;
   pool: NodePoolInfo;
+  rank: string;
+  availableBalance: string;
+  lockedEarnings: string;
+  releasedEarnings: string;
 }
 
 export interface NodeEarningsRecord {
