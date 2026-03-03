@@ -48,46 +48,39 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
 
   if (isLoading) {
     return (
-      <Card className="border-border bg-card">
-        <CardContent className="p-3">
-          <div className="h-16 animate-pulse rounded bg-muted" />
-        </CardContent>
-      </Card>
+      <div>
+        <div className="h-16 animate-pulse rounded bg-muted/20" />
+      </div>
     );
   }
 
   return (
-    <Card
-      className="border-border bg-card"
-      style={{ boxShadow: "0 0 12px rgba(0, 188, 165, 0.06), inset 0 0 0 1px rgba(0, 188, 165, 0.08)" }}
-    >
-      <CardContent className="p-3">
-        <div className="text-xs font-medium mb-2 text-primary/80">
-          {t("trade.myStats")}
+    <div>
+      <h3 className="text-[15px] font-bold text-foreground mb-3">
+        {t("trade.myStats")}
+      </h3>
+      <div className="grid grid-cols-4 gap-3 text-center">
+        <div>
+          <div className="text-lg font-bold text-foreground tabular-nums font-mono" data-testid="text-total-bets">{totalAnim}</div>
+          <div className="text-[12px] text-muted-foreground mt-0.5">{t("trade.totalBets")}</div>
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center">
-          <div>
-            <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-total-bets">{totalAnim}</div>
-            <div className="text-[12px] text-muted-foreground">{t("trade.totalBets")}</div>
+        <div>
+          <div className="text-lg font-bold tabular-nums font-mono" data-testid="text-win-loss">
+            <span className="text-foreground">{winsAnim}</span>
+            <span className="text-muted-foreground/60">/</span>
+            <span className="text-foreground">{lossesAnim}</span>
           </div>
-          <div>
-            <div className="text-base font-bold tabular-nums" data-testid="text-win-loss">
-              <span className="text-neon-value">{winsAnim}</span>
-              <span className="text-muted-foreground">/</span>
-              <span className="text-red-400">{lossesAnim}</span>
-            </div>
-            <div className="text-[12px] text-muted-foreground">{t("trade.wl")}</div>
-          </div>
-          <div>
-            <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-win-rate">{winRate}%</div>
-            <div className="text-[12px] text-muted-foreground">{t("trade.winRate")}</div>
-          </div>
-          <div>
-            <div className="text-base font-bold text-neon-value tabular-nums" data-testid="text-total-staked">${staked.toFixed(0)}</div>
-            <div className="text-[12px] text-muted-foreground">{t("trade.staked")}</div>
-          </div>
+          <div className="text-[12px] text-muted-foreground mt-0.5">{t("trade.wl")}</div>
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <div className="text-lg font-bold text-foreground tabular-nums font-mono" data-testid="text-win-rate">{winRate}%</div>
+          <div className="text-[12px] text-muted-foreground mt-0.5">{t("trade.winRate")}</div>
+        </div>
+        <div>
+          <div className="text-lg font-bold text-foreground tabular-nums font-mono" data-testid="text-total-staked">{staked.toFixed(0)}</div>
+          <div className="text-[12px] text-muted-foreground mt-0.5">{t("trade.staked")}</div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -12,7 +12,6 @@ interface DepthBarProps {
   fearGreedLabel?: string;
 }
 
-/* Animated number that smoothly transitions and randomly "ticks" several times per second */
 function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color: string; suffix?: string }) {
   const [display, setDisplay] = useState(value);
   const prevRef = useRef(value);
@@ -23,7 +22,6 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
     const diff = value - prev;
     prevRef.current = value;
 
-    // Smooth transition to new value
     if (Math.abs(diff) > 0.01) {
       let frame = 0;
       const totalFrames = 20;
@@ -38,7 +36,6 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
     }
   }, [value]);
 
-  // Fast random fluctuations for aggressive "live" feel (several ticks per second)
   useEffect(() => {
     const tick = () => {
       setDisplay(prev => {
@@ -52,16 +49,12 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
   }, []);
 
   return (
-    <span
-      className="font-mono font-bold tabular-nums transition-colors duration-300"
-      style={{ color }}
-    >
+    <span className="font-mono font-bold tabular-nums transition-colors duration-300" style={{ color }}>
       {display.toFixed(1)}{suffix}
     </span>
   );
 }
 
-/* Animated Fear & Greed counter */
 function AnimatedCounter({ value, color }: { value: number; color: string }) {
   const [display, setDisplay] = useState(0);
 
@@ -91,45 +84,17 @@ function AnimatedCounter({ value, color }: { value: number; color: string }) {
   );
 }
 
-/* Animated bar width with oscillation */
-function AnimatedBar({ baseWidth, color, gradientFrom, gradientTo, shimmerDelay = "0s" }: {
-  baseWidth: number; color: string; gradientFrom: string; gradientTo: string; shimmerDelay?: string;
-}) {
-  const [width, setWidth] = useState(baseWidth);
-  const tickRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    setWidth(baseWidth);
-  }, [baseWidth]);
-
-  // Oscillation: subtle left-right movement several times per second
-  useEffect(() => {
-    const oscillate = () => {
-      setWidth(prev => {
-        const jitter = (Math.random() - 0.5) * 1.8;
-        return Math.max(0.5, Math.min(99.5, baseWidth + jitter));
-      });
-      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
-    };
-    tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
-    return () => clearTimeout(tickRef.current);
-  }, [baseWidth]);
-
+function GemIndicator({ position }: { position: number }) {
   return (
     <div
-      className={`bg-gradient-to-r ${gradientFrom} ${gradientTo} relative`}
-      style={{
-        width: `${width}%`,
-        transition: "width 0.2s ease-out",
-      }}
+      className="depth-gem-wrap absolute z-10 top-1/2"
+      style={{ left: `${position}%`, transform: 'translate(-50%, -50%)' }}
     >
-      <div
-        className="absolute inset-0 opacity-50"
-        style={{
-          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
-          animation: `shimmer 1.5s ease-in-out infinite ${shimmerDelay}`,
-        }}
-      />
+      <svg width="12" height="16" viewBox="0 0 10 14" className="depth-gem-icon">
+        <path d="M5 0 L10 5 L5 14 L0 5 Z" fill="rgba(255,255,255,0.9)" />
+        <path d="M5 0 L10 5 L5 14 L0 5 Z" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
+        <path d="M0 5 L5 3 L10 5" fill="rgba(255,255,255,0.15)" />
+      </svg>
     </div>
   );
 }
@@ -138,6 +103,23 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
   const { t } = useTranslation();
   const buyNum = parseFloat(buyPercent) || 50;
   const sellNum = parseFloat(sellPercent) || 50;
+
+  const [buyWidth, setBuyWidth] = useState(buyNum);
+  const tickRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => { setBuyWidth(buyNum); }, [buyNum]);
+
+  useEffect(() => {
+    const oscillate = () => {
+      setBuyWidth(() => {
+        const jitter = (Math.random() - 0.5) * 1.8;
+        return Math.max(0.5, Math.min(99.5, buyNum + jitter));
+      });
+      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
+    };
+    tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
+    return () => clearTimeout(tickRef.current);
+  }, [buyNum]);
 
   if (isLoading) {
     return <Skeleton className="h-20 w-full rounded-md" data-testid="skeleton-depth-bar" />;
@@ -157,13 +139,14 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
           : "bg-yellow-500/15 text-yellow-400"
       : "bg-muted text-muted-foreground";
 
+  const sellWidth = 100 - buyWidth;
+
   return (
-    <Card className="border-border bg-card overflow-hidden" data-testid="card-depth-bar">
+    <Card className="glass-card border-0 overflow-hidden rounded-2xl" data-testid="card-depth-bar">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{t("dashboard.depthRatio")}</span>
-            {/* Pulsing live dot */}
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -197,22 +180,32 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
               </div>
             </div>
 
-            {/* Animated depth bar with oscillation */}
-            <div className="flex h-3 overflow-hidden rounded-full bg-white/[0.03]" data-testid="bar-depth-ratio">
-              <AnimatedBar
-                baseWidth={buyNum}
-                color="#00e7a0"
-                gradientFrom="from-emerald-600"
-                gradientTo="to-emerald-400"
-                shimmerDelay="0s"
-              />
-              <AnimatedBar
-                baseWidth={sellNum}
-                color="#ef4444"
-                gradientFrom="from-red-400"
-                gradientTo="to-red-600"
-                shimmerDelay="0.3s"
-              />
+            <div className="relative h-3 rounded-full bg-white/[0.03] overflow-visible" data-testid="bar-depth-ratio">
+              <div className="absolute inset-0 flex h-full rounded-full overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-400 relative transition-[width] duration-200 ease-out"
+                  style={{ width: `${buyWidth}%` }}
+                >
+                  <div className="absolute inset-0 opacity-50"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                      animation: "shimmer 1.5s ease-in-out infinite",
+                    }}
+                  />
+                </div>
+                <div
+                  className="bg-gradient-to-r from-red-400 to-red-600 relative transition-[width] duration-200 ease-out"
+                  style={{ width: `${sellWidth}%` }}
+                >
+                  <div className="absolute inset-0 opacity-50"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                      animation: "shimmer 1.5s ease-in-out infinite 0.3s",
+                    }}
+                  />
+                </div>
+              </div>
+              <GemIndicator position={buyWidth} />
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { ASSET_IDS } from "@/lib/constants";
 import { fetchExchangeDepth, getAiForecastMulti } from "@/lib/api";
 import { useCryptoPrices, useBinanceKlines, useOrderBook } from "@/hooks/use-crypto-price";
@@ -33,6 +34,8 @@ interface MultiForecastResponse {
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
+  const { i18n } = useTranslation();
+  const lang = i18n.language;
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const [selectedTimeframe, setSelectedTimeframe] = useState<ChartTimeframe>("1H");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -69,10 +72,11 @@ export default function Dashboard() {
   });
 
   const { data: multiResult, isLoading: forecastLoading } = useQuery<MultiForecastResponse>({
-    queryKey: ["ai-forecast-multi", selectedAsset, selectedTimeframe],
-    queryFn: () => getAiForecastMulti(selectedAsset, selectedTimeframe),
+    queryKey: ["ai-forecast-multi", selectedAsset, selectedTimeframe, lang],
+    queryFn: () => getAiForecastMulti(selectedAsset, selectedTimeframe, lang),
     staleTime: 3 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
+    retry: 1,
   });
 
   const allForecasts = multiResult?.forecasts || [];
@@ -101,20 +105,23 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 pb-24" data-testid="page-dashboard">
       <div
-        className="gradient-green-dark rounded-b-2xl p-4 pt-2"
+        className="gradient-green-dark rounded-b-2xl px-3 pb-3 pt-1.5"
         style={{ animation: "fadeSlideIn 0.5s ease-out" }}
       >
-        <div className="flex items-start justify-between gap-2 flex-wrap">
+        <div className="flex items-start justify-between gap-2">
           <PriceHeader coin={selectedCoin} isLoading={pricesLoading} />
-          <Button
-            size="icon"
-            variant="ghost"
+          <button
             onClick={() => navigate(`/market?coin=${selectedAsset}`)}
-            className="mt-1 shrink-0"
+            className="mt-0.5 shrink-0 h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-200 active:translate-y-[1px] active:shadow-none"
+            style={{
+              background: "linear-gradient(145deg, rgba(0,231,160,0.2) 0%, rgba(0,180,130,0.12) 100%)",
+              border: "1px solid rgba(0,231,160,0.25)",
+              boxShadow: "0 2px 8px rgba(0,231,160,0.15), inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.3)",
+            }}
             data-testid="button-market-analysis"
           >
-            <BarChart3 className="h-5 w-5" />
-          </Button>
+            <BarChart3 className="h-4 w-4 text-[#00e7a0]" />
+          </button>
         </div>
         <PriceChart
           ohlcData={klineData}
@@ -152,11 +159,15 @@ export default function Dashboard() {
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.85s ease-out" }}>
-        <TrendingFeed prices={prices} isLoading={pricesLoading} />
+        <div className="glass-card rounded-2xl p-4 relative overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          <TrendingFeed prices={prices} isLoading={pricesLoading} />
+        </div>
       </div>
 
       <div className="px-4" style={{ animation: "fadeSlideIn 0.9s ease-out" }}>
-        <ExchangeDepth symbol={selectedAsset} />
+        <div className="glass-card rounded-2xl p-4 relative overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          <ExchangeDepth symbol={selectedAsset} />
+        </div>
       </div>
     </div>
   );

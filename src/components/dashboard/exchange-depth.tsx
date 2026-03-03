@@ -25,18 +25,15 @@ interface ExchangeDepthProps {
   symbol: string;
 }
 
-/* Fast-ticking animated percentage for live feel */
 function JitterPercent({ value, color }: { value: number; color: string }) {
   const [display, setDisplay] = useState(value);
   const tickRef = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => {
-    setDisplay(value);
-  }, [value]);
+  useEffect(() => { setDisplay(value); }, [value]);
 
   useEffect(() => {
     const tick = () => {
-      setDisplay(prev => {
+      setDisplay(() => {
         const jitter = (Math.random() - 0.5) * 0.5;
         return Math.max(0, Math.min(100, value + jitter));
       });
@@ -47,9 +44,85 @@ function JitterPercent({ value, color }: { value: number; color: string }) {
   }, [value]);
 
   return (
-    <span className="font-mono font-medium tabular-nums" style={{ color }}>
+    <span className="font-mono font-semibold tabular-nums text-[10px]" style={{ color }}>
       {display.toFixed(1)}%
     </span>
+  );
+}
+
+function GemIndicator({ position }: { position: number }) {
+  return (
+    <div
+      className="depth-gem-wrap absolute z-10 top-1/2"
+      style={{ left: `${position}%`, transform: 'translate(-50%, -50%)' }}
+    >
+      <svg width="10" height="14" viewBox="0 0 10 14" className="depth-gem-icon">
+        <path d="M5 0 L10 5 L5 14 L0 5 Z" fill="rgba(255,255,255,0.9)" />
+        <path d="M5 0 L10 5 L5 14 L0 5 Z" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
+        <path d="M0 5 L5 3 L10 5" fill="rgba(255,255,255,0.15)" />
+      </svg>
+    </div>
+  );
+}
+
+function DepthBarRow({ ex, mounted, index }: { ex: ExchangeRow; mounted: boolean; index: number }) {
+  const { t } = useTranslation();
+  const [buyWidth, setBuyWidth] = useState(ex.buy);
+  const tickRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => { setBuyWidth(ex.buy); }, [ex.buy]);
+
+  useEffect(() => {
+    const oscillate = () => {
+      setBuyWidth(() => {
+        const jitter = (Math.random() - 0.5) * 1.2;
+        return Math.max(1, Math.min(99, ex.buy + jitter));
+      });
+      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 300);
+    };
+    tickRef.current = setTimeout(oscillate, 300);
+    return () => clearTimeout(tickRef.current);
+  }, [ex.buy]);
+
+  const sellWidth = 100 - buyWidth;
+
+  return (
+    <div
+      className="depth-row flex items-center gap-1.5"
+      data-testid={`exchange-${ex.name.toLowerCase().replace(/\./g, "")}`}
+      style={{
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? "translateX(0)" : "translateX(-8px)",
+        transition: `opacity 0.4s ease ${index * 40}ms, transform 0.4s ease ${index * 40}ms`,
+      }}
+    >
+      <span className="w-[60px] shrink-0 text-[11px] font-medium text-foreground/80 truncate">{ex.name}</span>
+      <span className="w-[14px] shrink-0 text-[9px] text-emerald-400/70 font-medium">{t("dashboard.buyLabel")}</span>
+      <span className="w-[36px] shrink-0 text-right"><JitterPercent value={ex.buy} color="#34d399" /></span>
+
+      <div className="flex-1 relative h-[18px] min-w-0">
+        <div className="absolute inset-0 flex h-full rounded-sm overflow-hidden">
+          <div
+            className="transition-[width] duration-200 ease-out"
+            style={{
+              width: mounted ? `${buyWidth}%` : "0%",
+              background: 'linear-gradient(90deg, rgba(16,185,129,0.5), rgba(16,185,129,0.8))',
+            }}
+          />
+          <div
+            className="transition-[width] duration-200 ease-out"
+            style={{
+              width: mounted ? `${sellWidth}%` : "0%",
+              background: 'linear-gradient(90deg, rgba(239,68,68,0.8), rgba(239,68,68,0.5))',
+            }}
+          />
+        </div>
+        {mounted && <GemIndicator position={buyWidth} />}
+      </div>
+
+      <span className="w-[36px] shrink-0"><JitterPercent value={ex.sell} color="#f87171" /></span>
+      <span className="w-[14px] shrink-0 text-[9px] text-red-400/70 font-medium text-right">{t("dashboard.sellLabel")}</span>
+    </div>
   );
 }
 
@@ -85,56 +158,30 @@ export function ExchangeDepth({ symbol }: ExchangeDepthProps) {
 
   return (
     <div data-testid="section-exchange-depth">
-      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+      <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="text-sm font-semibold">{t("dashboard.orderBookDepth", { symbol })}</h3>
         {data && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className="text-[11px] text-emerald-400 border-emerald-400/30 no-default-hover-elevate no-default-active-elevate">
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-400/30 no-default-hover-elevate no-default-active-elevate">
               {t("dashboard.lsRatio")}: {data.longShortRatio.toFixed(2)}
             </Badge>
-            <Badge variant="outline" className="text-[11px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate">
+            <Badge variant="outline" className="text-[10px] text-primary/70 border-primary/30 no-default-hover-elevate no-default-active-elevate">
               {t("common.live")}
             </Badge>
           </div>
         )}
       </div>
+
       {isLoading ? (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {Array.from({ length: 8 }, (_, i) => (
-            <Skeleton key={i} className="h-5 w-full rounded-sm" />
+            <Skeleton key={i} className="h-6 w-full rounded-sm" />
           ))}
         </div>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {exchanges.map((ex, index) => (
-            <div
-              key={ex.name}
-              className="flex items-center gap-2"
-              data-testid={`exchange-${ex.name.toLowerCase().replace(/\./g, "")}`}
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "translateX(0)" : "translateX(-8px)",
-                transition: `opacity 0.4s ease ${index * 40}ms, transform 0.4s ease ${index * 40}ms`,
-              }}
-            >
-              <span className="w-20 shrink-0 text-[13px] font-medium truncate">{ex.name}</span>
-              <span className="w-9 shrink-0 text-[12px] text-right">
-                <JitterPercent value={ex.buy} color="#34d399" />
-              </span>
-              <div className="flex-1 flex h-4 overflow-hidden rounded-sm">
-                <div
-                  className="bg-emerald-500 transition-all duration-700 ease-out"
-                  style={{ width: mounted ? `${ex.buy}%` : "0%" }}
-                />
-                <div
-                  className="bg-red-500 transition-all duration-700 ease-out"
-                  style={{ width: mounted ? `${ex.sell}%` : "0%" }}
-                />
-              </div>
-              <span className="w-9 shrink-0 text-[12px]">
-                <JitterPercent value={ex.sell} color="#f87171" />
-              </span>
-            </div>
+            <DepthBarRow key={ex.name} ex={ex} mounted={mounted} index={index} />
           ))}
         </div>
       )}
