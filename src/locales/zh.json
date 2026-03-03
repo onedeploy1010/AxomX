@@ -462,7 +462,14 @@
     "purchaseRecords": "购买记录",
     "earningsDetailTab": "收益明细",
     "myDetailTab": "我的明细",
-    "noData": "暂无数据"
+    "noData": "暂无数据",
+    "nonRefundable": "不可退",
+    "frozenFunds": "冻结资金",
+    "dailyEarnings": "每日收益",
+    "mintedAsMA": "铸造MA发放",
+    "milestoneSchedule": "考核时间节点",
+    "dayN": "第{{n}}天",
+    "nodeFailureWarning": "未达标将停止收益、收回冻结资金并取消节点资格"
   },
   "market": {
     "marketAnalysis": "市场分析",

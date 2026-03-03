@@ -135,9 +135,11 @@ export function usePayment() {
     async (nodeType: string, paymentMode: string = "FULL"): Promise<string> => {
       if (!NODE_CONTRACT_ADDRESS) throw new Error("Node contract not configured");
       if (!client) throw new Error("Thirdweb client not ready");
-      const prices: Record<string, number> = { MINI: 1000, MAX: 6000 };
-      const fullPrice = prices[nodeType] || 0;
-      const amountUsd = paymentMode === "EARLY_BIRD" ? fullPrice * 0.10 : fullPrice;
+      const contributions: Record<string, number> = { MINI: 100, MAX: 600 };
+      const frozenAmounts: Record<string, number> = { MINI: 1000, MAX: 6000 };
+      const contribution = contributions[nodeType] || 0;
+      const frozen = frozenAmounts[nodeType] || 0;
+      const amountUsd = contribution + frozen;
       return _executePayment(NODE_CONTRACT_ADDRESS, amountUsd, () =>
         prepareContractCall({
           contract: getNodeContract(client),

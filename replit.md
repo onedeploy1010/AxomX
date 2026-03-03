@@ -44,6 +44,13 @@ A cryptocurrency trading and portfolio management web application built with Rea
 - Environment variables prefixed with `VITE_` are exposed to the frontend
 - Key env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_THIRDWEB_CLIENT_ID`, contract addresses
 
+## Node System
+
+- **Large Node**: $600 contribution (10%, non-refundable) + $6,000 USDC frozen. Daily 0.9% MA earnings. 120-day program with V1→V6 milestones (days 15/30/45/60/90/120). Success at V6 unlocks frozen funds as withdrawable balance.
+- **Small Node**: $100 contribution (10%, non-refundable) + $1,000 USDC frozen. Daily 0.5% MA earnings (locked until milestone met). Day 15: V2 unlocks earnings. Day 90: V4 unlocks frozen amount withdrawal.
+- Failure to meet milestones: earnings stopped, frozen funds reclaimed, node qualification cancelled.
+- On-chain payment = contribution + frozen amount (MINI: $1,100, MAX: $6,600)
+
 ## Running
 
 ```

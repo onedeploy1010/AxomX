@@ -118,8 +118,8 @@ export default function ProfileNodesPage() {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="text-[11px] text-muted-foreground -mt-1">{t("profile.contribution")}{NODE_PLANS.MAX.price}</div>
-              <div className="text-[11px] text-muted-foreground -mt-1">{t("profile.contribution")}{NODE_PLANS.MINI.price}</div>
+              <div className="text-[11px] text-muted-foreground -mt-1">{t("profile.contribution")}${NODE_PLANS.MAX.price} + {t("profile.frozenFunds")}${NODE_PLANS.MAX.frozenAmount.toLocaleString()}</div>
+              <div className="text-[11px] text-muted-foreground -mt-1">{t("profile.contribution")}${NODE_PLANS.MINI.price} + {t("profile.frozenFunds")}${NODE_PLANS.MINI.frozenAmount.toLocaleString()}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

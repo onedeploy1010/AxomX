@@ -34,28 +34,31 @@ export const EARLY_BIRD_DEPOSIT_RATE = 0.10;
 
 export const NODE_PLANS = {
   MINI: {
-    price: 100, label: "Mini Node", assetPackage: 1000, dailyRate: 0.005, dailyYield: 5,
-    durationDays: 90, slots: 2000, weightMultiplier: 1.0, revenuePoolShare: 0,
-    referralBonus: "5%", features: ["basicStrategies", "communityAccess"],
+    price: 100, label: "Small Node", frozenAmount: 1000, dailyRate: 0.005, dailyYield: 5,
+    durationDays: 90, contributionRate: 0.10,
+    activationDesc: "V2: 100U holding + 3 small node referrals",
+    features: ["basicStrategies", "communityAccess"],
   },
   MAX: {
-    price: 1000, label: "Max Node", assetPackage: 10000, dailyRate: 0.009, dailyYield: 90,
-    durationDays: 120, slots: 1000, weightMultiplier: 1.5, revenuePoolShare: 0.50,
-    referralBonus: "10%", features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"],
+    price: 600, label: "Large Node", frozenAmount: 6000, dailyRate: 0.009, dailyYield: 54,
+    durationDays: 120, contributionRate: 0.10,
+    activationDesc: "V2→V6 progressive milestones",
+    features: ["allStrategiesUnlocked", "prioritySupport", "higherVaultYields"],
   },
 } as const;
 
 export const NODE_MILESTONES = {
   MINI: [
-    { rank: "V2", days: 60, unlocks: "earnings" },
-    { rank: "V3", days: 90, unlocks: "earnings_and_package" },
+    { rank: "V2", days: 15, unlocks: "earnings", desc: "Unlock daily 0.5% earnings" },
+    { rank: "V4", days: 90, unlocks: "earnings_and_package", desc: "Withdraw 1000 USDC equivalent MA" },
   ],
   MAX: [
-    { rank: "V1", days: 15, unlocks: "earnings" },
-    { rank: "V2", days: 30, unlocks: "earnings" },
-    { rank: "V3", days: 60, unlocks: "earnings" },
-    { rank: "V4", days: 90, unlocks: "earnings" },
-    { rank: "V6", days: 120, unlocks: "earnings_and_package" },
+    { rank: "V1", days: 15, unlocks: "none", desc: "Reach V1" },
+    { rank: "V2", days: 30, unlocks: "earnings", desc: "100U holding + 3 small node referrals" },
+    { rank: "V3", days: 45, unlocks: "earnings", desc: "500U holding / 45 days" },
+    { rank: "V4", days: 60, unlocks: "earnings", desc: "500U holding / 45 days" },
+    { rank: "V5", days: 90, unlocks: "earnings", desc: "500U holding / 45 days" },
+    { rank: "V6", days: 120, unlocks: "earnings_and_package", desc: "1000U holding / 45 days, unlock all" },
   ],
 } as const;
 

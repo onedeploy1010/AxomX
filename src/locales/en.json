@@ -462,7 +462,14 @@
     "purchaseRecords": "Purchase Records",
     "earningsDetailTab": "Earnings Detail",
     "myDetailTab": "My Detail",
-    "noData": "No Data"
+    "noData": "No Data",
+    "nonRefundable": "non-refundable",
+    "frozenFunds": "Frozen Funds",
+    "dailyEarnings": "Daily Earnings",
+    "mintedAsMA": "minted as MA",
+    "milestoneSchedule": "Milestone Schedule",
+    "dayN": "Day {{n}}",
+    "nodeFailureWarning": "Failure to meet milestones will stop earnings, reclaim frozen funds and cancel node qualification"
   },
   "market": {
     "marketAnalysis": "Market Analysis",
