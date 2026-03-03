@@ -147,7 +147,7 @@ export function PriceChart({
       layout: {
         background: { type: ColorType.Solid, color: BG_COLOR },
         textColor: TEXT_COLOR,
-        fontSize: 10,
+        fontSize: 12,
         fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
       },
       grid: {
