@@ -546,7 +546,9 @@
     "rankDescHolding": "{{amount}}U holding",
     "rankDescHoldingRefs": "{{amount}}U holding + {{refs}} referrals",
     "rankDescUnlockAll": "{{amount}}U holding, unlock all",
-    "directRefs": "direct referrals"
+    "directRefs": "direct referrals",
+    "milestoneV2Mini": "Unlock daily 0.5% earnings",
+    "milestoneV4Mini": "Withdraw 1000 USDC equivalent MA"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

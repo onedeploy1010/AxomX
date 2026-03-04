@@ -86,6 +86,20 @@ export default function ProfileNodesPage() {
     return new Date(d).toLocaleDateString();
   };
 
+  const getMilestoneDesc = (ms: { rank: string; desc: string; requiredHolding: number; requiredReferrals: number }) => {
+    if (nodeType === "MINI") {
+      if (ms.rank === "V2") return t("profile.milestoneV2Mini");
+      if (ms.rank === "V4") return t("profile.milestoneV4Mini");
+    }
+    if (ms.requiredReferrals > 0)
+      return t("profile.rankDescHoldingRefs", { amount: ms.requiredHolding, refs: ms.requiredReferrals });
+    if (ms.rank === "V6")
+      return t("profile.rankDescUnlockAll", { amount: ms.requiredHolding });
+    if (ms.requiredHolding > 0)
+      return t("profile.rankDescHolding", { amount: ms.requiredHolding });
+    return ms.desc;
+  };
+
   const milestoneStates = milestones.map((ms, idx) => {
     const daysLeft = getMilestoneDaysLeft(firstNode?.startDate ?? null, ms.days);
     const dbMilestone = firstNode?.milestones?.find((m: any) => m.requiredRank === ms.rank) ?? firstNode?.milestones?.[idx];
@@ -232,7 +246,7 @@ export default function ProfileNodesPage() {
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-2 h-2 rounded-full bg-yellow-400 shrink-0 animate-pulse" style={{ boxShadow: "0 0 6px rgba(250,204,21,0.5)" }} />
-                    <span className="text-[11px] text-white/70 truncate font-medium">{currentMilestone.desc}</span>
+                    <span className="text-[11px] text-white/70 truncate font-medium">{getMilestoneDesc(currentMilestone)}</span>
                   </div>
                 </div>
               )}
