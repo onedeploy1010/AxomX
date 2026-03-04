@@ -534,6 +534,7 @@
     "miniNodeDesc": "Small Node membership details",
     "daysDeadline": "days deadline",
     "totalPayment": "Total Payment",
+    "confirmPurchase": "Confirm Purchase",
     "stepSelectRank": "Select",
     "stepCheckReqs": "Verify",
     "stepConfirmPay": "Pay",

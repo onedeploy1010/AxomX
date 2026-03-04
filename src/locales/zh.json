@@ -534,6 +534,7 @@
     "miniNodeDesc": "小节点会员详情",
     "daysDeadline": "天期限",
     "totalPayment": "合计支付",
+    "confirmPurchase": "确认购买",
     "stepSelectRank": "选择",
     "stepCheckReqs": "检测",
     "stepConfirmPay": "支付",
