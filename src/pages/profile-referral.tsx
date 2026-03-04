@@ -1,12 +1,9 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { shortenAddress, formatCompact } from "@/lib/constants";
 import { useMaPrice } from "@/hooks/use-ma-price";
-import { ArrowLeft, Link2, Copy, Users, UserPlus, ArrowDownToLine, WalletCards, Layers, TrendingUp, ChevronRight } from "lucide-react";
+import { ArrowLeft, Copy, Users, UserPlus, DollarSign, WalletCards, Layers, ChevronRight, History, Network } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -35,6 +32,9 @@ interface ReferralData {
   directCount: number;
 }
 
+type MainTab = "team" | "history";
+type HistoryFilter = "deposit" | "redeem" | "income" | "invite" | "team";
+
 export default function ProfileReferralPage() {
   const { t } = useTranslation();
   const account = useActiveAccount();
@@ -44,7 +44,9 @@ export default function ProfileReferralPage() {
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;
 
-  // Breadcrumb navigation for drilling into sub-trees
+  const [mainTab, setMainTab] = useState<MainTab>("team");
+  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("income");
+
   const [addrStack, setAddrStack] = useState<Array<{ addr: string; label: string }>>([]);
   const viewingAddr = addrStack.length > 0 ? addrStack[addrStack.length - 1].addr : walletAddr;
   const isViewingSelf = viewingAddr === walletAddr;
@@ -85,6 +87,7 @@ export default function ProfileReferralPage() {
 
   const refCode = profile?.refCode;
   const referralLink = refCode ? `${window.location.origin}?ref=${refCode}` : "--";
+  const parentWallet = (profile as any)?.parentWallet || null;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -97,248 +100,352 @@ export default function ProfileReferralPage() {
     return sum + direct + sub;
   }, 0) || 0;
 
+  const filteredRecords = commission?.records?.filter((r) => {
+    if (historyFilter === "income") return true;
+    if (historyFilter === "invite") return r.details?.type === "direct_referral";
+    if (historyFilter === "team") return r.details?.type !== "direct_referral";
+    return true;
+  }) || [];
+
   return (
-    <div className="space-y-4 pb-24" data-testid="page-profile-referral">
-      <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-lg font-bold">{t("profile.referralTeam")}</h1>
-        </div>
+    <div className="min-h-screen pb-24" style={{ background: "#0a0a0a" }} data-testid="page-profile-referral">
+      <div className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0a1a10 0%, #0f2818 30%, #0a1510 60%, #0a0a0a 100%)" }}>
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 70% 20%, rgba(163,230,53,0.12) 0%, transparent 55%)" }} />
+        <div className="absolute top-0 right-0 w-48 h-48 opacity-15" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.5), transparent 70%)", filter: "blur(30px)" }} />
 
-        {!isConnected ? (
-          <Card className="border-border bg-card/50 border-dashed">
-            <CardContent className="p-4 text-center">
-              <WalletCards className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">{t("profile.connectToViewReferral")}</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="border-border bg-card/50">
-            <CardContent className="p-4 space-y-3">
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                  <span className="text-xs text-muted-foreground">{t("profile.referralLink")}</span>
-                  <Button
-                    size="sm"
-                    onClick={() => copyToClipboard(referralLink)}
-                    data-testid="button-copy-referral"
-                  >
-                    <Link2 className="mr-1 h-3 w-3" /> {t("common.copyLink")}
-                  </Button>
-                </div>
-                <div className="text-xs font-mono text-muted-foreground truncate" data-testid="text-referral-link">{referralLink}</div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                  <span className="text-xs text-muted-foreground">{t("profile.referralCode")}</span>
-                  <Button
-                    size="sm"
-                    onClick={() => copyToClipboard(refCode || "")}
-                    data-testid="button-copy-code"
-                  >
-                    <Copy className="mr-1 h-3 w-3" /> {t("common.copy")}
-                  </Button>
-                </div>
-                <div className="text-xs font-mono text-muted-foreground" data-testid="text-ref-code">
-                  {refCode || "--"}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.1s both" }}>
-        <h3 className="text-sm font-bold mb-3">{t("profile.teamPerformance")}</h3>
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="border-border bg-card">
-            <CardContent className="p-3 text-center">
-              <Users className="h-4 w-4 text-primary mx-auto mb-1" />
-              <div className="text-lg font-bold text-neon-value" data-testid="text-team-size">{isConnected ? (teamData?.teamSize || 0) : "--"}</div>
-              <div className="text-[12px] text-muted-foreground">{t("profile.teamSize")}</div>
-            </CardContent>
-          </Card>
-          <Card className="border-border bg-card">
-            <CardContent className="p-3 text-center">
-              <UserPlus className="h-4 w-4 text-primary mx-auto mb-1" />
-              <div className="text-lg font-bold text-neon-value" data-testid="text-direct-count">{isConnected ? (teamData?.directCount || 0) : "--"}</div>
-              <div className="text-[12px] text-muted-foreground">{t("profile.direct")}</div>
-            </CardContent>
-          </Card>
-          <Card className="border-border bg-card">
-            <CardContent className="p-3 text-center">
-              <ArrowDownToLine className="h-4 w-4 text-primary mx-auto mb-1" />
-              <div className="text-lg font-bold text-neon-value" data-testid="text-team-deposits">{isConnected ? formatCompact(totalTeamDeposits) : "--"}</div>
-              <div className="text-[12px] text-muted-foreground">{t("profile.deposits")}</div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.2s both" }}>
-        <h3 className="text-sm font-bold mb-3">{t("profile.referralTree")}</h3>
-
-        {/* Breadcrumb navigation */}
-        {!isViewingSelf && (
-          <div className="flex items-center gap-1 mb-3 flex-wrap text-[12px]">
+        <div className="relative px-4 pt-3 pb-5">
+          <div className="flex items-center justify-center relative mb-5">
             <button
-              className="text-primary hover:underline font-medium"
-              onClick={goToRoot}
+              onClick={() => navigate("/profile")}
+              className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
             >
-              {t("profile.myTeam")}
+              <ArrowLeft className="h-5 w-5 text-white/90" />
             </button>
-            {addrStack.map((item, idx) => (
-              <span key={idx} className="flex items-center gap-1">
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                {idx < addrStack.length - 1 ? (
-                  <button
-                    className="text-primary hover:underline font-medium"
-                    onClick={() => setAddrStack((prev) => prev.slice(0, idx + 1))}
-                  >
-                    {item.label}
-                  </button>
-                ) : (
-                  <span className="text-muted-foreground">{item.label}</span>
-                )}
-              </span>
-            ))}
+            <h1 className="text-[17px] font-bold tracking-wide text-white">{t("profile.promotionCenter")}</h1>
           </div>
-        )}
 
-        {!isConnected ? (
-          <Card className="border-border bg-card">
-            <CardContent className="p-6 text-center">
-              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">{t("profile.connectToViewTeam")}</p>
-            </CardContent>
-          </Card>
-        ) : isLoading ? (
-          <Skeleton className="h-24 w-full rounded-md" />
-        ) : !teamData?.referrals.length ? (
-          <Card className="border-border bg-card">
-            <CardContent className="p-6 text-center">
-              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground" data-testid="text-no-referrals">
-                {t("profile.noTeamMembers")}
-              </p>
-              {!isViewingSelf && (
-                <Button size="sm" variant="ghost" className="mt-2" onClick={goBack}>
-                  <ArrowLeft className="mr-1 h-3 w-3" /> {t("profile.goBack")}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-0" data-testid="referral-tree">
-            {teamData.referrals.map((ref) => (
-              <div key={ref.id} className="mb-3">
-                <button
-                  className="w-full flex items-center gap-2 p-2 rounded-md bg-card border border-border hover-elevate text-left"
-                  onClick={() => drillInto(ref.walletAddress, shortenAddress(ref.walletAddress))}
-                >
-                  <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-mono truncate" data-testid={`text-ref-wallet-${ref.id}`}>
-                      {shortenAddress(ref.walletAddress)}
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="text-[11px] no-default-hover-elevate no-default-active-elevate shrink-0">
-                    {ref.rank}
-                  </Badge>
-                  <Badge variant="secondary" className="text-[11px] no-default-hover-elevate no-default-active-elevate shrink-0">
-                    {ref.nodeType}
-                  </Badge>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-                </button>
-                {ref.subReferrals && ref.subReferrals.length > 0 && (
-                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-3">
-                    {ref.subReferrals.map((sub) => (
-                      <button
-                        key={sub.id}
-                        className="w-full flex items-center gap-2 p-2 rounded-md bg-card/50 border border-border/50 hover-elevate text-left"
-                        onClick={() => drillInto(sub.walletAddress, shortenAddress(sub.walletAddress))}
-                      >
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[12px] font-mono truncate" data-testid={`text-subref-wallet-${sub.id}`}>
-                            {shortenAddress(sub.walletAddress)}
-                          </div>
-                        </div>
-                        <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0">
-                          {sub.rank}
-                        </Badge>
-                        <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+            <span className="text-[13px] font-bold text-white">{t("profile.currentLevel")}</span>
           </div>
-        )}
+
+          <div className="relative h-28 mb-4 rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <svg viewBox="0 0 400 120" className="w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#22c55e" />
+                  <stop offset="100%" stopColor="#a3e635" />
+                </linearGradient>
+              </defs>
+              <path d="M 20 100 Q 80 95 120 85 Q 160 75 200 65 Q 240 55 280 40 Q 320 25 360 15 Q 380 10 390 8" stroke="url(#lineGrad)" strokeWidth="2.5" fill="none" />
+              {[
+                { x: 40, y: 98, label: "V1" },
+                { x: 100, y: 88, label: "V2" },
+                { x: 160, y: 75, label: "V3" },
+                { x: 220, y: 62, label: "V4" },
+                { x: 280, y: 42, label: "V5" },
+                { x: 340, y: 18, label: "V6" },
+                { x: 385, y: 8, label: "V7" },
+              ].map((p) => (
+                <g key={p.label}>
+                  <circle cx={p.x} cy={p.y} r="4" fill="#4ade80" stroke="#0a0a0a" strokeWidth="2" />
+                  <text x={p.x} y={p.y - 10} textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="9" fontWeight="600">{p.label}</text>
+                </g>
+              ))}
+              <text x="280" y="58" textAnchor="start" fill="rgba(255,255,255,0.3)" fontSize="7">V5 Reward 30,000 CRS</text>
+              <text x="320" y="35" textAnchor="start" fill="rgba(255,255,255,0.3)" fontSize="7">V6 Reward 100,000 CRS</text>
+              <text x="350" y="7" textAnchor="start" fill="rgba(255,255,255,0.3)" fontSize="7">V7 Reward 300,000 CRS</text>
+              <text x="350" y="50" fill="rgba(255,255,255,0.2)" fontSize="7">50 people</text>
+              <text x="370" y="30" fill="rgba(255,255,255,0.2)" fontSize="7">200 people</text>
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+            <span className="text-[13px] font-bold text-white">{t("profile.claimedAndPending")}</span>
+          </div>
+
+          <div className="rounded-2xl p-4" style={{ background: "#181818", border: "1px solid rgba(255,255,255,0.4)" }}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-white/50">{t("profile.totalRewards")}</span>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #facc15, #eab308)" }}>
+                <DollarSign className="h-3.5 w-3.5 text-black" />
+              </div>
+            </div>
+            <div className="text-[24px] font-black text-white mb-3">
+              {formatCompact(totalCommission)}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-[11px] text-white/40 mb-0.5">{t("profile.claimed")}</div>
+                <div className="text-[16px] font-bold text-white">$0</div>
+              </div>
+              <div>
+                <div className="text-[11px] text-white/40 mb-0.5">{t("profile.pendingRewards")}</div>
+                <div className="text-[16px] font-bold text-white">{formatCompact(totalCommission)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.5s ease-out 0.25s both" }}>
-        <h3 className="text-sm font-bold mb-3">{t("profile.brokerEarnings")}</h3>
-        {!isConnected ? (
-          <Card className="border-border bg-card">
-            <CardContent className="p-6 text-center">
-              <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">{t("profile.connectToViewCommission")}</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <Card className="border-border bg-card">
-                <CardContent className="p-3 text-center">
-                  <UserPlus className="h-4 w-4 text-primary mx-auto mb-1" />
-                  {commissionLoading ? (
-                    <Skeleton className="h-5 w-16 mx-auto" />
-                  ) : (
-                    <div className="text-sm font-bold text-neon-value" data-testid="text-direct-total">
-                      {formatCompactMA(directTotal)}
-                    </div>
-                  )}
-                  <div className="text-[12px] text-muted-foreground">{t("profile.directReferralBonus")}</div>
-                </CardContent>
-              </Card>
-              <Card className="border-border bg-card">
-                <CardContent className="p-3 text-center">
-                  <Layers className="h-4 w-4 text-primary mx-auto mb-1" />
-                  {commissionLoading ? (
-                    <Skeleton className="h-5 w-16 mx-auto" />
-                  ) : (
-                    <div className="text-sm font-bold text-neon-value" data-testid="text-diff-total">
-                      {formatCompactMA(diffTotal)}
-                    </div>
-                  )}
-                  <div className="text-[12px] text-muted-foreground">{t("profile.differentialCommission")}</div>
-                </CardContent>
-              </Card>
+      <div className="px-4 -mt-1 space-y-3">
+        <div className="rounded-2xl p-4 space-y-4" style={{ background: "#181818", border: "1px solid rgba(255,255,255,0.4)" }}>
+          <div>
+            <div className="text-[13px] font-bold text-white mb-1">{t("profile.myParent")}</div>
+            <div className="text-[12px] text-white/45 font-mono">
+              {parentWallet ? shortenAddress(parentWallet) : "--"}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[13px] font-bold text-white">{t("profile.inviteLink")}</span>
+              <button
+                className="text-[11px] font-bold px-3 py-1 rounded-lg transition-all active:scale-95"
+                style={{ background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80" }}
+                onClick={() => copyToClipboard(referralLink)}
+              >
+                {refCode ? t("common.copy") : t("profile.generateInvite")}
+              </button>
+            </div>
+            <div className="text-[11px] text-white/40 font-mono truncate">{referralLink}</div>
+            <div className="h-px mt-2" style={{ background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.3), transparent)" }} />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[13px] font-bold text-white">{t("profile.inviteCode")}</span>
+              <button
+                className="text-[11px] font-bold px-3 py-1 rounded-lg transition-all active:scale-95"
+                style={{ background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80" }}
+                onClick={() => copyToClipboard(refCode || "")}
+              >
+                {refCode ? t("common.copy") : t("profile.generateInvite")}
+              </button>
+            </div>
+            <div className="text-[11px] text-white/40 font-mono">{refCode || "--"}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl p-3.5 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+            <div className="text-[11px] text-white/50 font-medium mb-2">{t("profile.directInvites")}</div>
+            <Users className="h-5 w-5 mx-auto text-white/50 mb-1.5" />
+            <div className="text-[18px] font-black text-white">{isConnected ? (teamData?.directCount || 0) : "--"}</div>
+          </div>
+          <div className="rounded-xl p-3.5 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+            <div className="text-[11px] text-white/50 font-medium mb-2">{t("profile.teamPerformance")}</div>
+            <DollarSign className="h-5 w-5 mx-auto text-white/50 mb-1.5" />
+            <div className="text-[18px] font-black text-white">{isConnected ? formatCompact(totalTeamDeposits) : "--"}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl p-3.5 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+            <div className="text-[11px] text-white/50 font-medium mb-2">{t("profile.inviteRewards")}</div>
+            <UserPlus className="h-5 w-5 mx-auto text-white/50 mb-1.5" />
+            <div className="text-[18px] font-black text-white">{isConnected ? formatCompact(directTotal) : "--"}</div>
+          </div>
+          <div className="rounded-xl p-3.5 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+            <div className="text-[11px] text-white/50 font-medium mb-2">{t("profile.teamRewards")}</div>
+            <Layers className="h-5 w-5 mx-auto text-white/50 mb-1.5" />
+            <div className="text-[18px] font-black text-white">{isConnected ? formatCompact(diffTotal) : "--"}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 mt-1">
+          {([
+            { key: "team" as MainTab, label: t("profile.tabTeam"), icon: Network },
+            { key: "history" as MainTab, label: t("profile.tabHistory"), icon: History },
+          ]).map((tab) => (
+            <button
+              key={tab.key}
+              className="py-3 rounded-xl text-[13px] font-bold transition-all text-center flex items-center justify-center gap-2"
+              style={{
+                border: mainTab === tab.key
+                  ? "1px solid rgba(74,222,128,0.5)"
+                  : "1px solid rgba(255,255,255,0.3)",
+                color: mainTab === tab.key ? "#4ade80" : "rgba(255,255,255,0.6)",
+                background: mainTab === tab.key ? "rgba(74,222,128,0.1)" : "#181818",
+              }}
+              onClick={() => setMainTab(tab.key)}
+            >
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {mainTab === "team" && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+              <span className="text-[13px] font-bold text-white">
+                {t("profile.teamMembersCount", { count: teamData?.teamSize || 0 })}
+              </span>
             </div>
 
-            <h4 className="text-xs font-semibold text-muted-foreground mb-2">{t("profile.commissionRecords")}</h4>
-            {commissionLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-20 w-full rounded-md" />
+            {!isViewingSelf && (
+              <div className="flex items-center gap-1 mb-3 flex-wrap text-[12px]">
+                <button
+                  className="font-bold transition-colors"
+                  style={{ color: "#4ade80" }}
+                  onClick={goToRoot}
+                >
+                  {t("profile.myTeam")}
+                </button>
+                {addrStack.map((item, idx) => (
+                  <span key={idx} className="flex items-center gap-1">
+                    <ChevronRight className="h-3 w-3 text-white/30" />
+                    {idx < addrStack.length - 1 ? (
+                      <button
+                        className="font-bold"
+                        style={{ color: "#4ade80" }}
+                        onClick={() => setAddrStack((prev) => prev.slice(0, idx + 1))}
+                      >
+                        {item.label}
+                      </button>
+                    ) : (
+                      <span className="text-white/50">{item.label}</span>
+                    )}
+                  </span>
                 ))}
               </div>
-            ) : !commission?.records.length ? (
-              <Card className="border-border bg-card">
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground" data-testid="text-no-commission">
-                    {t("profile.noCommissionRecords")}
-                  </p>
-                </CardContent>
-              </Card>
+            )}
+
+            {!isConnected ? (
+              <div className="rounded-2xl p-8 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+                <WalletCards className="h-8 w-8 text-white/25 mx-auto mb-3" />
+                <p className="text-[13px] text-white/40">{t("profile.connectToViewTeam")}</p>
+              </div>
+            ) : isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+              </div>
+            ) : !teamData?.referrals.length ? (
+              <div className="rounded-2xl p-8 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+                <Users className="h-8 w-8 text-white/25 mx-auto mb-3" />
+                <p className="text-[13px] text-white/40">{t("profile.noTeamMembers")}</p>
+                {!isViewingSelf && (
+                  <button
+                    className="mt-3 text-[12px] font-bold px-4 py-1.5 rounded-lg transition-all"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)" }}
+                    onClick={goBack}
+                  >
+                    <ArrowLeft className="inline h-3 w-3 mr-1" />{t("profile.goBack")}
+                  </button>
+                )}
+              </div>
             ) : (
-              <div className="space-y-2" data-testid="commission-list">
-                {commission.records.map((record) => {
+              <div className="space-y-2">
+                {teamData.referrals.map((ref) => (
+                  <div key={ref.id}>
+                    <button
+                      className="w-full rounded-xl p-3 flex items-center gap-3 text-left transition-all active:scale-[0.98]"
+                      style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.35)" }}
+                      onClick={() => drillInto(ref.walletAddress, shortenAddress(ref.walletAddress))}
+                    >
+                      <div className="h-2 w-2 rounded-full shrink-0" style={{ background: "#4ade80" }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12px] font-mono text-white/80 truncate">
+                          {shortenAddress(ref.walletAddress)}
+                        </div>
+                      </div>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-md font-bold shrink-0"
+                        style={{ background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.2)", color: "#4ade80" }}
+                      >
+                        {ref.rank}
+                      </span>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-md font-bold shrink-0"
+                        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.5)" }}
+                      >
+                        {ref.nodeType}
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 text-white/30 shrink-0" />
+                    </button>
+                    {ref.subReferrals && ref.subReferrals.length > 0 && (
+                      <div className="ml-5 mt-1.5 space-y-1.5 border-l-2 pl-3" style={{ borderColor: "rgba(74,222,128,0.15)" }}>
+                        {ref.subReferrals.map((sub) => (
+                          <button
+                            key={sub.id}
+                            className="w-full rounded-lg p-2.5 flex items-center gap-2.5 text-left transition-all active:scale-[0.98]"
+                            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.15)" }}
+                            onClick={() => drillInto(sub.walletAddress, shortenAddress(sub.walletAddress))}
+                          >
+                            <div className="h-1.5 w-1.5 rounded-full shrink-0 bg-white/25" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[11px] font-mono text-white/60 truncate">
+                                {shortenAddress(sub.walletAddress)}
+                              </div>
+                            </div>
+                            <span
+                              className="text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0"
+                              style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}
+                            >
+                              {sub.rank}
+                            </span>
+                            <ChevronRight className="h-3 w-3 text-white/20 shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {mainTab === "history" && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+              <span className="text-[13px] font-bold text-white">{t("profile.tabHistory")}</span>
+            </div>
+
+            <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
+              {([
+                { key: "deposit" as HistoryFilter, label: t("profile.historyDeposit") },
+                { key: "redeem" as HistoryFilter, label: t("profile.historyRedeem") },
+                { key: "income" as HistoryFilter, label: t("profile.historyIncome") },
+                { key: "invite" as HistoryFilter, label: t("profile.historyInvite") },
+                { key: "team" as HistoryFilter, label: t("profile.historyTeam") },
+              ]).map((f) => (
+                <button
+                  key={f.key}
+                  className="px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all"
+                  style={{
+                    background: historyFilter === f.key ? "rgba(74,222,128,0.12)" : "rgba(255,255,255,0.04)",
+                    border: historyFilter === f.key ? "1px solid rgba(74,222,128,0.35)" : "1px solid rgba(255,255,255,0.12)",
+                    color: historyFilter === f.key ? "#4ade80" : "rgba(255,255,255,0.45)",
+                  }}
+                  onClick={() => setHistoryFilter(f.key)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {!isConnected ? (
+              <div className="rounded-2xl p-8 text-center" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.4)" }}>
+                <WalletCards className="h-8 w-8 text-white/25 mx-auto mb-3" />
+                <p className="text-[13px] text-white/40">{t("profile.connectToViewCommission")}</p>
+              </div>
+            ) : commissionLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+              </div>
+            ) : filteredRecords.length === 0 ? (
+              <div className="py-16 text-center text-white/30 text-[13px]">
+                {t("profile.noHistoryData")}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredRecords.map((record) => {
                   const isDirectRef = record.details?.type === "direct_referral";
                   const amount = Number(record.amount || 0);
                   const depth = record.details?.depth || 0;
@@ -350,58 +457,53 @@ export default function ProfileReferralPage() {
                     : "--";
 
                   return (
-                    <Card key={record.id} className="border-border bg-card">
-                      <CardContent className="p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${
-                              isDirectRef ? "bg-primary/15" : "bg-amber-500/15"
-                            }`}>
-                              {isDirectRef ? (
-                                <UserPlus className="h-4 w-4 text-primary" />
-                              ) : (
-                                <Layers className="h-4 w-4 text-amber-500" />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0"
-                                >
-                                  {isDirectRef ? t("profile.directRef") : t("profile.differential")}
-                                </Badge>
-                                <span className="text-[10px] text-muted-foreground">
-                                  L{depth}
-                                </span>
-                                {rate !== undefined && !isDirectRef && (
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {(rate * 100).toFixed(0)}%
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                                {t("profile.from")}: {record.sourceWallet ? shortenAddress(record.sourceWallet) : "--"}
-                                {record.sourceRank && (
-                                  <span className="ml-1 text-[10px]">({record.sourceRank})</span>
-                                )}
-                              </div>
-                            </div>
+                    <div
+                      key={record.id}
+                      className="rounded-xl p-3.5 flex items-center justify-between"
+                      style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.35)" }}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div
+                          className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ background: isDirectRef ? "rgba(74,222,128,0.1)" : "rgba(245,158,11,0.1)" }}
+                        >
+                          {isDirectRef ? (
+                            <UserPlus className="h-4 w-4 text-green-400" />
+                          ) : (
+                            <Layers className="h-4 w-4 text-amber-400" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                              style={{
+                                background: isDirectRef ? "rgba(74,222,128,0.1)" : "rgba(245,158,11,0.1)",
+                                color: isDirectRef ? "#4ade80" : "#f59e0b",
+                              }}
+                            >
+                              {isDirectRef ? t("profile.directRef") : t("profile.differential")}
+                            </span>
+                            <span className="text-[10px] text-white/30">L{depth}</span>
+                            {rate !== undefined && !isDirectRef && (
+                              <span className="text-[10px] text-white/30">{(rate * 100).toFixed(0)}%</span>
+                            )}
                           </div>
-                          <div className="text-right shrink-0">
-                            <div className="text-sm font-bold text-neon-value">
-                              +{usdcToMA(amount).toFixed(2)} MA
-                            </div>
-                            <div className="text-[10px] text-muted-foreground">{createdAt}</div>
+                          <div className="text-[10px] text-white/35 mt-0.5 truncate">
+                            {t("profile.from")}: {record.sourceWallet ? shortenAddress(record.sourceWallet) : "--"}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-[13px] font-bold text-green-400">+{usdcToMA(amount).toFixed(2)} MA</div>
+                        <div className="text-[10px] text-white/30">{createdAt}</div>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
