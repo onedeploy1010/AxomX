@@ -216,7 +216,7 @@ export default function ProfilePage() {
 
         <div
           className="rounded-2xl relative overflow-hidden"
-          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}
+          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.35)", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}
         >
           <div className="absolute top-0 right-0 w-40 h-40 opacity-[0.05]" style={{ background: "radial-gradient(circle, #4ade80, transparent 70%)" }} />
 
@@ -308,7 +308,7 @@ export default function ProfilePage() {
         {isConnected && referralLink && (
           <div
             className="rounded-2xl p-4"
-            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.35)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <div
@@ -347,7 +347,7 @@ export default function ProfilePage() {
 
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.35)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
         >
           <div className="p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -475,7 +475,7 @@ export default function ProfilePage() {
         <div className="pt-1">
           <div
             className="rounded-2xl overflow-hidden"
-            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.35)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
           >
             {MENU_ITEMS.map((item, idx) => (
               <button
