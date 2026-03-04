@@ -433,31 +433,40 @@ export default function ProfilePage() {
         </div>
 
         <button
-          className="w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-all active:scale-[0.98] relative overflow-hidden group"
+          className="w-full rounded-2xl text-left transition-all active:scale-[0.98] relative overflow-hidden group"
           style={{
-            background: "linear-gradient(135deg, #0d1f12 0%, #0f0f0f 60%, #0f1a0f 100%)",
-            border: "1px solid rgba(74,222,128,0.25)",
+            background: "linear-gradient(135deg, #0a2614 0%, #143d20 50%, #0d2a15 100%)",
+            border: "1px solid rgba(74,222,128,0.35)",
+            boxShadow: "0 4px 24px rgba(74,222,128,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
           }}
           onClick={() => navigate("/profile/nodes")}
           data-testid="menu-nodes"
         >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "linear-gradient(135deg, rgba(74,222,128,0.05), transparent)" }} />
-          <div className="absolute -right-6 -top-6 w-28 h-28 opacity-[0.07]" style={{ background: "radial-gradient(circle, #4ade80, transparent 70%)" }} />
-          <div
-            className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 relative"
-            style={{
-              background: "linear-gradient(135deg, rgba(74,222,128,0.25), rgba(74,222,128,0.08))",
-              border: "1px solid rgba(74,222,128,0.3)",
-              boxShadow: "0 0 12px rgba(74,222,128,0.15)",
-            }}
-          >
-            <Server className="h-5 w-5 text-primary" />
+          <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(74,222,128,0.2) 0%, transparent 60%)" }} />
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20" style={{ background: "radial-gradient(circle, #22c55e, transparent 70%)" }} />
+          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+
+          <div className="relative p-4 flex items-center gap-3.5">
+            <div
+              className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
+              }}
+            >
+              <Server className="h-5.5 w-5.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[15px] font-bold text-white tracking-wide">{t("profile.nodeManagement")}</div>
+              <div className="text-[11px] text-white/50 mt-0.5">{t("profile.nodeManagementDesc")}</div>
+            </div>
+            <div
+              className="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.25)" }}
+            >
+              <ChevronRight className="h-4 w-4 text-primary" />
+            </div>
           </div>
-          <div className="flex-1 min-w-0 relative">
-            <div className="text-[14px] font-bold text-white">{t("profile.nodeManagement")}</div>
-            <div className="text-[11px] text-white/40 mt-0.5">{t("profile.nodeManagementDesc")}</div>
-          </div>
-          <ChevronRight className="h-5 w-5 text-primary/60 shrink-0 relative" />
         </button>
 
         <div className="pt-1">
