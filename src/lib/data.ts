@@ -57,7 +57,7 @@ export const NODE_MILESTONES = {
     { rank: "V2", days: 30, unlocks: "earnings", desc: "100U holding + 3 direct small node referrals", requiredHolding: 100, requiredReferrals: 3 },
     { rank: "V3", days: 45, unlocks: "earnings", desc: "500U holding", requiredHolding: 500, requiredReferrals: 0 },
     { rank: "V4", days: 60, unlocks: "earnings", desc: "600U holding", requiredHolding: 600, requiredReferrals: 0 },
-    { rank: "V5", days: 90, unlocks: "earnings", desc: "700U holding", requiredHolding: 700, requiredReferrals: 0 },
+    { rank: "V5", days: 90, unlocks: "earnings", desc: "800U holding", requiredHolding: 800, requiredReferrals: 0 },
     { rank: "V6", days: 120, unlocks: "earnings_and_package", desc: "1000U holding, unlock all", requiredHolding: 1000, requiredReferrals: 0 },
   ],
 } as const;
