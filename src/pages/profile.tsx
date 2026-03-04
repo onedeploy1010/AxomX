@@ -215,92 +215,95 @@ export default function ProfilePage() {
       <div className="px-4 -mt-1 space-y-3">
 
         <div
-          className="rounded-2xl p-4 relative overflow-hidden"
-          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+          className="rounded-2xl relative overflow-hidden"
+          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}
         >
-          <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04]" style={{ background: "radial-gradient(circle, #4ade80, transparent 70%)" }} />
-          <div className="flex items-center justify-between gap-3 relative">
-            <div>
-              <div className="text-[11px] text-white/45 font-medium uppercase tracking-wider mb-1">{t("profile.totalAssets")}</div>
-              {!isConnected ? (
-                <div className="text-[28px] font-black text-white/20 leading-tight" data-testid="text-net-assets">--</div>
-              ) : profileLoading ? (
-                <Skeleton className="h-9 w-28" />
-              ) : (
-                <div className="text-[28px] font-black text-white leading-tight" data-testid="text-net-assets">{formatMA(net)}</div>
-              )}
-            </div>
-            <div
-              className="h-11 w-11 rounded-2xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05))", border: "1px solid rgba(74,222,128,0.15)" }}
-            >
-              <Wallet className="h-5 w-5 text-primary" />
+          <div className="absolute top-0 right-0 w-40 h-40 opacity-[0.05]" style={{ background: "radial-gradient(circle, #4ade80, transparent 70%)" }} />
+
+          <div className="p-4 relative">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] text-white/45 font-medium uppercase tracking-wider mb-1">{t("profile.totalAssets")}</div>
+                {!isConnected ? (
+                  <div className="text-[28px] font-black text-white/20 leading-tight" data-testid="text-net-assets">--</div>
+                ) : profileLoading ? (
+                  <Skeleton className="h-9 w-28" />
+                ) : (
+                  <div className="text-[28px] font-black text-white leading-tight" data-testid="text-net-assets">{formatMA(net)}</div>
+                )}
+              </div>
+              <div
+                className="h-11 w-11 rounded-2xl flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05))", border: "1px solid rgba(74,222,128,0.15)" }}
+              >
+                <Wallet className="h-5 w-5 text-primary" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {isConnected && (
-          <div
-            className="rounded-2xl p-4"
-            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
-          >
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05))", border: "1px solid rgba(74,222,128,0.15)" }}
-                >
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <div className="text-[11px] text-white/45 font-medium">{t("profile.totalEarningsLabel")}</div>
-                  {profileLoading ? (
-                    <Skeleton className="h-5 w-20" />
-                  ) : (
-                    <div className="text-[18px] font-bold text-white" data-testid="text-total-earnings">
-                      {formatMA(totalEarnings)}
+          {isConnected && (
+            <>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", margin: "0 16px" }} />
+              <div className="p-4 relative">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05))", border: "1px solid rgba(74,222,128,0.15)" }}
+                    >
+                      <TrendingUp className="h-4 w-4 text-primary" />
                     </div>
-                  )}
+                    <div>
+                      <div className="text-[11px] text-white/45 font-medium">{t("profile.totalEarningsLabel")}</div>
+                      {profileLoading ? (
+                        <Skeleton className="h-5 w-20" />
+                      ) : (
+                        <div className="text-[18px] font-bold text-white" data-testid="text-total-earnings">
+                          {formatMA(totalEarnings)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="rounded-xl text-[12px] h-8"
+                    onClick={() => {
+                      toast({ title: t("profile.withdrawEarnings"), description: t("profile.withdrawEarningsDesc") });
+                    }}
+                    disabled={totalEarnings <= 0}
+                    data-testid="button-withdraw-earnings"
+                  >
+                    <ArrowUpFromLine className="mr-1 h-3 w-3" /> {t("common.withdraw")}
+                  </Button>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { label: t("profile.nodeEarningsLabel"), value: formatCompactMA(nodeEarnings) },
+                    { label: t("profile.vaultEarningsLabel"), value: formatCompactMA(vaultYield) },
+                    { label: t("profile.brokerEarningsLabel"), value: formatCompactMA(referralEarnings) },
+                  ].map((item, i) => (
+                    <div key={i} className="rounded-xl p-2.5" style={{ background: "#1c1c1c" }}>
+                      <div className="text-[10px] text-white/40 mb-0.5">{item.label}</div>
+                      <div className="text-[13px] font-bold text-white/90">{item.value}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <Button
-                size="sm"
-                className="rounded-xl text-[12px] h-8"
-                onClick={() => {
-                  toast({ title: t("profile.withdrawEarnings"), description: t("profile.withdrawEarningsDesc") });
-                }}
-                disabled={totalEarnings <= 0}
-                data-testid="button-withdraw-earnings"
-              >
-                <ArrowUpFromLine className="mr-1 h-3 w-3" /> {t("common.withdraw")}
-              </Button>
-            </div>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {[
-                { label: t("profile.nodeEarningsLabel"), value: formatCompactMA(nodeEarnings) },
-                { label: t("profile.vaultEarningsLabel"), value: formatCompactMA(vaultYield) },
-                { label: t("profile.brokerEarningsLabel"), value: formatCompactMA(referralEarnings) },
-              ].map((item, i) => (
-                <div key={i} className="rounded-xl p-2.5" style={{ background: "#1c1c1c" }}>
-                  <div className="text-[10px] text-white/40 mb-0.5">{item.label}</div>
-                  <div className="text-[13px] font-bold text-white/90">{item.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+            </>
+          )}
 
-        {!isConnected && (
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ background: "#141414", border: "1px dashed rgba(255,255,255,0.18)" }}
-          >
-            <WalletCards className="h-8 w-8 text-white/20 mx-auto mb-3" />
-            <p className="text-[13px] text-white/35" data-testid="text-connect-prompt">
-              {t("common.connectWalletPrompt")}
-            </p>
-          </div>
-        )}
+          {!isConnected && (
+            <>
+              <div style={{ borderTop: "1px dashed rgba(255,255,255,0.1)", margin: "0 16px" }} />
+              <div className="p-6 text-center">
+                <WalletCards className="h-7 w-7 text-white/20 mx-auto mb-2" />
+                <p className="text-[12px] text-white/35" data-testid="text-connect-prompt">
+                  {t("common.connectWalletPrompt")}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
 
         {isConnected && referralLink && (
           <div
