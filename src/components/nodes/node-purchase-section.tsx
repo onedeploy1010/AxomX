@@ -221,7 +221,7 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
           )}
         </div>
 
-        <div className="px-5 pb-5 pt-3 overflow-y-auto flex-1" style={{ minHeight: 0 }}>
+        <div className="px-5 pb-5 pt-3 flex-1 node-dialog-scroll" style={{ minHeight: 0, overflowY: "auto" }}>
           {isMAX && step === "select_rank" && (
             <div className="space-y-2.5">
               {MAX_PURCHASABLE_MILESTONES.map((ms) => (
@@ -485,12 +485,12 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
                     </div>
                     <div className="flex items-center justify-between py-1.5">
                       <span className="text-[12px] text-white/40">{t("profile.frozenFunds")}</span>
-                      <span className="text-[13px] font-semibold text-white/80">${plan.frozenAmount.toLocaleString()} USDC</span>
+                      <span className="text-[13px] font-semibold text-white/60">${plan.frozenAmount.toLocaleString()} USDC</span>
                     </div>
                     <div className="h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
                     <div className="flex items-center justify-between py-1">
                       <span className="text-[13px] font-bold text-white/60">{t("profile.totalPayment")}</span>
-                      <span className="text-[17px] font-black text-primary">${(plan.price + plan.frozenAmount).toLocaleString()}</span>
+                      <span className="text-[17px] font-black text-primary">${plan.price}</span>
                     </div>
                   </div>
                 </div>
