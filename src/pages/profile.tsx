@@ -216,9 +216,9 @@ export default function ProfilePage() {
 
         <div
           className="rounded-2xl p-4 relative overflow-hidden"
-          style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)" }}
+          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
         >
-          <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.03]" style={{ background: "radial-gradient(circle, #4ade80, transparent 70%)" }} />
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04]" style={{ background: "radial-gradient(circle, #4ade80, transparent 70%)" }} />
           <div className="flex items-center justify-between gap-3 relative">
             <div>
               <div className="text-[11px] text-white/45 font-medium uppercase tracking-wider mb-1">{t("profile.totalAssets")}</div>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
         {isConnected && (
           <div
             className="rounded-2xl p-4"
-            style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
           >
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                 { label: t("profile.vaultEarningsLabel"), value: formatCompactMA(vaultYield) },
                 { label: t("profile.brokerEarningsLabel"), value: formatCompactMA(referralEarnings) },
               ].map((item, i) => (
-                <div key={i} className="rounded-xl p-2.5" style={{ background: "#161616" }}>
+                <div key={i} className="rounded-xl p-2.5" style={{ background: "#1c1c1c" }}>
                   <div className="text-[10px] text-white/40 mb-0.5">{item.label}</div>
                   <div className="text-[13px] font-bold text-white/90">{item.value}</div>
                 </div>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
         {!isConnected && (
           <div
             className="rounded-2xl p-8 text-center"
-            style={{ background: "#0f0f0f", border: "1px dashed rgba(255,255,255,0.12)" }}
+            style={{ background: "#141414", border: "1px dashed rgba(255,255,255,0.18)" }}
           >
             <WalletCards className="h-8 w-8 text-white/20 mx-auto mb-3" />
             <p className="text-[13px] text-white/35" data-testid="text-connect-prompt">
@@ -305,7 +305,7 @@ export default function ProfilePage() {
         {isConnected && referralLink && (
           <div
             className="rounded-2xl p-4"
-            style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <div
@@ -319,14 +319,14 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2">
               <div
                 className="flex-1 min-w-0 rounded-xl px-3 py-2.5 font-mono text-[11px] text-white/55 truncate"
-                style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.1)" }}
               >
                 {referralLink}
               </div>
               <button
                 onClick={() => copyToClipboard(referralLink)}
                 className="shrink-0 px-3 py-2.5 rounded-xl text-white/80 transition-all hover:bg-white/10 active:scale-95"
-                style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.1)" }}
               >
                 <Copy className="h-4 w-4" />
               </button>
@@ -344,7 +344,7 @@ export default function ProfilePage() {
 
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)" }}
+          style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
         >
           <div className="p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -381,8 +381,8 @@ export default function ProfilePage() {
                     key={planKey}
                     className="rounded-xl p-3.5 flex items-center justify-between gap-3 transition-all cursor-pointer"
                     style={{
-                      border: isSelected ? "1px solid rgba(234,179,8,0.5)" : "1px solid rgba(255,255,255,0.08)",
-                      background: isSelected ? "rgba(234,179,8,0.06)" : "#161616",
+                      border: isSelected ? "1px solid rgba(234,179,8,0.5)" : "1px solid rgba(255,255,255,0.12)",
+                      background: isSelected ? "rgba(234,179,8,0.06)" : "#1c1c1c",
                     }}
                     onClick={() => !vipMutation.isPending && setSelectedVipPlan(planKey)}
                   >
@@ -472,19 +472,19 @@ export default function ProfilePage() {
         <div className="pt-1">
           <div
             className="rounded-2xl overflow-hidden"
-            style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
           >
             {MENU_ITEMS.map((item, idx) => (
               <button
                 key={item.path}
-                className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-white/[0.03] active:bg-white/[0.05]"
-                style={{ borderBottom: idx < MENU_ITEMS.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}
+                className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-white/[0.04] active:bg-white/[0.06]"
+                style={{ borderBottom: idx < MENU_ITEMS.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none" }}
                 onClick={() => navigate(item.path)}
                 data-testid={`menu-${item.path.split("/").pop()}`}
               >
                 <div
                   className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.06)" }}
+                  style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.08)" }}
                 >
                   <item.icon className="h-4 w-4 text-primary" />
                 </div>
