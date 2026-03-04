@@ -39,3 +39,8 @@ externalPort = 80
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+
+[userenv]
+
+[userenv.shared]
+VITE_VIP_RECEIVER_ADDRESS = "0x8dE73Dc07cdf679B29731827744464161132b581"
