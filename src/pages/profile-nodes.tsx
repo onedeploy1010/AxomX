@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
-import { ArrowLeft, ArrowUpRight, DollarSign, Calendar, Disc, Headphones, Info, WalletCards } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Calendar, Disc, Headphones, Info, WalletCards, Coins } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { getNodeOverview, getNodeEarningsRecords, getNodeMemberships } from "@/lib/api";
 import type { NodeOverview, NodeEarningsRecord, NodeMembership } from "@shared/types";
 import { NODE_PLANS } from "@/lib/data";
 import { useTranslation } from "react-i18next";
+import { useMaPrice } from "@/hooks/use-ma-price";
 
 type TabKey = "purchase" | "earnings" | "detail";
 
@@ -19,6 +20,7 @@ export default function ProfileNodesPage() {
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;
   const [activeTab, setActiveTab] = useState<TabKey>("purchase");
+  const { formatMA, formatCompactMA } = useMaPrice();
 
   const { data: overview, isLoading } = useQuery<NodeOverview>({
     queryKey: ["node-overview", walletAddr],
@@ -145,8 +147,8 @@ export default function ProfileNodesPage() {
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-3 text-center -mt-1">
-                <span className="text-[11px] text-white/35">{t("profile.contribution")} {NODE_PLANS.MAX.price}</span>
-                <span className="text-[11px] text-white/35">{t("profile.contribution")} {NODE_PLANS.MINI.price}</span>
+                <span className="text-[11px] text-white/35">{t("profile.contribution")} {NODE_PLANS.MAX.price} USDC</span>
+                <span className="text-[11px] text-white/35">{t("profile.contribution")} {NODE_PLANS.MINI.price} USDC</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -155,8 +157,8 @@ export default function ProfileNodesPage() {
                   style={{ border: cardBorder, background: "rgba(5,10,5,0.5)" }}
                 >
                   <div className="text-[12px] text-white/45 font-medium">{t("profile.nodeTotalAmount")} 🔊</div>
-                  <DollarSign className="h-6 w-6 mx-auto text-white/70" />
-                  <div className="text-lg font-bold text-primary">${totalEarnings.toFixed(0)}</div>
+                  <Coins className="h-6 w-6 mx-auto text-white/70" />
+                  <div className="text-lg font-bold text-primary">{formatCompactMA(totalEarnings)}</div>
                 </div>
                 <div
                   className="rounded-xl p-4 text-center space-y-2"
@@ -174,8 +176,8 @@ export default function ProfileNodesPage() {
                   style={{ border: cardBorder, background: "rgba(5,10,5,0.5)" }}
                 >
                   <div className="text-[12px] text-white/45 font-medium">{t("profile.releasedEarnings")}</div>
-                  <DollarSign className="h-6 w-6 mx-auto text-white/70" />
-                  <div className="text-lg font-bold text-primary">${releasedEarnings.toFixed(0)}</div>
+                  <Coins className="h-6 w-6 mx-auto text-white/70" />
+                  <div className="text-lg font-bold text-primary">{formatCompactMA(releasedEarnings)}</div>
                 </div>
                 <div
                   className="rounded-xl p-4 text-center space-y-2"
@@ -193,7 +195,7 @@ export default function ProfileNodesPage() {
               >
                 <div className="flex items-center gap-2">
                   <span className="text-[13px] text-white/50">{t("profile.availableBalance")}:</span>
-                  <span className="text-[13px] font-bold text-white/90">${availableBalance.toFixed(0)}/${lockedEarnings.toFixed(0)}</span>
+                  <span className="text-[13px] font-bold text-white/90">{formatCompactMA(availableBalance)}/{formatCompactMA(lockedEarnings)}</span>
                   <Headphones className="h-3.5 w-3.5 text-white/30" />
                 </div>
                 <button
@@ -255,8 +257,8 @@ export default function ProfileNodesPage() {
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1 text-[11px] text-white/35">
-                        <span>{t("profile.contribution")}: ${Number(m.contributionAmount || m.depositAmount || 0).toFixed(0)}</span>
-                        <span>{t("profile.frozenFunds")}: ${Number(m.frozenAmount || 0).toLocaleString()}</span>
+                        <span>{t("profile.contribution")}: {Number(m.contributionAmount || m.depositAmount || 0)} USDC</span>
+                        <span>{t("profile.frozenFunds")}: {Number(m.frozenAmount || 0).toLocaleString()} USDC</span>
                         <span>{t("profile.startDate")}: {formatDate(m.startDate)}</span>
                         <span>{t("profile.endDate")}: {formatDate(m.endDate)}</span>
                       </div>
@@ -306,7 +308,7 @@ export default function ProfileNodesPage() {
                         </div>
                       </div>
                       <div className="text-[13px] font-bold text-primary">
-                        +${Number(r.amount || 0).toFixed(4)}
+                        +{formatMA(Number(r.amount || 0))}
                       </div>
                     </div>
                   ))
@@ -338,7 +340,7 @@ export default function ProfileNodesPage() {
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1 text-[11px] text-white/35">
-                        <span>{t("profile.frozenFunds")}: ${Number(n.frozenAmount || 0).toLocaleString()}</span>
+                        <span>{t("profile.frozenFunds")}: {Number(n.frozenAmount || 0).toLocaleString()} USDC</span>
                         <span>{t("profile.dailyEarnings")}: {(Number(n.dailyRate || 0) * 100).toFixed(1)}%</span>
                         <span>{t("profile.milestoneSchedule")}: {n.milestoneStage}/{n.totalMilestones}</span>
                         <span>{t("profile.earningsCapacity")}: {(Number(n.earningsCapacity || 0) * 100).toFixed(0)}%</span>
