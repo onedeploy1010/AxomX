@@ -201,7 +201,7 @@ export default function ProfileNodesPage() {
                 >
                   <div className="text-[12px] text-white/45 font-medium">{t("profile.nodeTotalAmount")} 🔊</div>
                   <Coins className="h-6 w-6 mx-auto text-white/70" />
-                  <div className="text-lg font-bold text-primary">{formatCompactMA(totalEarnings)}</div>
+                  <div className="text-lg font-bold text-primary">${totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 </div>
                 <div
                   className="rounded-xl p-4 text-center space-y-2"
