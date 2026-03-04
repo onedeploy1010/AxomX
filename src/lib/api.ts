@@ -316,6 +316,14 @@ export async function checkNodeMilestones(walletAddress: string) {
   return toCamel(data);
 }
 
+export async function getNodeMilestoneRequirements(walletAddress: string) {
+  const { data, error } = await supabase.rpc("get_node_milestone_requirements", {
+    addr: walletAddress,
+  });
+  if (error) throw error;
+  return toCamel(data ?? { vault_deposited: 0, direct_node_referrals: 0 });
+}
+
 export async function placePredictionBet(
   walletAddress: string,
   marketId: string,

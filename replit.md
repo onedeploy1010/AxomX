@@ -55,9 +55,9 @@ A cryptocurrency trading and portfolio management web application built with Rea
 ## Database (Supabase)
 
 - **Tables**: `profiles`, `node_memberships`, `node_milestones`, `node_rewards`, `vault_positions`, `vault_rewards`, `trade_bets`, `prediction_bets`, `transactions`, `strategies`, `strategy_subscriptions`, `hedge_positions`, `insurance_purchases`, `revenue_pools`, `revenue_events`, `system_config`, `ai_predictions`
-- **RPCs**: `auth_wallet`, `purchase_node`, `get_node_overview`, `check_node_milestones`, `settle_node_fixed_yield`, `settle_node_pool_dividend`, `vault_deposit`, `vault_withdraw`, `place_trade_bet`, `get_trade_stats`, `subscribe_strategy`, `purchase_hedge`, `subscribe_vip`, `place_prediction_bet`, `get_vault_overview`, `get_strategy_overview`, `get_insurance_pool`, `get_referral_tree`
+- **RPCs**: `auth_wallet`, `purchase_node`, `get_node_overview`, `check_node_milestones`, `settle_node_fixed_yield`, `settle_node_pool_dividend`, `vault_deposit`, `vault_withdraw`, `place_trade_bet`, `get_trade_stats`, `subscribe_strategy`, `purchase_hedge`, `subscribe_vip`, `place_prediction_bet`, `get_vault_overview`, `get_strategy_overview`, `get_insurance_pool`, `get_referral_tree`, `get_node_milestone_requirements`
 - **Edge Functions**: `api-proxy`, `ai-forecast`, `ai-forecast-multi`, `ai-prediction`, `news-predictions`, `ai-fear-greed`
-- **Migrations**: `supabase/migrations/001-007` (must be applied in order via Supabase CLI or dashboard)
+- **Migrations**: `supabase/migrations/001-008` (must be applied in order via Supabase CLI or dashboard)
 - All frontend data fetching goes through `src/lib/api.ts` using Supabase client; `toCamel()` converts snake_case DB columns to camelCase
 
 ## Node System

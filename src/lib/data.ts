@@ -49,16 +49,16 @@ export const NODE_PLANS = {
 
 export const NODE_MILESTONES = {
   MINI: [
-    { rank: "V2", days: 15, unlocks: "earnings", desc: "Unlock daily 0.5% earnings" },
-    { rank: "V4", days: 90, unlocks: "earnings_and_package", desc: "Withdraw 1000 USDC equivalent MA" },
+    { rank: "V2", days: 15, unlocks: "earnings", desc: "Unlock daily 0.5% earnings", requiredHolding: 0, requiredReferrals: 0 },
+    { rank: "V4", days: 90, unlocks: "earnings_and_package", desc: "Withdraw 1000 USDC equivalent MA", requiredHolding: 0, requiredReferrals: 0 },
   ],
   MAX: [
-    { rank: "V1", days: 15, unlocks: "none", desc: "Reach V1" },
-    { rank: "V2", days: 30, unlocks: "earnings", desc: "100U holding + 3 small node referrals" },
-    { rank: "V3", days: 45, unlocks: "earnings", desc: "500U holding / 45 days" },
-    { rank: "V4", days: 60, unlocks: "earnings", desc: "500U holding / 45 days" },
-    { rank: "V5", days: 90, unlocks: "earnings", desc: "500U holding / 45 days" },
-    { rank: "V6", days: 120, unlocks: "earnings_and_package", desc: "1000U holding / 45 days, unlock all" },
+    { rank: "V1", days: 15, unlocks: "none", desc: "Reach V1", requiredHolding: 0, requiredReferrals: 0 },
+    { rank: "V2", days: 30, unlocks: "earnings", desc: "100U holding + 3 direct small node referrals", requiredHolding: 100, requiredReferrals: 3 },
+    { rank: "V3", days: 45, unlocks: "earnings", desc: "500U holding", requiredHolding: 500, requiredReferrals: 0 },
+    { rank: "V4", days: 60, unlocks: "earnings", desc: "600U holding", requiredHolding: 600, requiredReferrals: 0 },
+    { rank: "V5", days: 90, unlocks: "earnings", desc: "700U holding", requiredHolding: 700, requiredReferrals: 0 },
+    { rank: "V6", days: 120, unlocks: "earnings_and_package", desc: "1000U holding, unlock all", requiredHolding: 1000, requiredReferrals: 0 },
   ],
 } as const;
 

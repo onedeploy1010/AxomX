@@ -1,17 +1,26 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useActiveAccount } from "thirdweb/react";
-import { ArrowLeft, ArrowUpRight, Calendar, Disc, Headphones, Info, WalletCards, Coins } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Calendar, Disc, Headphones, Info, WalletCards, Coins, Clock, CheckCircle2, XCircle, AlertTriangle, Landmark } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { getNodeOverview, getNodeEarningsRecords, getNodeMemberships } from "@/lib/api";
+import { getNodeOverview, getNodeEarningsRecords, getNodeMemberships, getNodeMilestoneRequirements } from "@/lib/api";
 import type { NodeOverview, NodeEarningsRecord, NodeMembership } from "@shared/types";
-import { NODE_PLANS } from "@/lib/data";
+import { NODE_PLANS, NODE_MILESTONES } from "@/lib/data";
 import { useTranslation } from "react-i18next";
 import { useMaPrice } from "@/hooks/use-ma-price";
 
-type TabKey = "purchase" | "earnings" | "detail";
+type TabKey = "purchase" | "milestones" | "earnings" | "detail";
+
+function getMilestoneDaysLeft(startDate: string | null, deadlineDays: number): number {
+  if (!startDate) return deadlineDays;
+  const start = new Date(startDate).getTime();
+  const deadline = start + deadlineDays * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  return Math.max(0, Math.ceil((deadline - now) / (1000 * 60 * 60 * 24)));
+}
 
 export default function ProfileNodesPage() {
   const { t } = useTranslation();
@@ -19,8 +28,16 @@ export default function ProfileNodesPage() {
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
   const isConnected = !!walletAddr;
-  const [activeTab, setActiveTab] = useState<TabKey>("purchase");
+  const [activeTab, setActiveTab] = useState<TabKey>("milestones");
   const { formatMA, formatCompactMA } = useMaPrice();
+  const [showRequirementDialog, setShowRequirementDialog] = useState(false);
+  const [requirementDialogData, setRequirementDialogData] = useState<{
+    rank: string;
+    holdingRequired: number;
+    referralsRequired: number;
+    currentHolding: number;
+    currentReferrals: number;
+  } | null>(null);
 
   const { data: overview, isLoading } = useQuery<NodeOverview>({
     queryKey: ["node-overview", walletAddr],
@@ -40,6 +57,15 @@ export default function ProfileNodesPage() {
     enabled: isConnected,
   });
 
+  const { data: requirements } = useQuery<{ vaultDeposited: number; directNodeReferrals: number }>({
+    queryKey: ["node-milestone-requirements", walletAddr],
+    queryFn: () => getNodeMilestoneRequirements(walletAddr),
+    enabled: isConnected,
+  });
+
+  const vaultDeposited = requirements?.vaultDeposited ?? 0;
+  const directNodeReferrals = requirements?.directNodeReferrals ?? 0;
+
   const nodes = overview?.nodes ?? [];
   const activeNodes = nodes.filter((n) => n.status === "ACTIVE" || n.status === "PENDING_MILESTONES");
   const activeCount = activeNodes.length;
@@ -54,6 +80,7 @@ export default function ProfileNodesPage() {
     : 0;
   const nodeType = (firstNode?.nodeType || "MINI") as keyof typeof NODE_PLANS;
   const totalDays = firstNode ? (NODE_PLANS[nodeType]?.durationDays || 0) : 0;
+  const milestones = NODE_MILESTONES[nodeType] || [];
 
   const currentRank = overview?.rank || "V0";
   const rankIndex = currentRank === "V0" ? 0 : parseInt(currentRank.replace("V", "")) || 0;
@@ -66,6 +93,22 @@ export default function ProfileNodesPage() {
   const formatDate = (d: string | null) => {
     if (!d) return "--";
     return new Date(d).toLocaleDateString();
+  };
+
+  const handleMilestoneClick = (milestone: typeof milestones[number]) => {
+    if (nodeType !== "MAX") return;
+    const holdingOk = vaultDeposited >= milestone.requiredHolding;
+    const referralsOk = milestone.requiredReferrals === 0 || directNodeReferrals >= milestone.requiredReferrals;
+    if (!holdingOk || !referralsOk) {
+      setRequirementDialogData({
+        rank: milestone.rank,
+        holdingRequired: milestone.requiredHolding,
+        referralsRequired: milestone.requiredReferrals,
+        currentHolding: vaultDeposited,
+        currentReferrals: directNodeReferrals,
+      });
+      setShowRequirementDialog(true);
+    }
   };
 
   const cardBorder = "1px solid rgba(74, 222, 128, 0.15)";
@@ -207,15 +250,16 @@ export default function ProfileNodesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {([
+                { key: "milestones" as TabKey, label: t("profile.milestoneCountdown") },
                 { key: "purchase" as TabKey, label: t("profile.purchaseRecords") },
                 { key: "earnings" as TabKey, label: t("profile.earningsDetailTab") },
                 { key: "detail" as TabKey, label: t("profile.myDetailTab") },
               ]).map((tab) => (
                 <button
                   key={tab.key}
-                  className="py-2 rounded-lg text-[13px] font-medium transition-all text-center"
+                  className="py-2 rounded-lg text-[12px] font-medium transition-all text-center"
                   style={{
                     border: activeTab === tab.key
                       ? "1px solid rgba(74, 222, 128, 0.5)"
@@ -229,6 +273,127 @@ export default function ProfileNodesPage() {
                 </button>
               ))}
             </div>
+
+            {activeTab === "milestones" && (
+              <div className="space-y-3">
+                {activeNodes.length === 0 ? (
+                  <div className="text-center py-16 text-white/25 text-[14px] italic">
+                    {t("profile.noData")}
+                  </div>
+                ) : (
+                  milestones.map((ms, idx) => {
+                    const daysLeft = getMilestoneDaysLeft(firstNode?.startDate ?? null, ms.days);
+                    const dbMilestone = firstNode?.milestones?.find((m: any) => m.requiredRank === ms.rank) ?? firstNode?.milestones?.[idx];
+                    const isAchieved = dbMilestone?.status === "ACHIEVED";
+                    const isFailed = dbMilestone?.status === "FAILED";
+                    const isExpired = !isAchieved && daysLeft === 0;
+                    const prevMs = idx > 0 ? milestones[idx - 1] : null;
+                    const prevDbMilestone = prevMs ? (firstNode?.milestones?.find((m: any) => m.requiredRank === prevMs.rank) ?? firstNode?.milestones?.[idx - 1]) : null;
+                    const isCurrent = !isAchieved && !isFailed && !isExpired && (idx === 0 || prevDbMilestone?.status === "ACHIEVED");
+
+                    const holdingOk = nodeType === "MAX" ? vaultDeposited >= ms.requiredHolding : true;
+                    const referralsOk = ms.requiredReferrals === 0 || directNodeReferrals >= ms.requiredReferrals;
+                    const requirementsMet = holdingOk && referralsOk;
+                    const hasRequirements = ms.requiredHolding > 0 || ms.requiredReferrals > 0;
+
+                    return (
+                      <div
+                        key={ms.rank}
+                        className="rounded-xl p-4 space-y-3 transition-all"
+                        style={{
+                          border: isAchieved
+                            ? "1px solid rgba(74, 222, 128, 0.4)"
+                            : isCurrent
+                            ? "1px solid rgba(234, 179, 8, 0.4)"
+                            : isFailed || isExpired
+                            ? "1px solid rgba(239, 68, 68, 0.3)"
+                            : cardBorder,
+                          background: isAchieved
+                            ? "rgba(74, 222, 128, 0.05)"
+                            : isCurrent
+                            ? "rgba(234, 179, 8, 0.05)"
+                            : cardBg,
+                        }}
+                        onClick={() => isCurrent && hasRequirements && !requirementsMet && handleMilestoneClick(ms)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {isAchieved ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-400" />
+                            ) : isFailed || isExpired ? (
+                              <XCircle className="h-4 w-4 text-red-400" />
+                            ) : isCurrent ? (
+                              <Clock className="h-4 w-4 text-yellow-400 animate-pulse" />
+                            ) : (
+                              <Clock className="h-4 w-4 text-white/20" />
+                            )}
+                            <span className="text-[14px] font-bold text-white/90">{ms.rank}</span>
+                            {ms.unlocks === "earnings" && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">{t("profile.unlockEarnings")}</span>
+                            )}
+                            {ms.unlocks === "earnings_and_package" && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">{t("profile.unlockAll")}</span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            {isAchieved ? (
+                              <span className="text-[11px] text-green-400 font-medium">{t("profile.achieved")}</span>
+                            ) : isFailed || isExpired ? (
+                              <span className="text-[11px] text-red-400 font-medium">{t("profile.expired")}</span>
+                            ) : (
+                              <span className="text-[13px] font-bold text-yellow-400">{daysLeft}{t("profile.daysLeft")}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-[11px] text-white/40">{ms.desc}</div>
+
+                        {!isAchieved && !isFailed && hasRequirements && nodeType === "MAX" && (
+                          <div className="space-y-1.5">
+                            {ms.requiredHolding > 0 && (
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-white/40">{t("profile.holdingRequired")}: {ms.requiredHolding}U</span>
+                                <span className={holdingOk ? "text-green-400" : "text-red-400"}>
+                                  {vaultDeposited.toFixed(0)}U {holdingOk ? "✓" : "✗"}
+                                </span>
+                              </div>
+                            )}
+                            {ms.requiredReferrals > 0 && (
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-white/40">{t("profile.directNodeRequired")}: {ms.requiredReferrals}</span>
+                                <span className={referralsOk ? "text-green-400" : "text-red-400"}>
+                                  {directNodeReferrals}/{ms.requiredReferrals} {referralsOk ? "✓" : "✗"}
+                                </span>
+                              </div>
+                            )}
+                            {!requirementsMet && isCurrent && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <AlertTriangle className="h-3 w-3 text-yellow-400 shrink-0" />
+                                <span className="text-[10px] text-yellow-400/80">{t("profile.requirementNotMet")}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {!isAchieved && !isFailed && !isExpired && (
+                          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${Math.max(100 - (daysLeft / ms.days) * 100, 3)}%`,
+                                background: isCurrent
+                                  ? "linear-gradient(90deg, #eab308, #f59e0b)"
+                                  : "linear-gradient(90deg, #22c55e, #84cc16)",
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
 
             {activeTab === "purchase" && (
               <div className="space-y-2">
@@ -362,6 +527,107 @@ export default function ProfileNodesPage() {
           </div>
         </>
       )}
+
+      <Dialog open={showRequirementDialog} onOpenChange={setShowRequirementDialog}>
+        <DialogContent className="max-w-sm" style={{ background: "#111", border: "1px solid rgba(74, 222, 128, 0.2)" }}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[15px]">
+              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+              {t("profile.milestoneNotReady")}
+            </DialogTitle>
+            <DialogDescription className="text-[12px] text-white/40">
+              {t("profile.milestoneNotReadyDesc")} — {requirementDialogData?.rank}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {requirementDialogData && requirementDialogData.holdingRequired > 0 && (
+              <div
+                className="rounded-xl p-3 space-y-1"
+                style={{
+                  border: vaultDeposited >= requirementDialogData.holdingRequired
+                    ? "1px solid rgba(74, 222, 128, 0.3)"
+                    : "1px solid rgba(239, 68, 68, 0.3)",
+                  background: "rgba(0,0,0,0.3)",
+                }}
+              >
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-white/60">{t("profile.holdingRequired")}</span>
+                  <span className="font-bold text-white/90">{requirementDialogData.holdingRequired} USDC</span>
+                </div>
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-white/60">{t("profile.currentHolding")}</span>
+                  <span className={vaultDeposited >= requirementDialogData.holdingRequired ? "text-green-400 font-bold" : "text-red-400 font-bold"}>
+                    {vaultDeposited.toFixed(0)} USDC
+                  </span>
+                </div>
+                {vaultDeposited < requirementDialogData.holdingRequired && (
+                  <p className="text-[10px] text-yellow-400/70 mt-1">{t("profile.depositToMeet")}</p>
+                )}
+              </div>
+            )}
+            {requirementDialogData && requirementDialogData.referralsRequired > 0 && (
+              <div
+                className="rounded-xl p-3 space-y-1"
+                style={{
+                  border: directNodeReferrals >= requirementDialogData.referralsRequired
+                    ? "1px solid rgba(74, 222, 128, 0.3)"
+                    : "1px solid rgba(239, 68, 68, 0.3)",
+                  background: "rgba(0,0,0,0.3)",
+                }}
+              >
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-white/60">{t("profile.directNodeRequired")}</span>
+                  <span className="font-bold text-white/90">{requirementDialogData.referralsRequired}</span>
+                </div>
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-white/60">{t("profile.currentDirectNodes")}</span>
+                  <span className={directNodeReferrals >= requirementDialogData.referralsRequired ? "text-green-400 font-bold" : "text-red-400 font-bold"}>
+                    {directNodeReferrals}
+                  </span>
+                </div>
+                {directNodeReferrals < requirementDialogData.referralsRequired && (
+                  <p className="text-[10px] text-yellow-400/70 mt-1">{t("profile.referralToMeet")}</p>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-[12px]"
+              onClick={() => setShowRequirementDialog(false)}
+            >
+              {t("common.cancel")}
+            </Button>
+            {requirementDialogData && vaultDeposited < requirementDialogData.holdingRequired && (
+              <Button
+                size="sm"
+                className="flex-1 text-[12px]"
+                onClick={() => {
+                  setShowRequirementDialog(false);
+                  navigate("/vault");
+                }}
+              >
+                <Landmark className="mr-1 h-3 w-3" />
+                {t("profile.goToVault")}
+              </Button>
+            )}
+            {requirementDialogData && requirementDialogData.referralsRequired > 0 && directNodeReferrals < requirementDialogData.referralsRequired && vaultDeposited >= requirementDialogData.holdingRequired && (
+              <Button
+                size="sm"
+                className="flex-1 text-[12px]"
+                onClick={() => {
+                  setShowRequirementDialog(false);
+                  navigate("/profile/referral");
+                }}
+              >
+                {t("profile.inviteFriends")}
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
