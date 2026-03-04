@@ -219,43 +219,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {isConnected && referralLink && (
-        <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.05s both" }}>
-          <div
-            className="rounded-2xl p-4"
-            style={{ border: cardBorder, background: cardBg }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <Link2 className="h-4 w-4 text-primary" />
-              <span className="text-[13px] font-semibold text-white/80">{t("profile.inviteFriends")}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div
-                className="flex-1 min-w-0 rounded-lg px-3 py-2.5 font-mono text-[12px] text-white/50 truncate"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                {referralLink}
-              </div>
-              <button
-                onClick={() => copyToClipboard(referralLink)}
-                className="shrink-0 px-3 py-2.5 rounded-lg text-[12px] font-medium text-white/70 transition-colors hover:bg-white/5"
-                style={{ border: "1px solid rgba(255,255,255,0.12)" }}
-              >
-                <Copy className="h-4 w-4" />
-              </button>
-              <button
-                onClick={shareReferralLink}
-                className="shrink-0 px-3 py-2.5 rounded-lg text-[12px] font-medium text-primary transition-colors hover:bg-primary/5"
-                style={{ border: "1px solid rgba(74, 222, 128, 0.3)", background: "rgba(74, 222, 128, 0.06)" }}
-              >
-                <Share2 className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="mt-2 text-[11px] text-white/30">{t("profile.inviteFriendsDesc")}</div>
-          </div>
-        </div>
-      )}
-
       <div className="gradient-green-dark px-4 py-4 rounded-2xl mx-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.08s both" }}>
         <h2 className="text-[15px] font-bold mb-3" data-testid="text-profile-title">{t("profile.assetsOverview")}</h2>
         <div
@@ -338,6 +301,48 @@ export default function ProfilePage() {
             <p className="text-[13px] text-white/30" data-testid="text-connect-prompt">
               {t("common.connectWalletPrompt")}
             </p>
+          </div>
+        </div>
+      )}
+
+      {isConnected && referralLink && (
+        <div className="px-4" style={{ animation: "fadeSlideIn 0.4s ease-out 0.13s both" }}>
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              border: "1px solid rgba(74, 222, 128, 0.25)",
+              background: "linear-gradient(135deg, rgba(74, 222, 128, 0.06) 0%, rgba(10, 15, 10, 0.7) 100%)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "rgba(74, 222, 128, 0.15)" }}>
+                <Link2 className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <span className="text-[14px] font-bold text-white/90">{t("profile.inviteFriends")}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className="flex-1 min-w-0 rounded-lg px-3 py-2.5 font-mono text-[12px] text-primary/70 truncate"
+                style={{ background: "rgba(74, 222, 128, 0.04)", border: "1px solid rgba(74, 222, 128, 0.15)" }}
+              >
+                {referralLink}
+              </div>
+              <button
+                onClick={() => copyToClipboard(referralLink)}
+                className="shrink-0 px-3 py-2.5 rounded-lg text-[12px] font-medium text-white/80 transition-all hover:bg-white/5 active:scale-95"
+                style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.04)" }}
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+              <button
+                onClick={shareReferralLink}
+                className="shrink-0 px-3 py-2.5 rounded-lg text-[12px] font-medium text-white transition-all hover:brightness-110 active:scale-95"
+                style={{ border: "1px solid rgba(74, 222, 128, 0.4)", background: "rgba(74, 222, 128, 0.15)" }}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-2.5 text-[11px] text-white/45">{t("profile.inviteFriendsDesc")}</div>
           </div>
         </div>
       )}
