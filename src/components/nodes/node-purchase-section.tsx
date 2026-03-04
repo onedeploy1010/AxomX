@@ -121,10 +121,10 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
       <DialogContent
         className="max-w-[380px] p-0 overflow-hidden gap-0"
         style={{
-          background: "#0c0c0c",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: "#141414",
+          border: "1px solid rgba(255,255,255,0.45)",
           borderRadius: 24,
-          boxShadow: "0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,222,128,0.05)",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,222,128,0.08)",
         }}
       >
         <VisuallyHidden.Root>
@@ -135,8 +135,8 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
           className="relative overflow-hidden px-5 pt-5 pb-4"
           style={{
             background: isMAX
-              ? "linear-gradient(160deg, #0a2614 0%, #122e1a 40%, #0c0c0c 100%)"
-              : "linear-gradient(160deg, #141414 0%, #1a1a1a 40%, #0c0c0c 100%)",
+              ? "linear-gradient(160deg, #0f2818 0%, #152f1d 40%, #141414 100%)"
+              : "linear-gradient(160deg, #1a1a1a 0%, #1e1e1e 40%, #141414 100%)",
           }}
         >
           {isMAX && (
@@ -157,9 +157,9 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
                   else if (step === "confirm_payment") setStep(isMAX ? "check_requirements" : "select_rank");
                 }}
                 className="w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)" }}
               >
-                <ArrowLeft className="h-4 w-4 text-white/70" />
+                <ArrowLeft className="h-4 w-4 text-white/80" />
               </button>
             )}
             <div className="flex-1 min-w-0">
