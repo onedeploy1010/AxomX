@@ -135,7 +135,7 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
           <DialogDescription>{t("profile.confirmPaymentDesc")}</DialogDescription>
         </VisuallyHidden.Root>
         <div
-          className="relative overflow-hidden px-5 pt-5 pb-4"
+          className="relative overflow-hidden px-5 pt-6 pb-5"
           style={{
             background: isMAX
               ? "linear-gradient(160deg, #0f2818 0%, #152f1d 40%, #141414 100%)"
@@ -152,7 +152,7 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
             />
           )}
 
-          <div className="relative flex items-center gap-3 mb-3">
+          <div className="relative flex items-center gap-3 mb-4">
             {((step !== "select_rank" && isMAX) || (step === "confirm_payment" && !isMAX)) && (
               <button
                 onClick={() => {
@@ -190,12 +190,12 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
           </div>
 
           {isMAX && (
-            <div className="flex items-center gap-2 relative">
+            <div className="flex items-center gap-2 relative mt-1">
               {STEP_LABELS_MAX.map((label, i) => (
-                <div key={label} className="flex-1 flex flex-col items-center gap-1">
+                <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
                   <div className="w-full flex items-center gap-1">
                     <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold transition-all duration-300"
+                      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold transition-all duration-300"
                       style={{
                         background: i <= stepIndex
                           ? "linear-gradient(135deg, #22c55e, #16a34a)"
