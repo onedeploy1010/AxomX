@@ -117,9 +117,9 @@ export function PriceChart({
     "bg-yellow-500/15 text-yellow-400";
 
   const forecastLineColor =
-    direction === "BULLISH" ? "#22c55e" :
-    direction === "BEARISH" ? "#ef4444" :
-    "#eab308";
+    direction === "BULLISH" ? "#38bdf8" :
+    direction === "BEARISH" ? "#818cf8" :
+    "#38bdf8";
 
   useEffect(() => {
     if (hasData) {
@@ -294,10 +294,10 @@ export function PriceChart({
 
       if (isCandleMode) {
         // Render predicted candles with semi-transparent forecast colors
-        const fcUpColor = direction === "BEARISH" ? "rgba(255, 73, 118, 0.45)" : "rgba(0, 231, 160, 0.45)";
-        const fcDownColor = direction === "BEARISH" ? "rgba(255, 73, 118, 0.45)" : "rgba(0, 231, 160, 0.45)";
-        const fcUpBorder = direction === "BEARISH" ? "rgba(255, 73, 118, 0.7)" : "rgba(0, 231, 160, 0.7)";
-        const fcDownBorder = direction === "BEARISH" ? "rgba(255, 73, 118, 0.7)" : "rgba(0, 231, 160, 0.7)";
+        const fcUpColor = direction === "BEARISH" ? "rgba(129, 140, 248, 0.45)" : "rgba(56, 189, 248, 0.45)";
+        const fcDownColor = direction === "BEARISH" ? "rgba(129, 140, 248, 0.45)" : "rgba(56, 189, 248, 0.45)";
+        const fcUpBorder = direction === "BEARISH" ? "rgba(129, 140, 248, 0.7)" : "rgba(56, 189, 248, 0.7)";
+        const fcDownBorder = direction === "BEARISH" ? "rgba(129, 140, 248, 0.7)" : "rgba(56, 189, 248, 0.7)";
 
         const forecastCandleSeries = chart.addCandlestickSeries({
           upColor: fcUpColor,
