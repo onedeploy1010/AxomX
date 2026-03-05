@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { Loader2, ChevronRight, ArrowLeft, Zap, ShieldCheck } from "lucide-react";
+import { Loader2, Zap, ShieldCheck } from "lucide-react";
 import { NODE_PLANS, NODE_MILESTONES } from "@/lib/data";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
 import { purchaseNode } from "@/lib/api";
@@ -10,8 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { NODE_CONTRACT_ADDRESS } from "@/lib/contracts";
 import { useTranslation } from "react-i18next";
-
-type Step = "info" | "confirm_payment";
 
 interface NodePurchaseDialogProps {
   open: boolean;
@@ -24,9 +22,11 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
   const { t } = useTranslation();
   const { toast } = useToast();
   const payment = usePayment();
-  const [step, setStep] = useState<Step>("info");
 
   const plan = NODE_PLANS[nodeType];
+  const isMAX = nodeType === "MAX";
+  const dailyRate = isMAX ? "0.9%" : "0.5%";
+  const milestones = NODE_MILESTONES[nodeType];
 
   const purchaseMutation = useMutation({
     mutationFn: async () => {
@@ -61,30 +61,22 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
 
   const handleClose = () => {
     if (purchaseMutation.isPending) return;
-    setStep("info");
     onOpenChange(false);
-  };
-
-  const handleConfirm = () => {
-    setStep("confirm_payment");
   };
 
   const handlePurchase = () => {
     purchaseMutation.mutate();
   };
 
-  const isMAX = nodeType === "MAX";
-  const dailyRate = isMAX ? "0.9%" : "0.5%";
-
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         className="max-w-[380px] p-0 overflow-hidden gap-0"
         style={{
-          background: "#141414",
+          background: "#1a1a1a",
           border: "1px solid rgba(255,255,255,0.45)",
           borderRadius: 24,
-          boxShadow: "0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,222,128,0.08)",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,222,128,0.1)",
           maxHeight: "85vh",
           display: "flex",
           flexDirection: "column" as const,
@@ -94,182 +86,138 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
           <DialogTitle>{isMAX ? t("profile.applyLargeNode") : t("profile.applySmallNode")}</DialogTitle>
           <DialogDescription>{t("profile.confirmPaymentDesc")}</DialogDescription>
         </VisuallyHidden.Root>
+
         <div
-          className="relative overflow-hidden px-5 pt-6 pb-5"
+          className="relative overflow-hidden px-5 pt-6 pb-4"
           style={{
-            background: isMAX
-              ? "linear-gradient(160deg, #0f2818 0%, #152f1d 40%, #141414 100%)"
-              : "linear-gradient(160deg, #1a1a1a 0%, #1e1e1e 40%, #141414 100%)",
+            background: "linear-gradient(160deg, #142a1c 0%, #1a2f20 40%, #1a1a1a 100%)",
           }}
         >
-          {isMAX && (
-            <div
-              className="absolute top-0 right-0 w-32 h-32 opacity-20"
-              style={{
-                background: "radial-gradient(circle, rgba(74,222,128,0.4) 0%, transparent 70%)",
-                filter: "blur(20px)",
-              }}
-            />
-          )}
+          <div
+            className="absolute top-0 right-0 w-36 h-36 opacity-25"
+            style={{
+              background: "radial-gradient(circle, rgba(74,222,128,0.5) 0%, transparent 70%)",
+              filter: "blur(25px)",
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 w-24 h-24 opacity-15"
+            style={{
+              background: "radial-gradient(circle, rgba(34,197,94,0.4) 0%, transparent 70%)",
+              filter: "blur(20px)",
+            }}
+          />
 
           <div className="relative flex items-center gap-3">
-            {step === "confirm_payment" && (
-              <button
-                onClick={() => setStep("info")}
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0"
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)" }}
-              >
-                <ArrowLeft className="h-4 w-4 text-white/80" />
-              </button>
-            )}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                {isMAX ? (
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #166534, #15803d)", boxShadow: "0 2px 8px rgba(22,101,52,0.4)" }}>
-                    <Zap className="h-3.5 w-3.5 text-green-200" />
-                  </div>
-                ) : (
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #374151, #4b5563)" }}>
-                    <ShieldCheck className="h-3.5 w-3.5 text-gray-200" />
-                  </div>
-                )}
-                <h2 className="text-[16px] font-bold text-white tracking-tight">
-                  {isMAX ? t("profile.applyLargeNode") : t("profile.applySmallNode")}
-                </h2>
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                    boxShadow: "0 4px 12px rgba(34,197,94,0.4)",
+                  }}
+                >
+                  {isMAX ? <Zap className="h-4.5 w-4.5 text-white" /> : <ShieldCheck className="h-4.5 w-4.5 text-white" />}
+                </div>
+                <div>
+                  <h2 className="text-[17px] font-bold text-white tracking-tight">
+                    {isMAX ? t("profile.applyLargeNode") : t("profile.applySmallNode")}
+                  </h2>
+                  <p className="text-[11px] text-white/40 mt-0.5">{t("profile.confirmPaymentDesc")}</p>
+                </div>
               </div>
-              <p className="text-[11px] text-white/30 mt-1 ml-9">
-                {step === "info" && (isMAX ? t("profile.largeNodeDesc") : t("profile.miniNodeDesc"))}
-                {step === "confirm_payment" && t("profile.confirmPaymentDesc")}
-              </p>
             </div>
           </div>
         </div>
 
-        <div className="px-5 pb-5 pt-3 flex-1 node-dialog-scroll" style={{ minHeight: 0, overflowY: "auto" }}>
-          {step === "info" && (
-            <div className="space-y-3">
-              <div
-                className="rounded-2xl p-4 relative overflow-hidden"
-                style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
-              >
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="rounded-xl p-3 text-center" style={{ background: "#1a1a1a" }}>
-                    <div className="text-[10px] text-white/30 mb-0.5">{t("profile.contribution")}</div>
-                    <div className="text-[15px] font-bold text-white">${plan.price}</div>
-                  </div>
-                  <div className="rounded-xl p-3 text-center" style={{ background: "#1a1a1a" }}>
-                    <div className="text-[10px] text-white/30 mb-0.5">{t("profile.nodeTotal")}</div>
-                    <div className="text-[15px] font-bold text-white">${plan.frozenAmount.toLocaleString()}</div>
-                  </div>
-                </div>
-                <div className="rounded-xl p-3 text-center" style={{ background: "#1a1a1a" }}>
-                  <div className="text-[10px] text-white/30 mb-0.5">{t("profile.dailyRelease")}</div>
-                  <div className="text-[15px] font-bold text-green-400">{dailyRate}</div>
-                  <div className="text-[9px] text-white/25 mt-0.5">{t("profile.releaseByMA")}</div>
-                </div>
-                <div className="rounded-xl p-3 space-y-1 mt-3" style={{ background: "#1a1a1a" }}>
-                  <div className="text-[10px] text-white/35 font-semibold uppercase tracking-wider mb-1">{t("profile.milestoneSchedule")}</div>
-                  {NODE_MILESTONES[nodeType].map((m, i) => (
-                    <div key={i} className="flex items-center gap-2 py-0.5">
-                      <div className="w-1 h-1 rounded-full bg-green-400/50" />
-                      <span className="text-[10px] text-white/50">
-                        {t("profile.dayN", { n: m.days })} → {m.rank}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <button
-                className="w-full rounded-2xl h-12 flex items-center justify-center gap-2 text-[14px] font-bold text-white transition-all active:scale-[0.97]"
-                style={{
-                  background: isMAX
-                    ? "linear-gradient(135deg, #16a34a, #15803d)"
-                    : "linear-gradient(135deg, #374151, #4b5563)",
-                  boxShadow: isMAX ? "0 4px 16px rgba(22,163,74,0.3)" : "0 4px 16px rgba(55,65,81,0.3)",
-                }}
-                onClick={handleConfirm}
-              >
-                {t("common.next")}
-                <ChevronRight className="h-4 w-4" />
-              </button>
+        <div className="px-5 pb-5 pt-4 flex-1 node-dialog-scroll" style={{ minHeight: 0, overflowY: "auto" }}>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="rounded-xl p-3 text-center" style={{ background: "#222", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="text-[9px] text-white/40 mb-1 font-medium">{t("profile.contribution")}</div>
+              <div className="text-[15px] font-bold text-white">${plan.price}</div>
             </div>
-          )}
+            <div className="rounded-xl p-3 text-center" style={{ background: "#222", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="text-[9px] text-white/40 mb-1 font-medium">{t("profile.nodeTotal")}</div>
+              <div className="text-[15px] font-bold text-white">${plan.frozenAmount.toLocaleString()}</div>
+            </div>
+            <div className="rounded-xl p-3 text-center" style={{ background: "#222", border: "1px solid rgba(74,222,128,0.12)" }}>
+              <div className="text-[9px] text-white/40 mb-1 font-medium">{t("profile.dailyRelease")}</div>
+              <div className="text-[15px] font-bold text-green-400">{dailyRate}</div>
+            </div>
+          </div>
 
-          {step === "confirm_payment" && (
-            <div className="space-y-3">
+          <div className="text-[9px] text-green-400/50 text-center mb-4 font-medium">{t("profile.releaseByMA")}</div>
+
+          <div
+            className="rounded-xl p-4 mb-4"
+            style={{ background: "#222", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <div className="text-[10px] text-white/45 font-semibold uppercase tracking-wider mb-3">{t("profile.milestoneSchedule")}</div>
+            <div className="relative">
               <div
-                className="rounded-2xl p-5 relative overflow-hidden"
-                style={{
-                  background: "linear-gradient(135deg, #0f1f15, #141414)",
-                  border: "1px solid rgba(74,222,128,0.1)",
-                }}
-              >
-                <div className="absolute inset-0 opacity-5" style={{ background: "radial-gradient(circle at 50% 0%, rgba(74,222,128,0.5), transparent 60%)" }} />
-                <div className="relative">
-                  <div className="text-center mb-4">
+                className="absolute left-[6px] top-1 bottom-1 w-[2px] rounded-full"
+                style={{ background: "linear-gradient(180deg, #22c55e, rgba(34,197,94,0.15))" }}
+              />
+              <div className="space-y-2.5">
+                {milestones.map((m, i) => (
+                  <div key={i} className="flex items-center gap-3 relative pl-0">
                     <div
-                      className="w-14 h-14 rounded-2xl mx-auto mb-2 flex items-center justify-center"
+                      className="w-[14px] h-[14px] rounded-full shrink-0 flex items-center justify-center relative z-10"
                       style={{
-                        background: isMAX
-                          ? "linear-gradient(135deg, #166534, #15803d)"
-                          : "linear-gradient(135deg, #374151, #4b5563)",
-                        boxShadow: isMAX ? "0 6px 24px rgba(22,101,52,0.35)" : "0 6px 24px rgba(55,65,81,0.3)",
+                        background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                        boxShadow: "0 0 8px rgba(34,197,94,0.3)",
                       }}
                     >
-                      {isMAX ? <Zap className="h-6 w-6 text-green-200" /> : <ShieldCheck className="h-6 w-6 text-gray-200" />}
+                      <div className="w-[5px] h-[5px] rounded-full bg-white" />
                     </div>
-                    <div className="text-[12px] text-white/40">
-                      {isMAX ? t("profile.applyLargeNode") : t("profile.applySmallNode")}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between py-1.5">
-                      <span className="text-[12px] text-white/40">{t("profile.contribution")}</span>
-                      <span className="text-[13px] font-semibold text-white/80">${plan.price} USDC</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1.5">
-                      <span className="text-[12px] text-white/40">{t("profile.nodeTotal")}</span>
-                      <span className="text-[13px] font-semibold text-white/60">${plan.frozenAmount.toLocaleString()} USDC</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1.5">
-                      <span className="text-[12px] text-white/40">{t("profile.dailyRelease")}</span>
-                      <span className="text-[13px] font-semibold text-green-400">{dailyRate}</span>
-                    </div>
-                    <div className="h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-[13px] font-bold text-white/60">{t("profile.totalPayment")}</span>
-                      <span className="text-[17px] font-black text-primary">${plan.price}</span>
+                    <div className="flex items-center gap-2 flex-1">
+                      <span
+                        className="text-[11px] font-bold px-2 py-0.5 rounded-md"
+                        style={{ background: "rgba(74,222,128,0.1)", color: "#4ade80" }}
+                      >
+                        {t("profile.dayN", { n: m.days })}
+                      </span>
+                      <span className="text-[11px] text-white/50">→</span>
+                      <span className="text-[12px] font-bold text-white/80">{m.rank}</span>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-
-              <button
-                className="w-full rounded-2xl h-12 flex items-center justify-center gap-2 text-[14px] font-bold text-white transition-all active:scale-[0.97] disabled:opacity-50"
-                style={{
-                  background: purchaseMutation.isPending
-                    ? "linear-gradient(135deg, #374151, #4b5563)"
-                    : "linear-gradient(135deg, #16a34a, #15803d)",
-                  boxShadow: purchaseMutation.isPending ? "none" : "0 4px 20px rgba(22,163,74,0.35)",
-                }}
-                onClick={handlePurchase}
-                disabled={purchaseMutation.isPending}
-              >
-                {purchaseMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {getPaymentStatusLabel(payment.status) || t("common.processing")}
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-4 w-4" />
-                    {t("profile.confirmPurchase")}
-                  </>
-                )}
-              </button>
             </div>
-          )}
+          </div>
+
+          <div
+            className="rounded-xl p-3.5 mb-4 flex items-center justify-between"
+            style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.03))", border: "1px solid rgba(74,222,128,0.15)" }}
+          >
+            <span className="text-[13px] font-bold text-white/70">{t("profile.totalPayment")}</span>
+            <span className="text-[19px] font-black text-green-400">${plan.price} <span className="text-[11px] font-semibold text-white/40">USDC</span></span>
+          </div>
+
+          <button
+            className="w-full rounded-2xl h-12 flex items-center justify-center gap-2 text-[14px] font-bold text-white transition-all active:scale-[0.97] disabled:opacity-50"
+            style={{
+              background: purchaseMutation.isPending
+                ? "linear-gradient(135deg, #374151, #4b5563)"
+                : "linear-gradient(135deg, #22c55e, #16a34a)",
+              boxShadow: purchaseMutation.isPending ? "none" : "0 4px 20px rgba(34,197,94,0.35)",
+            }}
+            onClick={handlePurchase}
+            disabled={purchaseMutation.isPending}
+          >
+            {purchaseMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {getPaymentStatusLabel(payment.status) || t("common.processing")}
+              </>
+            ) : (
+              <>
+                <ShieldCheck className="h-4 w-4" />
+                {t("profile.confirmPurchase")}
+              </>
+            )}
+          </button>
         </div>
       </DialogContent>
     </Dialog>
