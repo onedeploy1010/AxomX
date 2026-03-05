@@ -8,7 +8,7 @@ import { ThirdwebProvider, ConnectButton, useActiveAccount } from "thirdweb/reac
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { useThirdwebClient } from "@/hooks/use-thirdweb";
 import { BottomNav } from "@/components/bottom-nav";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import Dashboard from "@/pages/dashboard";
@@ -34,27 +34,32 @@ const wallets = [
   createWallet("io.rabby"),
 ];
 
+function getRefCodeFromUrl(): string | null {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlRef = urlParams.get("ref");
+  if (urlRef) {
+    sessionStorage.setItem("coinmax_ref_code", urlRef);
+    urlParams.delete("ref");
+    const newUrl = urlParams.toString()
+      ? `${window.location.pathname}?${urlParams.toString()}`
+      : window.location.pathname;
+    window.history.replaceState({}, "", newUrl);
+    return urlRef;
+  }
+  return sessionStorage.getItem("coinmax_ref_code");
+}
+
 function WalletSync() {
   const account = useActiveAccount();
+  const refCodeRef = useRef<string | null>(null);
 
-  // Extract ref code from URL on mount (before wallet connects)
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlRef = urlParams.get("ref");
-    if (urlRef) {
-      sessionStorage.setItem("coinmax_ref_code", urlRef);
-      urlParams.delete("ref");
-      const newUrl = urlParams.toString()
-        ? `${window.location.pathname}?${urlParams.toString()}`
-        : window.location.pathname;
-      window.history.replaceState({}, "", newUrl);
-    }
+    refCodeRef.current = getRefCodeFromUrl();
   }, []);
 
-  // Auth wallet with ref code when wallet connects
   useEffect(() => {
     if (account?.address) {
-      const refCode = sessionStorage.getItem("coinmax_ref_code");
+      const refCode = refCodeRef.current || sessionStorage.getItem("coinmax_ref_code");
       authWallet(account.address, refCode || undefined)
         .then(() => { if (refCode) sessionStorage.removeItem("coinmax_ref_code"); })
         .catch(console.error);
