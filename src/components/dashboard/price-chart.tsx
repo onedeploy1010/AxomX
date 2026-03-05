@@ -109,7 +109,10 @@ export function PriceChart({
   const dataVersionRef = useRef(0);
 
   const hasOhlc = !!(ohlcData && ohlcData.length > 0);
-  const hasData = hasOhlc || !!(data && data.length > 0);
+  const hasDataNow = hasOhlc || !!(data && data.length > 0);
+  const hadDataRef = useRef(false);
+  if (hasDataNow) hadDataRef.current = true;
+  const hasData = hasDataNow || hadDataRef.current;
 
   const direction = forecast?.direction || "NEUTRAL";
   const confidence = forecast?.confidence || 0;

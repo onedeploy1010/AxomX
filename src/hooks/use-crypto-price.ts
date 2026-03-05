@@ -105,20 +105,39 @@ function parseKlines(raw: any[], tf: ChartTimeframe): OhlcDataPoint[] {
   }));
 }
 
+async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchBinanceKlines(symbol: string, timeframe: ChartTimeframe): Promise<OhlcDataPoint[]> {
   const pair = symbol === "DOGE" ? "DOGEUSDT" : `${symbol}USDT`;
   const cfg = BINANCE_INTERVALS[timeframe];
-  const res = await fetch(
-    `https://api.binance.us/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
-  );
-  if (!res.ok) {
-    const fallbackRes = await fetch(
-      `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`
-    );
-    if (!fallbackRes.ok) throw new Error("Failed to fetch klines");
-    return parseKlines(await fallbackRes.json(), timeframe);
-  }
-  return parseKlines(await res.json(), timeframe);
+  const url = `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`;
+  const urlUs = `https://api.binance.us/api/v3/klines?symbol=${pair}&interval=${cfg.interval}&limit=${cfg.limit}`;
+
+  try {
+    const res = await fetchWithTimeout(url);
+    if (res.ok) return parseKlines(await res.json(), timeframe);
+  } catch {}
+
+  try {
+    const res = await fetchWithTimeout(urlUs);
+    if (res.ok) return parseKlines(await res.json(), timeframe);
+  } catch {}
+
+  try {
+    const data = await proxyFetch(url);
+    if (Array.isArray(data)) return parseKlines(data, timeframe);
+  } catch {}
+
+  throw new Error("Failed to fetch klines from all sources");
 }
 
 export function useBinanceChart(symbol: string, timeframe: ChartTimeframe) {
@@ -133,8 +152,11 @@ export function useBinanceChart(symbol: string, timeframe: ChartTimeframe) {
       }));
     },
     refetchInterval: timeframe === "1m" ? 30000 : timeframe === "5m" ? 30000 : 60000,
-    staleTime: timeframe === "1m" ? 20000 : 30000,
+    staleTime: timeframe === "1m" ? 25000 : 30000,
     placeholderData: keepPreviousData,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -143,9 +165,12 @@ export function useBinanceKlines(symbol: string, timeframe: ChartTimeframe) {
     queryKey: ["binance-klines", symbol, timeframe],
     queryFn: () => fetchBinanceKlines(symbol, timeframe),
     refetchInterval: timeframe === "1m" ? 30000 : timeframe === "5m" ? 30000 : 60000,
-    staleTime: timeframe === "1m" ? 20000 : 30000,
+    staleTime: timeframe === "1m" ? 25000 : 30000,
     placeholderData: keepPreviousData,
     structuralSharing: true,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    refetchOnWindowFocus: false,
   });
 }
 
