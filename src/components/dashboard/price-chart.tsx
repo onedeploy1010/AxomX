@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   createChart,
   ColorType,
@@ -52,36 +52,37 @@ const TIMEFRAMES: { key: ChartTimeframe; label: string }[] = [
   { key: "1W", label: "1W" },
 ];
 
-const CHART_TYPES: { key: ChartType; icon: typeof CandlestickChart; label: string }[] = [
-  { key: "candle", icon: CandlestickChart, label: "K" },
+const CHART_TYPES: { key: ChartType; icon: any; label: string }[] = [
+  { key: "candle", icon: CandlestickChart, label: "Candlestick" },
   { key: "line", icon: LineChart, label: "Line" },
   { key: "area", icon: AreaChart, label: "Area" },
-  { key: "bar", icon: BarChart3, label: "OHLC" },
+  { key: "bar", icon: BarChart3, label: "Bar" },
 ];
 
-const UP_COLOR = "#00e7a0";
-const DOWN_COLOR = "#ff4976";
-const GRID_COLOR = "rgba(255, 255, 255, 0.03)";
-const TEXT_COLOR = "rgba(180, 195, 190, 0.65)";
-const CROSSHAIR_COLOR = "rgba(0, 231, 160, 0.3)";
-const BG_COLOR = "transparent";
-
-function toUTC(ts: number): UTCTimestamp {
-  return Math.floor(ts / 1000) as UTCTimestamp;
+function getVisibleBars(tf?: ChartTimeframe): number {
+  if (!tf) return 60;
+  switch (tf) {
+    case "1m": return 40;
+    case "5m": return 50;
+    case "15m": return 50;
+    case "30m": return 60;
+    case "1H": return 60;
+    case "4H": return 60;
+    case "1D": return 80;
+    case "1W": return 52;
+    default: return 60;
+  }
 }
 
-function getVisibleBars(timeframe?: ChartTimeframe): number {
-  switch (timeframe) {
-    case "1m": return 40;
-    case "5m": return 40;
-    case "15m": return 36;
-    case "30m": return 32;
-    case "1H": return 30;
-    case "4H": return 28;
-    case "1D": return 30;
-    case "1W": return 26;
-    default: return 40;
-  }
+const BG_COLOR = "transparent";
+const TEXT_COLOR = "rgba(180, 195, 190, 0.6)";
+const GRID_COLOR = "rgba(255, 255, 255, 0.025)";
+const CROSSHAIR_COLOR = "rgba(0, 231, 160, 0.3)";
+const UP_COLOR = "#00e7a0";
+const DOWN_COLOR = "#ff4976";
+
+function toUTC(ts: number): UTCTimestamp {
+  return (Math.floor(ts / 1000)) as UTCTimestamp;
 }
 
 export function PriceChart({
@@ -101,11 +102,14 @@ export function PriceChart({
   const mainSeriesRef = useRef<ISeriesApi<any> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const forecastSeriesRef = useRef<ISeriesApi<any> | null>(null);
+  const forecastPriceLineRef = useRef<any>(null);
   const [chartType, setChartType] = useState<ChartType>("candle");
   const [visible, setVisible] = useState(false);
+  const prevChartTypeRef = useRef<ChartType>(chartType);
+  const dataVersionRef = useRef(0);
 
-  const hasOhlc = ohlcData && ohlcData.length > 0;
-  const hasData = hasOhlc || (data && data.length > 0);
+  const hasOhlc = !!(ohlcData && ohlcData.length > 0);
+  const hasData = hasOhlc || !!(data && data.length > 0);
 
   const direction = forecast?.direction || "NEUTRAL";
   const confidence = forecast?.confidence || 0;
@@ -126,17 +130,22 @@ export function PriceChart({
     setVisible(false);
   }, [hasData]);
 
-  const buildChart = useCallback(() => {
-    const container = chartContainerRef.current;
-    if (!container) return;
-
+  const destroyChart = useCallback(() => {
     if (chartRef.current) {
       chartRef.current.remove();
       chartRef.current = null;
       mainSeriesRef.current = null;
       volumeSeriesRef.current = null;
       forecastSeriesRef.current = null;
+      forecastPriceLineRef.current = null;
     }
+  }, []);
+
+  const createChartInstance = useCallback(() => {
+    const container = chartContainerRef.current;
+    if (!container) return;
+
+    destroyChart();
 
     const chart = createChart(container, {
       width: container.clientWidth,
@@ -184,36 +193,24 @@ export function PriceChart({
 
     chartRef.current = chart;
 
-    // Main series
     let mainSeries: ISeriesApi<any>;
 
-    if (hasOhlc && (chartType === "candle" || chartType === "bar")) {
-      if (chartType === "candle") {
-        mainSeries = chart.addCandlestickSeries({
-          upColor: UP_COLOR,
-          downColor: DOWN_COLOR,
-          borderUpColor: UP_COLOR,
-          borderDownColor: DOWN_COLOR,
-          wickUpColor: UP_COLOR,
-          wickDownColor: DOWN_COLOR,
-        });
-      } else {
-        mainSeries = chart.addBarSeries({
-          upColor: UP_COLOR,
-          downColor: DOWN_COLOR,
-          thinBars: false,
-        });
-      }
-
-      const candleData: CandlestickData[] = ohlcData!.map(d => ({
-        time: toUTC(d.timestamp),
-        open: d.open,
-        high: d.high,
-        low: d.low,
-        close: d.close,
-      }));
-      mainSeries.setData(candleData);
-    } else if (hasOhlc && chartType === "area") {
+    if (chartType === "candle") {
+      mainSeries = chart.addCandlestickSeries({
+        upColor: UP_COLOR,
+        downColor: DOWN_COLOR,
+        borderUpColor: UP_COLOR,
+        borderDownColor: DOWN_COLOR,
+        wickUpColor: UP_COLOR,
+        wickDownColor: DOWN_COLOR,
+      });
+    } else if (chartType === "bar") {
+      mainSeries = chart.addBarSeries({
+        upColor: UP_COLOR,
+        downColor: DOWN_COLOR,
+        thinBars: false,
+      });
+    } else if (chartType === "area") {
       mainSeries = chart.addAreaSeries({
         topColor: "rgba(0, 231, 160, 0.25)",
         bottomColor: "rgba(0, 231, 160, 0.01)",
@@ -223,12 +220,7 @@ export function PriceChart({
         crosshairMarkerBorderColor: UP_COLOR,
         crosshairMarkerBackgroundColor: "#0a0f0d",
       });
-      const lineData: LineData[] = ohlcData!.map(d => ({
-        time: toUTC(d.timestamp),
-        value: d.close,
-      }));
-      mainSeries.setData(lineData);
-    } else if (hasOhlc && chartType === "line") {
+    } else {
       mainSeries = chart.addLineSeries({
         color: UP_COLOR,
         lineWidth: 2,
@@ -236,73 +228,109 @@ export function PriceChart({
         crosshairMarkerBorderColor: UP_COLOR,
         crosshairMarkerBackgroundColor: "#0a0f0d",
       });
-      const lineData: LineData[] = ohlcData!.map(d => ({
-        time: toUTC(d.timestamp),
-        value: d.close,
-      }));
-      mainSeries.setData(lineData);
-    } else if (data && data.length > 0) {
-      mainSeries = chart.addAreaSeries({
-        topColor: "rgba(0, 231, 160, 0.25)",
-        bottomColor: "rgba(0, 231, 160, 0.01)",
-        lineColor: UP_COLOR,
-        lineWidth: 2,
-      });
-      const lineData: LineData[] = data.map(d => ({
-        time: toUTC(d.timestamp),
-        value: d.price,
-      }));
-      mainSeries.setData(lineData);
-    } else {
-      return;
     }
 
     mainSeriesRef.current = mainSeries;
 
-    // Volume histogram
     if (hasOhlc) {
       const volumeSeries = chart.addHistogramSeries({
         priceFormat: { type: "volume" },
         priceScaleId: "volume",
       });
-
       chart.priceScale("volume").applyOptions({
         scaleMargins: { top: 0.82, bottom: 0 },
       });
-
-      const volData: HistogramData[] = ohlcData!.map(d => ({
-        time: toUTC(d.timestamp),
-        value: d.volume,
-        color: d.close >= d.open ? "rgba(0, 231, 160, 0.18)" : "rgba(255, 73, 118, 0.18)",
-      }));
-      volumeSeries.setData(volData);
       volumeSeriesRef.current = volumeSeries;
     }
 
-    // AI forecast overlay
-    if (forecast?.forecastPoints?.length && hasOhlc) {
-      const lastCandle = ohlcData![ohlcData!.length - 1];
+    const handleResize = () => {
+      if (chartRef.current && container) {
+        chartRef.current.applyOptions({ width: container.clientWidth });
+      }
+    };
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [chartType, destroyChart, hasOhlc]);
+
+  useEffect(() => {
+    const cleanup = createChartInstance();
+    dataVersionRef.current++;
+    return () => {
+      cleanup?.();
+      destroyChart();
+    };
+  }, [createChartInstance, destroyChart]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    const mainSeries = mainSeriesRef.current;
+    const volumeSeries = volumeSeriesRef.current;
+    if (!chart || !mainSeries) return;
+
+    if (forecastSeriesRef.current) {
+      try { chart.removeSeries(forecastSeriesRef.current); } catch {}
+      forecastSeriesRef.current = null;
+    }
+    if (forecastPriceLineRef.current) {
+      try { mainSeries.removePriceLine(forecastPriceLineRef.current); } catch {}
+      forecastPriceLineRef.current = null;
+    }
+
+    if (hasOhlc && ohlcData) {
+      if (chartType === "candle" || chartType === "bar") {
+        const candleData: CandlestickData[] = ohlcData.map(d => ({
+          time: toUTC(d.timestamp),
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+        }));
+        mainSeries.setData(candleData);
+      } else {
+        const lineData: LineData[] = ohlcData.map(d => ({
+          time: toUTC(d.timestamp),
+          value: d.close,
+        }));
+        mainSeries.setData(lineData);
+      }
+
+      if (volumeSeries) {
+        const volData: HistogramData[] = ohlcData.map(d => ({
+          time: toUTC(d.timestamp),
+          value: d.volume,
+          color: d.close >= d.open ? "rgba(0, 231, 160, 0.18)" : "rgba(255, 73, 118, 0.18)",
+        }));
+        volumeSeries.setData(volData);
+      }
+    } else if (data && data.length > 0) {
+      const lineData: LineData[] = data.map(d => ({
+        time: toUTC(d.timestamp),
+        value: d.price,
+      }));
+      mainSeries.setData(lineData);
+    }
+
+    if (forecast?.forecastPoints?.length && hasOhlc && ohlcData) {
+      const lastCandle = ohlcData[ohlcData.length - 1];
       const prevPrice = lastCandle.close;
-
-      // Build price sequence: [lastClose, fp1, fp2, ...]
       const priceSeq = [prevPrice, ...forecast.forecastPoints.map(fp => fp.price)];
-
       const isCandleMode = chartType === "candle" || chartType === "bar";
 
       if (isCandleMode) {
-        // Render predicted candles with semi-transparent forecast colors
-        const fcUpColor = "rgba(56, 189, 248, 0.45)";
-        const fcDownColor = "rgba(56, 189, 248, 0.45)";
-        const fcUpBorder = "rgba(56, 189, 248, 0.7)";
-        const fcDownBorder = "rgba(56, 189, 248, 0.7)";
+        const fcColor = "rgba(56, 189, 248, 0.45)";
+        const fcBorder = "rgba(56, 189, 248, 0.7)";
 
         const forecastCandleSeries = chart.addCandlestickSeries({
-          upColor: fcUpColor,
-          downColor: fcDownColor,
-          borderUpColor: fcUpBorder,
-          borderDownColor: fcDownBorder,
-          wickUpColor: fcUpBorder,
-          wickDownColor: fcDownBorder,
+          upColor: fcColor,
+          downColor: fcColor,
+          borderUpColor: fcBorder,
+          borderDownColor: fcBorder,
+          wickUpColor: fcBorder,
+          wickDownColor: fcBorder,
         });
 
         const forecastCandles: CandlestickData[] = forecast.forecastPoints.map((fp, i) => {
@@ -323,7 +351,6 @@ export function PriceChart({
         forecastCandleSeries.setData(forecastCandles);
         forecastSeriesRef.current = forecastCandleSeries;
 
-        // Mark first and last forecast candles
         forecastCandleSeries.setMarkers([
           {
             time: toUTC(forecast.forecastPoints[0].timestamp) as UTCTimestamp,
@@ -343,7 +370,6 @@ export function PriceChart({
           },
         ]);
       } else {
-        // Line/area modes: render as dashed line
         const forecastLineSeries = chart.addLineSeries({
           color: forecastLineColor,
           lineWidth: 2,
@@ -378,9 +404,8 @@ export function PriceChart({
       }
     }
 
-    // Target price line
     if (targetPrice && mainSeries) {
-      mainSeries.createPriceLine({
+      forecastPriceLineRef.current = mainSeries.createPriceLine({
         price: targetPrice,
         color: forecastLineColor,
         lineWidth: 1,
@@ -394,41 +419,19 @@ export function PriceChart({
     const forecastBars = forecast?.forecastPoints?.length || 0;
     const totalBars = baseBars + forecastBars;
     const visibleBars = getVisibleBars(selectedTimeframe);
-    if (baseBars > visibleBars) {
-      chart.timeScale().setVisibleLogicalRange({
-        from: baseBars - visibleBars,
-        to: totalBars + 5,
-      });
-    } else {
-      chart.timeScale().fitContent();
+    if (dataVersionRef.current <= 2) {
+      if (baseBars > visibleBars) {
+        chart.timeScale().setVisibleLogicalRange({
+          from: baseBars - visibleBars,
+          to: totalBars + 5,
+        });
+      } else {
+        chart.timeScale().fitContent();
+      }
     }
+    dataVersionRef.current++;
+  }, [ohlcData, data, forecast, targetPrice, forecastLineColor, hasOhlc, chartType, selectedTimeframe, t]);
 
-    // Resize handler
-    const handleResize = () => {
-      if (chartRef.current && container) {
-        chartRef.current.applyOptions({ width: container.clientWidth });
-      }
-    };
-    const resizeObserver = new ResizeObserver(handleResize);
-    resizeObserver.observe(container);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [ohlcData, data, chartType, forecast, targetPrice, forecastLineColor, hasOhlc, selectedTimeframe, t]);
-
-  useEffect(() => {
-    const cleanup = buildChart();
-    return () => {
-      cleanup?.();
-      if (chartRef.current) {
-        chartRef.current.remove();
-        chartRef.current = null;
-      }
-    };
-  }, [buildChart]);
-
-  // OHLC info display
   const lastCandle = hasOhlc ? ohlcData![ohlcData!.length - 1] : null;
   const priceChange = lastCandle ? lastCandle.close - lastCandle.open : 0;
   const priceChangePercent = lastCandle && lastCandle.open ? ((priceChange / lastCandle.open) * 100) : 0;
@@ -518,7 +521,6 @@ export function PriceChart({
         </div>
       )}
 
-      {/* Chart */}
       {isLoading || !hasData ? (
         <Skeleton className="h-[280px] w-full rounded-lg" />
       ) : (
@@ -533,7 +535,6 @@ export function PriceChart({
         >
 
           <div ref={chartContainerRef} className="w-full tv-hide-logo" style={{ height: 280 }} />
-          {/* Custom branding replacing TV logo */}
           <div className="absolute bottom-1.5 left-2 text-[9px] font-bold tracking-widest text-white/[0.06] pointer-events-none select-none">
             NEXA AI
           </div>
