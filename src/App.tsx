@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThirdwebProvider, ConnectButton, useActiveAccount } from "thirdweb/react";
-import { createWallet, inAppWallet } from "thirdweb/wallets";
+import { createWallet } from "thirdweb/wallets";
 import { useThirdwebClient } from "@/hooks/use-thirdweb";
 import { BottomNav } from "@/components/bottom-nav";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -28,7 +28,6 @@ import MarketPage from "@/pages/market";
 import NotFound from "@/pages/not-found";
 
 const wallets = [
-  inAppWallet(),
   createWallet("pro.tokenpocket"),
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),
@@ -205,6 +204,7 @@ function Header() {
             },
           }}
           theme="dark"
+          showThirdwebBranding={false}
         />
       )}
     </header>
