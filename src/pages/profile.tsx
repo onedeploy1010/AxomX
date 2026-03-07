@@ -135,7 +135,7 @@ export default function ProfilePage() {
   const shortAddr = walletAddr ? `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}` : "";
 
   return (
-    <div className="pb-24 lg:pb-8 lg:px-6 lg:pt-4" data-testid="page-profile" style={{ background: "#060606" }}>
+    <div className="pb-24 lg:pb-8 lg:pt-4" data-testid="page-profile" style={{ background: "#060606" }}>
 
       <div className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0d1f12 0%, #060606 100%)" }}>
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.15) 0%, transparent 70%)" }} />
@@ -453,69 +453,72 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <button
-          className="w-full rounded-2xl text-left transition-all active:scale-[0.98] relative overflow-hidden group"
-          style={{
-            background: "linear-gradient(135deg, #0a2614 0%, #143d20 50%, #0d2a15 100%)",
-            border: "1px solid rgba(74,222,128,0.35)",
-            boxShadow: "0 4px 24px rgba(74,222,128,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
-          }}
-          onClick={() => navigate("/profile/nodes")}
-          data-testid="menu-nodes"
-        >
-          <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(74,222,128,0.2) 0%, transparent 60%)" }} />
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20" style={{ background: "radial-gradient(circle, #22c55e, transparent 70%)" }} />
-          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
-
-          <div className="relative p-4 flex items-center gap-3.5">
-            <div
-              className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
-                boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
-              }}
-            >
-              <Server className="h-5.5 w-5.5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[15px] font-bold text-white tracking-wide">{t("profile.nodeManagement")}</div>
-              <div className="text-[11px] text-white/50 mt-0.5">{t("profile.nodeManagementDesc")}</div>
-            </div>
-            <div
-              className="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.25)" }}
-            >
-              <ChevronRight className="h-4 w-4 text-primary" />
-            </div>
-          </div>
-        </button>
-
-        <div className="pt-1">
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.35)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+        {/* Node management + menu items — hidden on desktop (sidebar handles navigation) */}
+        <div className="lg:hidden">
+          <button
+            className="w-full rounded-2xl text-left transition-all active:scale-[0.98] relative overflow-hidden group"
+            style={{
+              background: "linear-gradient(135deg, #0a2614 0%, #143d20 50%, #0d2a15 100%)",
+              border: "1px solid rgba(74,222,128,0.35)",
+              boxShadow: "0 4px 24px rgba(74,222,128,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
+            }}
+            onClick={() => navigate("/profile/nodes")}
+            data-testid="menu-nodes"
           >
-            {MENU_ITEMS.map((item, idx) => (
-              <button
-                key={item.path}
-                className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-white/[0.04] active:bg-white/[0.06]"
-                style={{ borderBottom: idx < MENU_ITEMS.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none" }}
-                onClick={() => navigate(item.path)}
-                data-testid={`menu-${item.path.split("/").pop()}`}
+            <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(74,222,128,0.2) 0%, transparent 60%)" }} />
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20" style={{ background: "radial-gradient(circle, #22c55e, transparent 70%)" }} />
+            <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+
+            <div className="relative p-4 flex items-center gap-3.5">
+              <div
+                className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                  boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
+                }}
               >
-                <div
-                  className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.08)" }}
+                <Server className="h-5.5 w-5.5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[15px] font-bold text-white tracking-wide">{t("profile.nodeManagement")}</div>
+                <div className="text-[11px] text-white/50 mt-0.5">{t("profile.nodeManagementDesc")}</div>
+              </div>
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.25)" }}
+              >
+                <ChevronRight className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+          </button>
+
+          <div className="pt-1">
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.35)", boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+            >
+              {MENU_ITEMS.map((item, idx) => (
+                <button
+                  key={item.path}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-white/[0.04] active:bg-white/[0.06]"
+                  style={{ borderBottom: idx < MENU_ITEMS.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none" }}
+                  onClick={() => navigate(item.path)}
+                  data-testid={`menu-${item.path.split("/").pop()}`}
                 >
-                  <item.icon className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-white/90">{t(item.labelKey)}</div>
-                  <div className="text-[10px] text-white/35 mt-0.5">{t(item.descKey)}</div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-white/20 shrink-0" />
-              </button>
-            ))}
+                  <div
+                    className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    <item.icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-semibold text-white/90">{t(item.labelKey)}</div>
+                    <div className="text-[10px] text-white/35 mt-0.5">{t(item.descKey)}</div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-white/20 shrink-0" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

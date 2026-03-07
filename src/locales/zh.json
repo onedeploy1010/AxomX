@@ -564,7 +564,11 @@
     "enterRefCode": "输入推荐码",
     "refCodeRequired": "注册需要推荐码",
     "refCodePlaceholder": "请输入推荐码",
-    "invalidRefCode": "推荐码无效，请重试"
+    "invalidRefCode": "推荐码无效，请重试",
+    "confirmRefCode": "确认推荐码",
+    "confirmRefCodeDesc": "您通过推荐链接访问，请确认或修改下方的推荐码。",
+    "confirmAndRegister": "确认并注册",
+    "referrer": "推荐人"
   },
   "market": {
     "marketAnalysis": "市场分析",

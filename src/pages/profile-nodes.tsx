@@ -140,7 +140,7 @@ export default function ProfileNodesPage() {
   const accentGreen = "#34d399";
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-8" style={{ background: "#080b0e" }} data-testid="page-profile-nodes">
+    <div className="min-h-screen pb-24 lg:pb-8 lg:pt-4" style={{ background: "#080b0e" }} data-testid="page-profile-nodes">
       {/* Header with Tiffany-Green gradient */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #0a1f1e 0%, #0c1a18 30%, #080b0e 100%)" }} />
@@ -149,10 +149,10 @@ export default function ProfileNodesPage() {
         <div className="absolute top-0 left-0 w-full h-full opacity-15" style={{ background: "radial-gradient(circle at 50% 40%, rgba(129,216,208,0.3), transparent 60%)" }} />
 
         <div className="relative px-4 sm:px-6 pt-3 pb-6">
-          <div className="flex items-center justify-center relative mb-5">
+          <div className="flex items-center justify-center relative mb-5 lg:justify-start">
             <button
               onClick={() => navigate("/profile")}
-              className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+              className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors lg:hidden"
               style={{ background: "rgba(10,186,181,0.1)", border: "1px solid rgba(10,186,181,0.25)" }}
             >
               <ArrowLeft className="h-5 w-5 text-white/90" />

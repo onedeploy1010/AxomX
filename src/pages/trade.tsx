@@ -76,7 +76,7 @@ export default function Trade() {
 
   return (
     <div className="space-y-3 pb-72 lg:pb-8 lg:px-6 lg:pt-4">
-      <div className="flex items-center justify-between gap-2 px-4 pt-3 flex-wrap" style={{ animation: "fadeSlideIn 0.3s ease-out" }}>
+      <div className="flex items-center justify-between gap-2 px-4 lg:px-0 pt-3 flex-wrap" style={{ animation: "fadeSlideIn 0.3s ease-out" }}>
         <Select value={selectedAsset} onValueChange={setSelectedAsset}>
           <SelectTrigger className="w-24 border-border bg-card text-sm" data-testid="select-asset">
             <SelectValue />
@@ -96,7 +96,7 @@ export default function Trade() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-4 flex-wrap gap-2">
+      <div className="flex items-center justify-between px-4 lg:px-0 flex-wrap gap-2">
         <div className="flex items-center gap-1 flex-wrap">
           {TIMEFRAMES.map((tf) => (
             <Button
@@ -136,7 +136,7 @@ export default function Trade() {
         </div>
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.05s both" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.35s ease-out 0.05s both" }}>
         <div className="flex items-center gap-2 mb-1.5">
           <Radio className="h-3 w-3 text-primary animate-pulse" />
           <span className="text-[12px] text-primary/80 font-medium">{tfLabel}</span>
@@ -144,7 +144,7 @@ export default function Trade() {
         <PredictionGrid bets={bets} gridType={gridView} timeframe={timeframe} />
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.1s both" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.35s ease-out 0.1s both" }}>
         <div className="rounded-lg overflow-hidden" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap px-4 pt-3 pb-2">
             <div className="flex gap-2 flex-wrap">
@@ -210,13 +210,14 @@ export default function Trade() {
         </div>
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.35s ease-out 0.15s both" }}>
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.35s ease-out 0.15s both" }}>
         <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <StatsPanel stats={stats} isLoading={statsLoading && !!walletAddress} />
         </div>
       </div>
 
-      <div className="px-4 space-y-2" style={{ animation: "fadeSlideIn 0.35s ease-out 0.2s both" }}>
+      <div className="px-4 lg:px-0 space-y-2" style={{ animation: "fadeSlideIn 0.35s ease-out 0.2s both" }}>
         <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
             <span className="text-sm font-bold text-foreground">{t("trade.orders", { count: bets.length })}</span>
@@ -279,6 +280,7 @@ export default function Trade() {
           </div>
         )}
         </div>
+      </div>
       </div>
 
       <BetControls

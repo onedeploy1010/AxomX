@@ -564,7 +564,11 @@
     "enterRefCode": "Enter Referral Code",
     "refCodeRequired": "A referral code is required to register",
     "refCodePlaceholder": "Enter referral code",
-    "invalidRefCode": "Invalid referral code, please try again"
+    "invalidRefCode": "Invalid referral code, please try again",
+    "confirmRefCode": "Confirm Referral Code",
+    "confirmRefCodeDesc": "You were invited via a referral link. Please confirm or edit the referral code below.",
+    "confirmAndRegister": "Confirm & Register",
+    "referrer": "Referred by"
   },
   "market": {
     "marketAnalysis": "Market Analysis",

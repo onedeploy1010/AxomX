@@ -108,16 +108,16 @@ export default function ProfileReferralPage() {
   }) || [];
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-8" style={{ background: "#0a0a0a" }} data-testid="page-profile-referral">
+    <div className="min-h-screen pb-24 lg:pb-8 lg:pt-4" style={{ background: "#0a0a0a" }} data-testid="page-profile-referral">
       <div className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0a1a10 0%, #0f2818 30%, #0a1510 60%, #0a0a0a 100%)" }}>
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 70% 20%, rgba(163,230,53,0.12) 0%, transparent 55%)" }} />
         <div className="absolute top-0 right-0 w-48 h-48 opacity-15" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.5), transparent 70%)", filter: "blur(30px)" }} />
 
         <div className="relative px-4 pt-3 pb-5">
-          <div className="flex items-center justify-center relative mb-5">
+          <div className="flex items-center justify-center relative mb-5 lg:justify-start">
             <button
               onClick={() => navigate("/profile")}
-              className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+              className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors lg:hidden"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
             >
               <ArrowLeft className="h-5 w-5 text-white/90" />

@@ -16,12 +16,12 @@ export default function ProfileSwapPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-8" style={{ background: "#0a0a0a" }}>
+    <div className="min-h-screen pb-24 lg:pb-8 lg:pt-4" style={{ background: "#0a0a0a" }}>
       <div className="px-4 pt-3 pb-4">
-        <div className="flex items-center justify-center relative mb-4">
+        <div className="flex items-center justify-center relative mb-4 lg:justify-start">
           <button
             onClick={() => navigate("/profile")}
-            className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
+            className="absolute left-0 w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors lg:hidden"
           >
             <ArrowLeft className="h-5 w-5 text-white/80" />
           </button>

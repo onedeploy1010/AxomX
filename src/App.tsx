@@ -1,6 +1,6 @@
-import { Switch, Route, Link, useLocation as useWouterLocation } from "wouter";
+import { Switch, Route, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { authWallet } from "./lib/api";
+import { authWallet, getProfile, getProfileByRefCode } from "./lib/api";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -56,9 +56,11 @@ function WalletSync() {
   const account = useActiveAccount();
   const refCodeRef = useRef<string | null>(null);
   const [showRefDialog, setShowRefDialog] = useState(false);
+  const [showRefConfirm, setShowRefConfirm] = useState(false);
   const [refInput, setRefInput] = useState("");
   const [refError, setRefError] = useState("");
   const [refLoading, setRefLoading] = useState(false);
+  const [referrerWallet, setReferrerWallet] = useState<string | null>(null);
 
   useEffect(() => {
     refCodeRef.current = getRefCodeFromUrl();
@@ -75,11 +77,50 @@ function WalletSync() {
   }, []);
 
   useEffect(() => {
-    if (account?.address) {
-      const refCode = refCodeRef.current || sessionStorage.getItem("coinmax_ref_code");
-      doAuth(account.address, refCode || undefined).catch(console.error);
-    }
+    if (!account?.address) return;
+    const refCode = refCodeRef.current || sessionStorage.getItem("coinmax_ref_code");
+
+    (async () => {
+      try {
+        const profile = await getProfile(account.address);
+        if (!profile && refCode) {
+          // New user with referral code — look up referrer and show confirmation
+          try {
+            const referrer = await getProfileByRefCode(refCode);
+            if (referrer?.walletAddress) {
+              setReferrerWallet(referrer.walletAddress);
+            }
+          } catch {}
+          setRefInput(refCode);
+          setShowRefConfirm(true);
+        } else {
+          // Existing user or no ref code — auth directly
+          await doAuth(account.address, refCode || undefined);
+        }
+      } catch {
+        await doAuth(account.address, refCode || undefined);
+      }
+    })();
   }, [account?.address, doAuth]);
+
+  const handleRefConfirm = async () => {
+    if (!refInput.trim() || !account?.address) return;
+    setRefError("");
+    setRefLoading(true);
+    try {
+      const ok = await doAuth(account.address, refInput.trim());
+      if (ok) {
+        setShowRefConfirm(false);
+        setRefInput("");
+      } else {
+        setRefError(t("profile.invalidRefCode"));
+      }
+    } catch {
+      setRefError(t("profile.invalidRefCode"));
+    } finally {
+      setRefLoading(false);
+    }
+  };
 
   const handleRefSubmit = async () => {
     if (!refInput.trim() || !account?.address) return;
@@ -101,6 +142,7 @@ function WalletSync() {
   };
 
   return (
+    <>
     <Dialog open={showRefDialog} onOpenChange={() => {}}>
       <DialogContent
         className="max-w-[340px] p-0 overflow-hidden"
@@ -153,55 +195,85 @@ function WalletSync() {
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Referral code confirmation dialog for new users from referral link */}
+    <Dialog open={showRefConfirm} onOpenChange={() => {}}>
+      <DialogContent
+        className="max-w-[340px] p-0 overflow-hidden"
+        style={{
+          background: "#1a1a1a",
+          border: "1px solid rgba(10,186,181,0.3)",
+          borderRadius: 20,
+          boxShadow: "0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(10,186,181,0.1)",
+        }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
+        <DialogTitle className="sr-only">{t("profile.confirmRefCode")}</DialogTitle>
+        <DialogDescription className="sr-only">{t("profile.confirmRefCodeDesc")}</DialogDescription>
+        <div className="px-6 pt-6 pb-2">
+          <div className="text-center mb-4">
+            <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #0abab5, #34d399)", boxShadow: "0 4px 15px rgba(10,186,181,0.4)" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3 className="text-base font-bold text-white">{t("profile.confirmRefCode")}</h3>
+            <p className="text-xs text-white/40 mt-1">{t("profile.confirmRefCodeDesc")}</p>
+          </div>
+        </div>
+        <div className="px-6 pb-6 space-y-3">
+          {referrerWallet && (
+            <div className="rounded-xl px-4 py-3" style={{ background: "rgba(10,186,181,0.08)", border: "1px solid rgba(10,186,181,0.15)" }}>
+              <p className="text-[11px] text-white/40 mb-1">{t("profile.referrer")}</p>
+              <p className="text-xs text-primary font-mono truncate">{referrerWallet}</p>
+            </div>
+          )}
+          <input
+            type="text"
+            value={refInput}
+            onChange={(e) => { setRefInput(e.target.value); setRefError(""); setReferrerWallet(null); }}
+            placeholder={t("profile.refCodePlaceholder")}
+            className="w-full h-11 rounded-xl px-4 text-sm text-white placeholder:text-white/25 outline-none text-center font-mono tracking-widest"
+            style={{ background: "rgba(255,255,255,0.06)", border: refError ? "1px solid #ef4444" : "1px solid rgba(10,186,181,0.15)" }}
+            onKeyDown={(e) => e.key === "Enter" && handleRefConfirm()}
+            autoFocus
+          />
+          {refError && <p className="text-xs text-red-400">{refError}</p>}
+          <button
+            onClick={handleRefConfirm}
+            disabled={refLoading || !refInput.trim()}
+            className="w-full h-11 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.97] disabled:opacity-40"
+            style={{
+              background: "linear-gradient(135deg, #0abab5, #34d399)",
+              boxShadow: "0 4px 15px rgba(10,186,181,0.3)",
+            }}
+          >
+            {refLoading ? t("common.processing") : t("profile.confirmAndRegister")}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
 function Header() {
   const { client, isLoading } = useThirdwebClient();
   const { t } = useTranslation();
-  const [location] = useWouterLocation();
-
-  const navItems = [
-    { path: "/", label: t("nav.home") },
-    { path: "/trade", label: t("nav.trade") },
-    { path: "/vault", label: t("nav.vault") },
-    { path: "/strategy", label: t("nav.strategy") },
-    { path: "/profile", label: t("nav.profile") },
-  ];
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-4 lg:px-8 py-2.5 lg:py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
-      <div className="flex items-center gap-8">
-        <Link href="/" className="flex items-center gap-2.5 cursor-pointer" data-testid="link-logo-home">
-          <div className="h-8 w-8 lg:h-9 lg:w-9 rounded-lg bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center neon-glow-sm border border-primary/30 relative overflow-hidden">
-            <span className="font-display text-sm lg:text-base font-black text-primary drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]">C</span>
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
-          </div>
-          <span className="font-display text-sm lg:text-base font-bold tracking-widest text-foreground">
-            Coin<span className="text-primary drop-shadow-[0_0_6px_rgba(0,188,165,0.5)]">Max</span>
-          </span>
-        </Link>
-
-        {/* Desktop nav links */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {navItems.map((item) => {
-            const isActive = item.path === "/" ? location === "/" : location.startsWith(item.path);
-            return (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? "text-primary bg-primary/10"
-                    : "text-foreground/50 hover:text-foreground/80 hover:bg-white/5"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+      <Link href="/" className="flex items-center gap-2.5 cursor-pointer" data-testid="link-logo-home">
+        <div className="h-8 w-8 lg:h-9 lg:w-9 rounded-lg bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center neon-glow-sm border border-primary/30 relative overflow-hidden">
+          <span className="font-display text-sm lg:text-base font-black text-primary drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]">C</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
+        </div>
+        <span className="font-display text-sm lg:text-base font-bold tracking-widest text-foreground">
+          Coin<span className="text-primary drop-shadow-[0_0_6px_rgba(0,188,165,0.5)]">Max</span>
+        </span>
+      </Link>
 
       {isLoading || !client ? (
         <div className="h-9 w-24 animate-pulse rounded-md bg-muted" />
@@ -265,6 +337,14 @@ function Router() {
   );
 }
 
+function AppMain() {
+  return (
+    <main className="flex-1 mx-auto max-w-lg lg:max-w-4xl w-full">
+      <Router />
+    </main>
+  );
+}
+
 function App() {
   return (
     <ThirdwebProvider>
@@ -276,9 +356,7 @@ function App() {
               {/* Desktop sidebar - hidden on mobile */}
               <DesktopSidebar />
               {/* Main content */}
-              <main className="flex-1 mx-auto max-w-lg lg:max-w-5xl w-full">
-                <Router />
-              </main>
+              <AppMain />
             </div>
             {/* Mobile bottom nav - hidden on desktop */}
             <BottomNav />

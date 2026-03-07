@@ -56,6 +56,16 @@ export async function getProfile(walletAddress: string) {
   return toCamel(data);
 }
 
+export async function getProfileByRefCode(refCode: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("wallet_address, rank, node_type")
+    .eq("ref_code", refCode)
+    .single();
+  if (error && error.code !== "PGRST116") throw error;
+  return toCamel(data);
+}
+
 export async function getStrategies() {
   const { data, error } = await supabase
     .from("strategies")

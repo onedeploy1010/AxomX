@@ -75,11 +75,11 @@ export default function ProfileNotificationsPage() {
   };
 
   return (
-    <div className="space-y-4 pb-24 lg:pb-8 lg:px-6 lg:pt-4" data-testid="page-profile-notifications">
-      <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
+    <div className="space-y-4 pb-24 lg:pb-8 lg:pt-4" data-testid="page-profile-notifications">
+      <div className="gradient-green-dark p-4 pt-2 rounded-b-2xl lg:rounded-none lg:bg-transparent lg:p-0 lg:pt-2 lg:px-6" style={{ animation: "fadeSlideIn 0.4s ease-out" }}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
-            <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile">
+            <Button size="icon" variant="ghost" onClick={() => navigate("/profile")} data-testid="button-back-profile" className="lg:hidden">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-lg font-bold">{t("notifications.title")}</h1>

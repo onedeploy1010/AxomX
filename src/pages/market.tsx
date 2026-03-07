@@ -412,7 +412,7 @@ export default function MarketPage() {
       {/* ═══ Section 1: Header + Coin Tabs + Calendar ═══ */}
       <div className="gradient-green-dark rounded-b-2xl p-4 pt-2" style={{ animation: "fadeSlideIn 0.5s ease-out" }}>
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <Button size="icon" variant="ghost" onClick={() => navigate("/")} data-testid="button-back-home"><ArrowLeft className="h-4 w-4" /></Button>
+          <Button size="icon" variant="ghost" onClick={() => navigate("/")} data-testid="button-back-home" className="lg:hidden"><ArrowLeft className="h-4 w-4" /></Button>
           <h1 className="text-lg font-bold">{t("market.marketAnalysis")}</h1>
         </div>
 
@@ -452,7 +452,7 @@ export default function MarketPage() {
       </div>
 
       {/* ═══ Section 2: Fear & Greed Index ═══ */}
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.6s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.6s ease-out" }}>
         <SectionHeader
           icon={Eye}
           title={t("market.fearGreedIndex", { coin: selectedCoinTab })}
@@ -516,7 +516,7 @@ export default function MarketPage() {
       </div>
 
       {/* ═══ Section 4: Market Sentiment ═══ */}
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.7s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.7s ease-out" }}>
         <SectionHeader
           icon={Flame}
           title={t("market.sentiment", { coin: selectedCoinTab })}
@@ -632,7 +632,7 @@ export default function MarketPage() {
       </div>
 
       {/* ═══ Section 5: Futures Open Interest ═══ */}
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.8s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.8s ease-out" }}>
         <SectionHeader
           icon={Activity}
           title={t("market.futuresOI", { coin: selectedCoinTab })}
@@ -722,7 +722,7 @@ export default function MarketPage() {
       </div>
 
       {/* ═══ Section 6: Cross-Exchange Price Table ═══ */}
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.9s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.9s ease-out" }}>
         <SectionHeader
           icon={Globe}
           title={t("market.crossExchangePrices", { coin: selectedCoinTab })}
