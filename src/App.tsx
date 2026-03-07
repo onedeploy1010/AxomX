@@ -1,4 +1,4 @@
-import { Switch, Route, Link } from "wouter";
+import { Switch, Route, Link, useLocation as useWouterLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { authWallet } from "./lib/api";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import { ThirdwebProvider, ConnectButton, useActiveAccount } from "thirdweb/reac
 import { createWallet } from "thirdweb/wallets";
 import { useThirdwebClient } from "@/hooks/use-thirdweb";
 import { BottomNav } from "@/components/bottom-nav";
+import { DesktopSidebar } from "@/components/desktop-sidebar";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -158,18 +159,50 @@ function WalletSync() {
 function Header() {
   const { client, isLoading } = useThirdwebClient();
   const { t } = useTranslation();
+  const [location] = useWouterLocation();
+
+  const navItems = [
+    { path: "/", label: t("nav.home") },
+    { path: "/trade", label: t("nav.trade") },
+    { path: "/vault", label: t("nav.vault") },
+    { path: "/strategy", label: t("nav.strategy") },
+    { path: "/profile", label: t("nav.profile") },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-background/90 backdrop-blur-xl">
-      <Link href="/" className="flex items-center gap-2.5 cursor-pointer" data-testid="link-logo-home">
-        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center neon-glow-sm border border-primary/30 relative overflow-hidden">
-          <span className="font-display text-sm font-black text-primary drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]">C</span>
-          <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
-        </div>
-        <span className="font-display text-sm font-bold tracking-widest text-foreground">
-          Coin<span className="text-primary drop-shadow-[0_0_6px_rgba(0,188,165,0.5)]">Max</span>
-        </span>
-      </Link>
+    <header className="sticky top-0 z-50 flex items-center justify-between px-4 lg:px-8 py-2.5 lg:py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
+      <div className="flex items-center gap-8">
+        <Link href="/" className="flex items-center gap-2.5 cursor-pointer" data-testid="link-logo-home">
+          <div className="h-8 w-8 lg:h-9 lg:w-9 rounded-lg bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center neon-glow-sm border border-primary/30 relative overflow-hidden">
+            <span className="font-display text-sm lg:text-base font-black text-primary drop-shadow-[0_0_8px_rgba(0,188,165,0.6)]">C</span>
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
+          </div>
+          <span className="font-display text-sm lg:text-base font-bold tracking-widest text-foreground">
+            Coin<span className="text-primary drop-shadow-[0_0_6px_rgba(0,188,165,0.5)]">Max</span>
+          </span>
+        </Link>
+
+        {/* Desktop nav links */}
+        <nav className="hidden lg:flex items-center gap-1">
+          {navItems.map((item) => {
+            const isActive = item.path === "/" ? location === "/" : location.startsWith(item.path);
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? "text-primary bg-primary/10"
+                    : "text-foreground/50 hover:text-foreground/80 hover:bg-white/5"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
       {isLoading || !client ? (
         <div className="h-9 w-24 animate-pulse rounded-md bg-muted" />
       ) : (
@@ -239,9 +272,15 @@ function App() {
         <TooltipProvider>
           <div className="min-h-screen bg-background text-foreground">
             <Header />
-            <main className="mx-auto max-w-lg">
-              <Router />
-            </main>
+            <div className="flex">
+              {/* Desktop sidebar - hidden on mobile */}
+              <DesktopSidebar />
+              {/* Main content */}
+              <main className="flex-1 mx-auto max-w-lg lg:max-w-5xl w-full">
+                <Router />
+              </main>
+            </div>
+            {/* Mobile bottom nav - hidden on desktop */}
             <BottomNav />
             <WalletSync />
           </div>

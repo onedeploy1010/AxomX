@@ -47,7 +47,8 @@
     "trade": "交易",
     "vault": "金库",
     "strategy": "策略",
-    "profile": "我的"
+    "profile": "我的",
+    "market": "市场"
   },
   "dashboard": {
     "depthRatio": "深度比率",

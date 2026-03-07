@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { ASSET_IDS } from "@/lib/constants";
@@ -71,13 +71,30 @@ export default function Dashboard() {
     refetchInterval: 60_000,
   });
 
+  const queryClient = useQueryClient();
+
   const { data: multiResult, isLoading: forecastLoading } = useQuery<MultiForecastResponse>({
     queryKey: ["ai-forecast-multi", selectedAsset, selectedTimeframe, lang],
     queryFn: () => getAiForecastMulti(selectedAsset, selectedTimeframe, lang),
     staleTime: 3 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
     retry: 1,
   });
+
+  // Prefetch adjacent timeframes for instant switching
+  const TIMEFRAMES: ChartTimeframe[] = ["1m", "5m", "15m", "30m", "1H", "4H", "1D", "1W"];
+  useEffect(() => {
+    const idx = TIMEFRAMES.indexOf(selectedTimeframe);
+    const adjacent = [TIMEFRAMES[idx - 1], TIMEFRAMES[idx + 1]].filter(Boolean) as ChartTimeframe[];
+    for (const tf of adjacent) {
+      queryClient.prefetchQuery({
+        queryKey: ["ai-forecast-multi", selectedAsset, tf, lang],
+        queryFn: () => getAiForecastMulti(selectedAsset, tf, lang),
+        staleTime: 3 * 60 * 1000,
+      });
+    }
+  }, [selectedAsset, selectedTimeframe, lang]);
 
   const allForecasts = multiResult?.forecasts || [];
 
@@ -103,9 +120,9 @@ export default function Dashboard() {
   const depthSell = exchangeData ? String(exchangeData.aggregatedSell) : (orderBook?.sellPercent || "50.0");
 
   return (
-    <div className="space-y-4 pb-24" data-testid="page-dashboard">
+    <div className="space-y-4 pb-24 lg:pb-8 lg:px-6 lg:pt-4" data-testid="page-dashboard">
       <div
-        className="gradient-green-dark rounded-b-2xl px-3 pb-3 pt-1.5"
+        className="gradient-green-dark rounded-b-2xl lg:rounded-2xl px-3 pb-3 pt-1.5 lg:pt-3"
         style={{ animation: "fadeSlideIn 0.5s ease-out" }}
       >
         <div className="flex items-start justify-between gap-2">
@@ -134,12 +151,12 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.55s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.55s ease-out" }}>
         <AssetTabs selected={selectedAsset} onChange={setSelectedAsset} />
       </div>
 
       {/* AI Model Carousel */}
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.6s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.6s ease-out" }}>
         <AiModelCarousel
           forecasts={allForecasts}
           isLoading={forecastLoading}
@@ -148,23 +165,26 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.7s ease-out" }}>
-        <DepthBar
-          buyPercent={depthBuy}
-          sellPercent={depthSell}
-          isLoading={bookLoading && exchangeLoading}
-          fearGreedIndex={exchangeData?.fearGreedIndex}
-          fearGreedLabel={exchangeData?.fearGreedLabel}
-        />
-      </div>
+      {/* Desktop: two-column grid for depth + trending */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4 space-y-4 lg:space-y-0">
+        <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.7s ease-out" }}>
+          <DepthBar
+            buyPercent={depthBuy}
+            sellPercent={depthSell}
+            isLoading={bookLoading && exchangeLoading}
+            fearGreedIndex={exchangeData?.fearGreedIndex}
+            fearGreedLabel={exchangeData?.fearGreedLabel}
+          />
+        </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.85s ease-out" }}>
-        <div className="glass-card rounded-2xl p-4 relative overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-          <TrendingFeed prices={prices} isLoading={pricesLoading} />
+        <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.85s ease-out" }}>
+          <div className="glass-card rounded-2xl p-4 relative overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+            <TrendingFeed prices={prices} isLoading={pricesLoading} />
+          </div>
         </div>
       </div>
 
-      <div className="px-4" style={{ animation: "fadeSlideIn 0.9s ease-out" }}>
+      <div className="px-4 lg:px-0" style={{ animation: "fadeSlideIn 0.9s ease-out" }}>
         <div className="glass-card rounded-2xl p-4 relative overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
           <ExchangeDepth symbol={selectedAsset} />
         </div>

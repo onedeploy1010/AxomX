@@ -16,7 +16,7 @@ export default function ProfileSwapPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: "#0a0a0a" }}>
+    <div className="min-h-screen pb-24 lg:pb-8" style={{ background: "#0a0a0a" }}>
       <div className="px-4 pt-3 pb-4">
         <div className="flex items-center justify-center relative mb-4">
           <button

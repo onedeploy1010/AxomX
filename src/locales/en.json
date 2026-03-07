@@ -47,7 +47,8 @@
     "trade": "Trade",
     "vault": "Vault",
     "strategy": "Strategy",
-    "profile": "Profile"
+    "profile": "Profile",
+    "market": "Market"
   },
   "dashboard": {
     "depthRatio": "Depth Ratio",

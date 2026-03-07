@@ -140,7 +140,7 @@ export default function ProfileNodesPage() {
   const accentGreen = "#34d399";
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: "#080b0e" }} data-testid="page-profile-nodes">
+    <div className="min-h-screen pb-24 lg:pb-8" style={{ background: "#080b0e" }} data-testid="page-profile-nodes">
       {/* Header with Tiffany-Green gradient */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #0a1f1e 0%, #0c1a18 30%, #080b0e 100%)" }} />

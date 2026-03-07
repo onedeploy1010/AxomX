@@ -135,7 +135,7 @@ export default function ProfilePage() {
   const shortAddr = walletAddr ? `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}` : "";
 
   return (
-    <div className="pb-24" data-testid="page-profile" style={{ background: "#060606" }}>
+    <div className="pb-24 lg:pb-8 lg:px-6 lg:pt-4" data-testid="page-profile" style={{ background: "#060606" }}>
 
       <div className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0d1f12 0%, #060606 100%)" }}>
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.15) 0%, transparent 70%)" }} />

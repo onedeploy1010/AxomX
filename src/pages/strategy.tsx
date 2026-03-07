@@ -298,7 +298,7 @@ export default function StrategyPage() {
   };
 
   return (
-    <div className="space-y-4 pb-24" data-testid="page-strategy">
+    <div className="space-y-4 pb-24 lg:pb-8 lg:px-6 lg:pt-4" data-testid="page-strategy">
       <StrategyHeader />
 
       <div className="px-4 space-y-3">
