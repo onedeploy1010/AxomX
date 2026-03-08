@@ -87,6 +87,7 @@ export default function ProfileReferralPage() {
   const diffTotal = Number(commission?.differentialTotal || 0);
 
   const refCode = profile?.refCode;
+  const currentRank = profile?.rank || "V0";
   const referralLink = refCode ? `${window.location.origin}?ref=${refCode}` : "--";
   const parentWallet = (profile as any)?.parentWallet || null;
 
@@ -126,62 +127,139 @@ export default function ProfileReferralPage() {
             <h1 className="text-[17px] font-bold tracking-wide text-white">{t("profile.promotionCenter")}</h1>
           </div>
 
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
-            <span className="text-[13px] font-bold text-white">{t("profile.currentLevel")}</span>
+          {/* Current Level Section */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #4ade80, #22c55e)" }} />
+              <span className="text-[13px] font-bold text-white">{t("profile.currentLevel")}</span>
+            </div>
+            <span
+              className="text-[13px] font-black px-3 py-1 rounded-lg"
+              style={{
+                background: "linear-gradient(135deg, rgba(74,222,128,0.15), rgba(163,230,53,0.1))",
+                border: "1px solid rgba(74,222,128,0.3)",
+                color: "#4ade80",
+                textShadow: "0 0 8px rgba(74,222,128,0.4)",
+              }}
+            >
+              {currentRank}
+            </span>
           </div>
 
-          <div className="relative mb-4 rounded-2xl overflow-hidden" style={{ height: 200, background: "linear-gradient(135deg, rgba(10,30,18,0.8), rgba(15,40,24,0.5), rgba(20,50,30,0.3))", border: "1px solid rgba(74,222,128,0.12)" }}>
-            <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(163,230,53,0.25), transparent 60%)" }} />
-            <div className="absolute inset-0 opacity-15" style={{ background: "radial-gradient(ellipse at 20% 80%, rgba(74,222,128,0.3), transparent 50%)" }} />
-            <svg viewBox="0 0 420 200" className="w-full h-full relative" preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#22c55e" />
-                  <stop offset="50%" stopColor="#4ade80" />
-                  <stop offset="100%" stopColor="#a3e635" />
-                </linearGradient>
-                <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(74,222,128,0.2)" />
-                  <stop offset="100%" stopColor="rgba(74,222,128,0)" />
-                </linearGradient>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <path d="M 30 165 C 60 160, 80 152, 110 145 C 140 138, 160 128, 190 118 C 220 108, 240 95, 270 78 C 300 61, 320 42, 350 28 C 370 18, 390 12, 400 10" stroke="url(#lineGrad)" strokeWidth="3" fill="none" filter="url(#glow)" strokeLinecap="round" />
-              <path d="M 30 165 C 60 160, 80 152, 110 145 C 140 138, 160 128, 190 118 C 220 108, 240 95, 270 78 C 300 61, 320 42, 350 28 C 370 18, 390 12, 400 10 L 400 190 L 30 190 Z" fill="url(#areaGrad)" />
+          <div
+            className="relative mb-4 rounded-2xl overflow-hidden p-4 sm:p-5"
+            style={{
+              background: "linear-gradient(145deg, rgba(10,30,18,0.9), rgba(8,20,14,0.95))",
+              border: "1px solid rgba(74,222,128,0.15)",
+            }}
+          >
+            {/* Decorative glows */}
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-20" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.5), transparent 70%)", filter: "blur(25px)" }} />
+            <div className="absolute bottom-0 left-0 w-24 h-24 opacity-10" style={{ background: "radial-gradient(circle, rgba(163,230,53,0.4), transparent 70%)", filter: "blur(20px)" }} />
+
+            {/* Level progression */}
+            <div className="relative grid grid-cols-7 gap-1 sm:gap-2">
               {[
-                { x: 30, y: 165, label: "V1" },
-                { x: 95, y: 148, label: "V2" },
-                { x: 160, y: 128, label: "V3" },
-                { x: 225, y: 105, label: "V4" },
-                { x: 290, y: 72, label: "V5", reward: "30,000 CMX" },
-                { x: 350, y: 28, label: "V6", reward: "100,000 CMX" },
-                { x: 400, y: 10, label: "V7", reward: "300,000 CMX" },
-              ].map((p: any) => (
-                <g key={p.label}>
-                  <circle cx={p.x} cy={p.y} r="6" fill="rgba(74,222,128,0.15)" stroke="none">
-                    <animate attributeName="r" values="6;9;6" dur="2.5s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx={p.x} cy={p.y} r="4" fill="#4ade80" stroke="#0f2818" strokeWidth="2" />
-                  <text x={p.x} y={p.y - 14} textAnchor="middle" fill="white" fontSize="11" fontWeight="700">{p.label}</text>
-                  {p.reward && (
-                    <text x={p.x + 8} y={p.y + 16} textAnchor="start" fill="rgba(163,230,53,0.55)" fontSize="7.5" fontWeight="500">
-                      {p.reward}
-                    </text>
-                  )}
-                </g>
-              ))}
-              <text x="355" y="68" fill="rgba(255,255,255,0.2)" fontSize="7.5" fontWeight="500">50 people</text>
-              <text x="365" y="48" fill="rgba(255,255,255,0.2)" fontSize="7.5" fontWeight="500">200 people</text>
-              <text x="340" y="100" fill="rgba(255,255,255,0.12)" fontSize="7">30 people</text>
-            </svg>
+                { label: "V1", req: "" },
+                { label: "V2", req: "" },
+                { label: "V3", req: "" },
+                { label: "V4", req: "" },
+                { label: "V5", req: "30人" },
+                { label: "V6", req: "50人" },
+                { label: "V7", req: "200人" },
+              ].map((level, idx) => {
+                const rankNum = parseInt(currentRank.replace("V", "")) || 0;
+                const levelNum = parseInt(level.label.replace("V", ""));
+                const isActive = levelNum <= rankNum;
+                const isCurrent = level.label === currentRank;
+                return (
+                  <div key={level.label} className="flex flex-col items-center gap-1.5">
+                    {/* Node circle */}
+                    <div className="relative">
+                      {isCurrent && (
+                        <div
+                          className="absolute inset-0 rounded-full animate-ping"
+                          style={{
+                            background: "rgba(74,222,128,0.3)",
+                            animationDuration: "2s",
+                          }}
+                        />
+                      )}
+                      <div
+                        className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all"
+                        style={{
+                          background: isCurrent
+                            ? "linear-gradient(135deg, #22c55e, #4ade80)"
+                            : isActive
+                            ? "linear-gradient(135deg, rgba(74,222,128,0.25), rgba(74,222,128,0.15))"
+                            : "rgba(255,255,255,0.04)",
+                          border: isCurrent
+                            ? "2px solid rgba(74,222,128,0.8)"
+                            : isActive
+                            ? "1.5px solid rgba(74,222,128,0.3)"
+                            : "1.5px solid rgba(255,255,255,0.08)",
+                          boxShadow: isCurrent
+                            ? "0 0 20px rgba(74,222,128,0.4), 0 0 6px rgba(74,222,128,0.3)"
+                            : "none",
+                        }}
+                      >
+                        <span
+                          className="text-[10px] sm:text-xs font-black"
+                          style={{
+                            color: isCurrent ? "#fff" : isActive ? "#4ade80" : "rgba(255,255,255,0.2)",
+                          }}
+                        >
+                          {level.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Connector line (except last) */}
+                    {idx < 6 && (
+                      <div
+                        className="absolute h-[2px] top-4 sm:top-5"
+                        style={{
+                          left: `${(idx + 0.5) * (100 / 7)}%`,
+                          width: `${100 / 7}%`,
+                          background: isActive && parseInt(currentRank.replace("V", "")) > levelNum
+                            ? "linear-gradient(90deg, rgba(74,222,128,0.4), rgba(74,222,128,0.2))"
+                            : "rgba(255,255,255,0.05)",
+                        }}
+                      />
+                    )}
+
+                    {/* Requirement text */}
+                    {level.req && (
+                      <span className="text-[8px] sm:text-[9px] text-white/20 font-medium text-center leading-tight">
+                        {level.req}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Progress bar */}
+            <div className="mt-4 sm:mt-5">
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <div
+                  className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
+                  style={{
+                    width: `${Math.max(((parseInt(currentRank.replace("V", "")) || 0) / 7) * 100, 2)}%`,
+                    background: "linear-gradient(90deg, #22c55e, #4ade80, #a3e635)",
+                    boxShadow: "0 0 8px rgba(74,222,128,0.4)",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)",
+                      animation: "shimmer 2s ease-in-out infinite",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 mb-3">
