@@ -73,13 +73,28 @@ export default function Dashboard() {
 
   const queryClient = useQueryClient();
 
+  const forecastCacheKey = `forecast:${selectedAsset}:${selectedTimeframe}`;
+
   const { data: multiResult, isLoading: forecastLoading } = useQuery<MultiForecastResponse>({
     queryKey: ["ai-forecast-multi", selectedAsset, selectedTimeframe, lang],
-    queryFn: () => getAiForecastMulti(selectedAsset, selectedTimeframe, lang),
+    queryFn: async () => {
+      const result = await getAiForecastMulti(selectedAsset, selectedTimeframe, lang);
+      // Persist to localStorage for instant display on next visit
+      try { localStorage.setItem(forecastCacheKey, JSON.stringify(result)); } catch {}
+      return result;
+    },
     staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
-    placeholderData: keepPreviousData,
+    placeholderData: (prev) => {
+      if (prev) return prev;
+      // Restore from localStorage on first load
+      try {
+        const cached = localStorage.getItem(forecastCacheKey);
+        if (cached) return JSON.parse(cached);
+      } catch {}
+      return undefined;
+    },
     retry: 1,
   });
 

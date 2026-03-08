@@ -13,7 +13,7 @@ interface CacheEntry<T> {
 }
 
 const forecastCache = new Map<string, CacheEntry<any>>();
-const FORECAST_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const FORECAST_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
 let fgiCache: CacheEntry<{ value: number; classification: string }> | null = null;
 const FGI_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -39,19 +39,20 @@ async function fetchFearGreedIndex() {
 async function fetchCurrentPrice(asset: string): Promise<number> {
   const cached = priceCache.get(asset);
   if (cached && Date.now() < cached.expiresAt) return cached.data;
-  try {
-    const res = await fetch(`https://api.binance.us/api/v3/ticker/price?symbol=${asset}USDT`);
-    if (res.ok) { const d = await res.json(); const p = parseFloat(d.price); if (p > 0) { priceCache.set(asset, { data: p, expiresAt: Date.now() + PRICE_CACHE_TTL }); return p; } }
-  } catch {}
-  const ids: Record<string, string> = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana", BNB: "binancecoin", DOGE: "dogecoin" };
-  try {
-    const id = ids[asset] || "bitcoin";
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currency=usd`);
-    const data = await res.json();
-    const p = data[id]?.usd || 0;
-    if (p > 0) priceCache.set(asset, { data: p, expiresAt: Date.now() + PRICE_CACHE_TTL });
-    return p;
-  } catch { return 0; }
+  // Race Binance global + Bybit — fastest wins
+  const pair = `${asset}USDT`;
+  const result = await Promise.any([
+    fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`).then(async (r) => {
+      if (!r.ok) throw new Error("not ok");
+      const d = await r.json(); const p = parseFloat(d.price); if (p <= 0) throw new Error("bad"); return p;
+    }),
+    fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}`).then(async (r) => {
+      if (!r.ok) throw new Error("not ok");
+      const d = await r.json(); const p = parseFloat(d.result?.list?.[0]?.lastPrice); if (!p) throw new Error("bad"); return p;
+    }),
+  ]).catch(() => 0);
+  if (result > 0) { priceCache.set(asset, { data: result, expiresAt: Date.now() + PRICE_CACHE_TTL }); return result; }
+  return 0;
 }
 
 // ── Constants ───────────────────────────────────────
@@ -243,11 +244,23 @@ serve(async (req) => {
 
     const activeModels = MODELS.filter(m => m.type !== "openai" || openaiKey);
 
+    // Per-model timeout — don't let one slow model block everything
+    const MODEL_TIMEOUT = 8000;
+    function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+      return Promise.race([
+        promise,
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+      ]);
+    }
+
     const results = await Promise.allSettled(
       activeModels.map(def =>
-        def.type === "openai"
-          ? callOpenAI(gatewayBase, cfToken, openaiKey, def, userPrompt)
-          : callWorkersAI(gatewayBase, cfToken, def, userPrompt)
+        withTimeout(
+          def.type === "openai"
+            ? callOpenAI(gatewayBase, cfToken, openaiKey, def, userPrompt)
+            : callWorkersAI(gatewayBase, cfToken, def, userPrompt),
+          MODEL_TIMEOUT
+        )
       )
     );
 

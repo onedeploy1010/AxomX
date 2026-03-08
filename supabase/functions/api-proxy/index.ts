@@ -9,6 +9,9 @@ const corsHeaders = {
 const ALLOWED_HOSTS = [
   "api.coingecko.com",
   "gamma-api.polymarket.com",
+  "api.binance.com",
+  "api.binance.us",
+  "api.bybit.com",
 ];
 
 serve(async (req) => {
