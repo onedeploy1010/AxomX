@@ -1,21 +1,30 @@
-const EXCHANGE_LOGOS: Record<string, string> = {
-  Binance: "https://bin.bnbstatic.com/static/images/common/favicon.ico",
-  OKX: "https://static.okx.com/cdn/assets/imgs/226/DF679B3DAD8B5765.png",
-  Bybit: "https://www.bybit.com/favicon.ico",
-  Bitget: "https://img.bitgetimg.com/image/third/1723517477631.png",
-  Kraken: "https://assets-cms.kraken.com/images/51n36hrp/facade/favicon-32x32.png",
-  Coinbase: "https://assets.coinbase.com/exchange/favicon.ico",
-  Gate: "https://www.gate.io/favicon.ico",
-  MEXC: "https://www.mexc.com/favicon.png",
-  CoinEx: "https://asset.coinex.com/favicon.ico",
-  LBank: "https://assets.lbkrs.com/v1/favicon.ico",
-  Hyperliquid: "https://app.hyperliquid.xyz/favicon.ico",
-  Bitmex: "https://www.bitmex.com/favicon.ico",
-  "Crypto.com": "https://crypto.com/favicon.ico",
-  Bitunix: "https://www.bitunix.com/favicon.ico",
-  KuCoin: "https://assets.staticimg.com/cms/media/7AV75b9jzr9S8H3eNuOuoqj8PwdUjmUBmMsGPGP7J.png",
-  Huobi: "https://www.htx.com/favicon.ico",
+import { useState } from "react";
+
+const EXCHANGE_DOMAINS: Record<string, string> = {
+  Binance: "binance.com",
+  OKX: "okx.com",
+  Bybit: "bybit.com",
+  Bitget: "bitget.com",
+  Kraken: "kraken.com",
+  Coinbase: "coinbase.com",
+  Gate: "gate.io",
+  MEXC: "mexc.com",
+  CoinEx: "coinex.com",
+  LBank: "lbank.com",
+  Hyperliquid: "hyperliquid.xyz",
+  Bitmex: "bitmex.com",
+  "Crypto.com": "crypto.com",
+  Bitunix: "bitunix.com",
+  KuCoin: "kucoin.com",
+  Huobi: "htx.com",
 };
+
+function getLogoUrl(name: string, size: number): string | null {
+  const domain = EXCHANGE_DOMAINS[name];
+  if (!domain) return null;
+  const sz = size <= 16 ? 32 : 64;
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=${sz}`;
+}
 
 const EXCHANGE_COLORS: Record<string, string> = {
   Binance: "#F0B90B",
@@ -46,36 +55,34 @@ interface ExchangeLogoProps {
   className?: string;
 }
 
+function Fallback({ name, size, color, className }: { name: string; size: number; color: string; className: string }) {
+  return (
+    <div
+      className={`rounded shrink-0 flex items-center justify-center font-bold text-white ${className}`}
+      style={{ width: size, height: size, fontSize: size * 0.45, backgroundColor: color }}
+    >
+      {name[0]}
+    </div>
+  );
+}
+
 export function ExchangeLogo({ name, size = 16, className = "" }: ExchangeLogoProps) {
-  const url = EXCHANGE_LOGOS[name];
+  const [failed, setFailed] = useState(false);
+  const url = getLogoUrl(name, size);
   const color = EXCHANGE_COLORS[name] || "#888";
 
-  if (!url) {
-    return (
-      <div
-        className={`rounded-full shrink-0 flex items-center justify-center font-bold text-white ${className}`}
-        style={{ width: size, height: size, fontSize: size * 0.45, backgroundColor: color }}
-      >
-        {name[0]}
-      </div>
-    );
+  if (!url || failed) {
+    return <Fallback name={name} size={size} color={color} className={className} />;
   }
 
   return (
     <img
       src={url}
       alt={name}
-      className={`rounded-full shrink-0 object-contain ${className}`}
+      className={`rounded shrink-0 object-contain ${className}`}
       style={{ width: size, height: size }}
-      onError={(e) => {
-        const el = e.currentTarget;
-        el.style.display = "none";
-        const fallback = document.createElement("div");
-        fallback.className = `rounded-full shrink-0 flex items-center justify-center font-bold text-white`;
-        fallback.style.cssText = `width:${size}px;height:${size}px;font-size:${size * 0.45}px;background-color:${color}`;
-        fallback.textContent = name[0];
-        el.parentNode?.insertBefore(fallback, el);
-      }}
+      loading="eager"
+      onError={() => setFailed(true)}
     />
   );
 }
