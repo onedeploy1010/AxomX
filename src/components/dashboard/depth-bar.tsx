@@ -42,9 +42,9 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
         const jitter = (Math.random() - 0.5) * 0.6;
         return Math.max(0, Math.min(100, prev + jitter));
       });
-      tickRef.current = setTimeout(tick, 300 + Math.random() * 300);
+      tickRef.current = setTimeout(tick, 80 + Math.random() * 120);
     };
-    tickRef.current = setTimeout(tick, 300 + Math.random() * 300);
+    tickRef.current = setTimeout(tick, 80 + Math.random() * 120);
     return () => clearTimeout(tickRef.current);
   }, []);
 
@@ -115,9 +115,9 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
         const jitter = (Math.random() - 0.5) * 1.8;
         return Math.max(0.5, Math.min(99.5, buyNum + jitter));
       });
-      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
+      tickRef.current = setTimeout(oscillate, 80 + Math.random() * 120);
     };
-    tickRef.current = setTimeout(oscillate, 250 + Math.random() * 350);
+    tickRef.current = setTimeout(oscillate, 80 + Math.random() * 120);
     return () => clearTimeout(tickRef.current);
   }, [buyNum]);
 
@@ -183,7 +183,7 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
             <div className="relative h-3 rounded-full bg-white/[0.03] overflow-visible" data-testid="bar-depth-ratio">
               <div className="absolute inset-0 flex h-full rounded-full overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-emerald-600 to-emerald-400 relative transition-[width] duration-200 ease-out"
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-400 relative transition-[width] duration-75 ease-out"
                   style={{ width: `${buyWidth}%` }}
                 >
                   <div className="absolute inset-0 opacity-50"
@@ -194,7 +194,7 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
                   />
                 </div>
                 <div
-                  className="bg-gradient-to-r from-red-400 to-red-600 relative transition-[width] duration-200 ease-out"
+                  className="bg-gradient-to-r from-red-400 to-red-600 relative transition-[width] duration-75 ease-out"
                   style={{ width: `${sellWidth}%` }}
                 >
                   <div className="absolute inset-0 opacity-50"
