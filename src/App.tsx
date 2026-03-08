@@ -146,7 +146,7 @@ function WalletSync() {
     <>
     <Dialog open={showRefDialog} onOpenChange={() => {}}>
       <DialogContent
-        className="max-w-[340px] p-0 overflow-hidden"
+        className="w-[calc(100vw-32px)] max-w-[340px] p-0 overflow-hidden"
         style={{
           background: "#1a1a1a",
           border: "1px solid rgba(10,186,181,0.3)",
@@ -158,19 +158,19 @@ function WalletSync() {
       >
         <DialogTitle className="sr-only">{t("profile.enterRefCode")}</DialogTitle>
         <DialogDescription className="sr-only">{t("profile.refCodeRequired")}</DialogDescription>
-        <div className="px-6 pt-6 pb-2">
-          <div className="text-center mb-4">
-            <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center"
+        <div className="px-4 sm:px-6 pt-5 sm:pt-6 pb-2">
+          <div className="text-center mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl mx-auto mb-2.5 sm:mb-3 flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #0abab5, #34d399)", boxShadow: "0 4px 15px rgba(10,186,181,0.4)" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
               </svg>
             </div>
-            <h3 className="text-base font-bold text-white">{t("profile.enterRefCode")}</h3>
-            <p className="text-xs text-white/40 mt-1">{t("profile.refCodeRequired")}</p>
+            <h3 className="text-[15px] sm:text-base font-bold text-white">{t("profile.enterRefCode")}</h3>
+            <p className="text-[11px] sm:text-xs text-white/40 mt-1">{t("profile.refCodeRequired")}</p>
           </div>
         </div>
-        <div className="px-6 pb-6 space-y-3">
+        <div className="px-4 sm:px-6 pb-5 sm:pb-6 space-y-3">
           <input
             type="text"
             value={refInput}
@@ -200,7 +200,7 @@ function WalletSync() {
     {/* Referral code confirmation dialog for new users from referral link */}
     <Dialog open={showRefConfirm} onOpenChange={() => {}}>
       <DialogContent
-        className="max-w-[340px] p-0 overflow-hidden"
+        className="w-[calc(100vw-32px)] max-w-[340px] p-0 overflow-hidden"
         style={{
           background: "#1a1a1a",
           border: "1px solid rgba(10,186,181,0.3)",
@@ -212,23 +212,23 @@ function WalletSync() {
       >
         <DialogTitle className="sr-only">{t("profile.confirmRefCode")}</DialogTitle>
         <DialogDescription className="sr-only">{t("profile.confirmRefCodeDesc")}</DialogDescription>
-        <div className="px-6 pt-6 pb-2">
-          <div className="text-center mb-4">
-            <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center"
+        <div className="px-4 sm:px-6 pt-5 sm:pt-6 pb-2">
+          <div className="text-center mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl mx-auto mb-2.5 sm:mb-3 flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #0abab5, #34d399)", boxShadow: "0 4px 15px rgba(10,186,181,0.4)" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
-            <h3 className="text-base font-bold text-white">{t("profile.confirmRefCode")}</h3>
-            <p className="text-xs text-white/40 mt-1">{t("profile.confirmRefCodeDesc")}</p>
+            <h3 className="text-[15px] sm:text-base font-bold text-white">{t("profile.confirmRefCode")}</h3>
+            <p className="text-[11px] sm:text-xs text-white/40 mt-1">{t("profile.confirmRefCodeDesc")}</p>
           </div>
         </div>
-        <div className="px-6 pb-6 space-y-3">
+        <div className="px-4 sm:px-6 pb-5 sm:pb-6 space-y-3">
           {referrerWallet && (
-            <div className="rounded-xl px-4 py-3" style={{ background: "rgba(10,186,181,0.08)", border: "1px solid rgba(10,186,181,0.15)" }}>
+            <div className="rounded-xl px-3 sm:px-4 py-2.5 sm:py-3" style={{ background: "rgba(10,186,181,0.08)", border: "1px solid rgba(10,186,181,0.15)" }}>
               <p className="text-[11px] text-white/40 mb-1">{t("profile.referrer")}</p>
-              <p className="text-xs text-primary font-mono truncate">{referrerWallet}</p>
+              <p className="text-[11px] sm:text-xs text-primary font-mono truncate">{referrerWallet}</p>
             </div>
           )}
           <input
