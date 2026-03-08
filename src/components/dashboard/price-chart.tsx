@@ -106,8 +106,7 @@ export function PriceChart({
   const [chartType, setChartType] = useState<ChartType>("candle");
   const prevChartTypeRef = useRef<ChartType>(chartType);
   const dataVersionRef = useRef(0);
-  const userScrolledRef = useRef(false);
-  const programmaticZoomRef = useRef(false);
+  const programmaticZoomUntilRef = useRef(0);
 
   const hasOhlc = !!(ohlcData && ohlcData.length > 0);
   const hasDataNow = hasOhlc || !!(data && data.length > 0);
@@ -240,13 +239,7 @@ export function PriceChart({
       volumeSeriesRef.current = volumeSeries;
     }
 
-    userScrolledRef.current = false;
-    chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-      if (programmaticZoomRef.current) return;
-      if (dataVersionRef.current > 0) {
-        userScrolledRef.current = true;
-      }
-    });
+    // No scroll tracking — always auto-zoom when data/forecast changes
 
     const handleResize = () => {
       if (chartRef.current && container) {
@@ -263,7 +256,6 @@ export function PriceChart({
   }, [chartType, destroyChart, hasOhlc]);
 
   useEffect(() => {
-    userScrolledRef.current = false;
     dataVersionRef.current = 0;
   }, [selectedTimeframe]);
 
@@ -458,25 +450,20 @@ export function PriceChart({
     const forecastBars = saneForecast?.forecastPoints?.length || 0;
     const totalBars = baseBars + forecastBars;
     const visibleBars = getVisibleBars(selectedTimeframe);
-    if (!userScrolledRef.current) {
-      programmaticZoomRef.current = true;
-      if (forecastBars > 0) {
-        // When forecast exists, ensure both recent candles + all forecast bars are visible
-        const showBars = Math.max(visibleBars, forecastBars + 20);
-        chart.timeScale().setVisibleLogicalRange({
-          from: totalBars - showBars,
-          to: totalBars + 4,
-        });
-      } else if (baseBars > visibleBars) {
-        chart.timeScale().setVisibleLogicalRange({
-          from: totalBars - visibleBars,
-          to: totalBars + 8,
-        });
-      } else {
-        chart.timeScale().fitContent();
-      }
-      // Delay clearing to let the listener fire first
-      requestAnimationFrame(() => { programmaticZoomRef.current = false; });
+    // Always auto-zoom to show forecast or recent bars
+    if (forecastBars > 0) {
+      const showBars = Math.max(visibleBars, forecastBars + 20);
+      chart.timeScale().setVisibleLogicalRange({
+        from: totalBars - showBars,
+        to: totalBars + 4,
+      });
+    } else if (baseBars > visibleBars) {
+      chart.timeScale().setVisibleLogicalRange({
+        from: totalBars - visibleBars,
+        to: totalBars + 8,
+      });
+    } else {
+      chart.timeScale().fitContent();
     }
     dataVersionRef.current++;
   }, [ohlcData, data, forecast, targetPrice, forecastLineColor, hasOhlc, chartType, selectedTimeframe, t]);
