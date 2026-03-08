@@ -42,9 +42,9 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
         const jitter = (Math.random() - 0.5) * 0.6;
         return Math.max(0, Math.min(100, prev + jitter));
       });
-      tickRef.current = setTimeout(tick, 80 + Math.random() * 120);
+      tickRef.current = setTimeout(tick, 30 + Math.random() * 50);
     };
-    tickRef.current = setTimeout(tick, 80 + Math.random() * 120);
+    tickRef.current = setTimeout(tick, 30 + Math.random() * 50);
     return () => clearTimeout(tickRef.current);
   }, []);
 
@@ -115,9 +115,9 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
         const jitter = (Math.random() - 0.5) * 1.8;
         return Math.max(0.5, Math.min(99.5, buyNum + jitter));
       });
-      tickRef.current = setTimeout(oscillate, 80 + Math.random() * 120);
+      tickRef.current = setTimeout(oscillate, 30 + Math.random() * 50);
     };
-    tickRef.current = setTimeout(oscillate, 80 + Math.random() * 120);
+    tickRef.current = setTimeout(oscillate, 30 + Math.random() * 50);
     return () => clearTimeout(tickRef.current);
   }, [buyNum]);
 
