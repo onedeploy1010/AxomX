@@ -285,86 +285,85 @@ export default function ProfileNodesPage() {
         </div>
       ) : (
         <div className="px-4 sm:px-6 -mt-1 space-y-3">
-          {/* Purchase buttons */}
+          {/* Purchase buttons — bright, distinct from data cards */}
           <div className="grid grid-cols-2 gap-3">
-            {/* MAX node — metallic premium CTA */}
+            {/* MAX node */}
             <button
-              className="node-btn-max rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-200 active:translate-y-[2px] relative overflow-hidden group"
+              className="node-btn-max rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-150 active:translate-y-[2px] relative overflow-hidden group"
               style={{
-                background: "linear-gradient(170deg, #134e4a 0%, #0d3d38 25%, #0a2f2b 50%, #072220 75%, #051a18 100%)",
-                border: "1.5px solid rgba(10,186,181,0.5)",
-                boxShadow: "0 6px 0 #04201e, 0 8px 0 rgba(10,186,181,0.2), 0 12px 30px rgba(10,186,181,0.25), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.3)",
+                background: "linear-gradient(165deg, #1a3a38 0%, #162e2c 50%, #122422 100%)",
+                border: "2px solid rgba(255,255,255,0.45)",
+                boxShadow: "0 6px 0 rgba(255,255,255,0.08), 0 0 20px rgba(255,255,255,0.06), 0 0 40px rgba(10,186,181,0.15), inset 0 1px 0 rgba(255,255,255,0.2)",
               }}
               onClick={() => { setPurchaseNodeType("MAX"); setPurchaseDialogOpen(true); }}
             >
-              {/* Animated glow orbs */}
-              <div className="node-btn-glow absolute -top-4 -right-4 w-28 h-28" style={{ background: `radial-gradient(circle, rgba(10,186,181,0.5), transparent 60%)`, filter: "blur(18px)" }} />
-              <div className="absolute bottom-0 left-0 w-20 h-20 opacity-25" style={{ background: `radial-gradient(circle, rgba(52,211,153,0.5), transparent 60%)`, filter: "blur(14px)" }} />
-              {/* Top metallic edge highlight */}
-              <div className="absolute top-0 left-[10%] right-[10%] h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), rgba(10,186,181,0.4), rgba(255,255,255,0.25), transparent)" }} />
+              {/* Glow */}
+              <div className="node-btn-glow absolute -top-6 -right-6 w-32 h-32" style={{ background: `radial-gradient(circle, rgba(10,186,181,0.4), transparent 60%)`, filter: "blur(20px)" }} />
+              {/* Top white edge */}
+              <div className="absolute top-0 left-[5%] right-[5%] h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)" }} />
 
               <div className="relative z-[2] flex items-center gap-3">
-                <div className="node-btn-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{
-                  background: `linear-gradient(145deg, #14b8a6, #0d9488, #0f766e)`,
-                  boxShadow: `0 4px 15px rgba(10,186,181,0.5), 0 2px 0 rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.2)`,
+                <div className="node-btn-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{
+                  background: `linear-gradient(145deg, #14b8a6, #0d9488)`,
+                  boxShadow: `0 3px 12px rgba(10,186,181,0.5), inset 0 1px 0 rgba(255,255,255,0.3)`,
                 }}>
-                  <Zap className="h-6 w-6 text-white" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
+                  <Zap className="h-5 w-5 text-white" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
                 </div>
-                <div className="text-left">
-                  <div className="text-[15px] sm:text-base font-extrabold text-white tracking-tight" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{t("profile.applyLargeNode")}</div>
-                  <div className="text-[14px] font-bold mt-0.5" style={{ color: "#5eead4", textShadow: "0 0 10px rgba(10,186,181,0.4)" }}>${NODE_PLANS.MAX.price} <span className="text-[11px] font-medium text-white/40">USDT</span></div>
+                <div className="text-left min-w-0">
+                  <div className="text-[14px] sm:text-[15px] font-extrabold text-white tracking-tight">{t("profile.applyLargeNode")}</div>
+                  <div className="text-[15px] font-black mt-0.5" style={{ color: "#5eead4" }}>${NODE_PLANS.MAX.price} <span className="text-[11px] font-semibold text-white/35">USDT</span></div>
                 </div>
               </div>
 
               <div className="relative z-[2] flex items-center justify-between w-full">
-                <span className="text-[11px] font-medium" style={{ color: `rgba(94,234,212,0.5)` }}>{t("profile.nodeTotal")} ${NODE_PLANS.MAX.frozenAmount.toLocaleString()}</span>
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all duration-200 group-active:scale-90" style={{
-                  background: "linear-gradient(135deg, rgba(10,186,181,0.2), rgba(10,186,181,0.1))",
-                  border: "1px solid rgba(10,186,181,0.35)",
-                  boxShadow: "0 2px 6px rgba(10,186,181,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+                <span className="text-[10px] text-white/35 font-medium">{t("profile.nodeTotal")} ${NODE_PLANS.MAX.frozenAmount.toLocaleString()}</span>
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full transition-all duration-150 group-active:scale-90" style={{
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
                 }}>
-                  <span className="text-[10px] font-extrabold tracking-wider" style={{ color: "#5eead4" }}>GO</span>
-                  <ArrowUpRight className="h-3 w-3" style={{ color: "#5eead4" }} />
+                  <span className="text-[10px] font-extrabold tracking-wider text-white/80">GO</span>
+                  <ArrowUpRight className="h-3 w-3 text-white/80" />
                 </div>
               </div>
             </button>
 
-            {/* MINI node — metallic secondary CTA */}
+            {/* MINI node */}
             <button
-              className="node-btn-mini rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-200 active:translate-y-[2px] relative overflow-hidden group"
+              className="node-btn-mini rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-150 active:translate-y-[2px] relative overflow-hidden group"
               style={{
-                background: "linear-gradient(170deg, #1e293b 0%, #1a2332 25%, #151c28 50%, #111720 75%, #0d1117 100%)",
-                border: "1.5px solid rgba(148,163,184,0.2)",
-                boxShadow: "0 6px 0 #0a0e14, 0 8px 0 rgba(100,116,139,0.1), 0 12px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.3)",
+                background: "linear-gradient(165deg, #252a34 0%, #1e222c 50%, #181c24 100%)",
+                border: "2px solid rgba(255,255,255,0.3)",
+                boxShadow: "0 6px 0 rgba(255,255,255,0.05), 0 0 15px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.12)",
               }}
               onClick={() => { setPurchaseNodeType("MINI"); setPurchaseDialogOpen(true); }}
             >
-              <div className="absolute -top-4 -right-4 w-24 h-24 opacity-20 group-active:opacity-40 transition-opacity" style={{ background: "radial-gradient(circle, rgba(148,163,184,0.5), transparent 60%)", filter: "blur(14px)" }} />
-              {/* Top metallic edge highlight */}
-              <div className="absolute top-0 left-[10%] right-[10%] h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), rgba(148,163,184,0.2), rgba(255,255,255,0.12), transparent)" }} />
+              <div className="absolute -top-4 -right-4 w-24 h-24 opacity-15" style={{ background: "radial-gradient(circle, rgba(200,210,220,0.5), transparent 60%)", filter: "blur(14px)" }} />
+              {/* Top white edge */}
+              <div className="absolute top-0 left-[5%] right-[5%] h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)" }} />
 
               <div className="relative z-[2] flex items-center gap-3">
-                <div className="node-btn-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{
-                  background: "linear-gradient(145deg, #475569, #3b4c63, #334155)",
-                  boxShadow: "0 4px 12px rgba(51,65,85,0.5), 0 2px 0 rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                <div className="node-btn-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{
+                  background: "linear-gradient(145deg, #64748b, #475569)",
+                  boxShadow: "0 3px 12px rgba(100,116,139,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
                 }}>
-                  <ShieldCheck className="h-6 w-6 text-white/90" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
+                  <ShieldCheck className="h-5 w-5 text-white" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
                 </div>
-                <div className="text-left">
-                  <div className="text-[15px] sm:text-base font-extrabold text-white tracking-tight" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{t("profile.applySmallNode")}</div>
-                  <div className="text-[14px] font-bold mt-0.5 text-slate-400">${NODE_PLANS.MINI.price} <span className="text-[11px] font-medium text-white/25">USDT</span></div>
+                <div className="text-left min-w-0">
+                  <div className="text-[14px] sm:text-[15px] font-extrabold text-white tracking-tight">{t("profile.applySmallNode")}</div>
+                  <div className="text-[15px] font-black mt-0.5 text-white/70">${NODE_PLANS.MINI.price} <span className="text-[11px] font-semibold text-white/25">USDT</span></div>
                 </div>
               </div>
 
               <div className="relative z-[2] flex items-center justify-between w-full">
-                <span className="text-[11px] text-white/25 font-medium">{t("profile.nodeTotal")} ${NODE_PLANS.MINI.frozenAmount.toLocaleString()}</span>
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all duration-200 group-active:scale-90" style={{
-                  background: "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+                <span className="text-[10px] text-white/25 font-medium">{t("profile.nodeTotal")} ${NODE_PLANS.MINI.frozenAmount.toLocaleString()}</span>
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full transition-all duration-150 group-active:scale-90" style={{
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
                 }}>
-                  <span className="text-[10px] font-extrabold tracking-wider text-white/45">GO</span>
-                  <ArrowUpRight className="h-3 w-3 text-white/45" />
+                  <span className="text-[10px] font-extrabold tracking-wider text-white/50">GO</span>
+                  <ArrowUpRight className="h-3 w-3 text-white/50" />
                 </div>
               </div>
             </button>
