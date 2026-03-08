@@ -307,7 +307,22 @@ export async function subscribeVip(walletAddress: string, txHash?: string, planL
   return toCamel(data);
 }
 
-export async function purchaseNode(walletAddress: string, nodeType: string, txHash?: string, paymentMode?: string) {
+export async function purchaseNode(walletAddress: string, nodeType: string, txHash?: string, paymentMode?: string, authCode?: string) {
+  // For MAX nodes, validate auth code first
+  if (nodeType === "MAX" && authCode) {
+    const { data: codeData, error: codeErr } = await supabase
+      .from("node_auth_codes")
+      .select("id, status, node_type")
+      .eq("code", authCode)
+      .eq("status", "ACTIVE")
+      .single();
+    if (codeErr || !codeData) throw new Error("Invalid or expired authorization code");
+    // Mark code as used
+    await supabase
+      .from("node_auth_codes")
+      .update({ status: "USED", used_by: walletAddress, used_at: new Date().toISOString() })
+      .eq("id", codeData.id);
+  }
   const { data, error } = await supabase.rpc("purchase_node", {
     addr: walletAddress,
     node_type_param: nodeType,
@@ -316,6 +331,16 @@ export async function purchaseNode(walletAddress: string, nodeType: string, txHa
   });
   if (error) throw error;
   return toCamel(data);
+}
+
+export async function validateAuthCode(code: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("node_auth_codes")
+    .select("id")
+    .eq("code", code)
+    .eq("status", "ACTIVE")
+    .single();
+  return !error && !!data;
 }
 
 export async function checkNodeMilestones(walletAddress: string) {

@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { Loader2, Zap, ShieldCheck } from "lucide-react";
+import { Loader2, Zap, ShieldCheck, KeyRound } from "lucide-react";
 import { NODE_PLANS } from "@/lib/data";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
-import { purchaseNode } from "@/lib/api";
+import { purchaseNode, validateAuthCode } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -22,17 +23,43 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
   const { toast } = useToast();
   const payment = usePayment();
 
+  const [authCode, setAuthCode] = useState("");
+  const [authCodeError, setAuthCodeError] = useState("");
+  const [authCodeValid, setAuthCodeValid] = useState(false);
+  const [validatingCode, setValidatingCode] = useState(false);
+
   const plan = NODE_PLANS[nodeType];
   const isMAX = nodeType === "MAX";
   const dailyRate = isMAX ? "0.9%" : "0.5%";
 
+  const handleAuthCodeBlur = async () => {
+    if (!isMAX || !authCode.trim()) {
+      setAuthCodeError("");
+      setAuthCodeValid(false);
+      return;
+    }
+    setValidatingCode(true);
+    setAuthCodeError("");
+    try {
+      const valid = await validateAuthCode(authCode.trim());
+      setAuthCodeValid(valid);
+      if (!valid) setAuthCodeError(t("profile.authCodeInvalid"));
+    } catch {
+      setAuthCodeError(t("profile.authCodeInvalid"));
+      setAuthCodeValid(false);
+    } finally {
+      setValidatingCode(false);
+    }
+  };
+
   const purchaseMutation = useMutation({
     mutationFn: async () => {
+      if (isMAX && !authCodeValid) throw new Error(t("profile.authCodeRequired"));
       let txHash: string | undefined;
       if (NODE_CONTRACT_ADDRESS) {
         txHash = await payment.payNodePurchase(nodeType, "FULL");
       }
-      const result = await purchaseNode(walletAddr, nodeType, txHash, "FULL");
+      const result = await purchaseNode(walletAddr, nodeType, txHash, "FULL", isMAX ? authCode.trim() : undefined);
       payment.markSuccess();
       return result;
     },
@@ -59,6 +86,9 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
 
   const handleClose = () => {
     if (purchaseMutation.isPending) return;
+    setAuthCode("");
+    setAuthCodeError("");
+    setAuthCodeValid(false);
     onOpenChange(false);
   };
 
@@ -155,16 +185,54 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
             <span className="text-[19px] font-black text-green-400">${plan.price} <span className="text-[11px] font-semibold text-white/40">USDT</span></span>
           </div>
 
+          {isMAX && (
+            <div className="mb-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <KeyRound className="h-3.5 w-3.5 text-amber-400/70" />
+                <span className="text-[12px] font-bold text-white/60">{t("profile.authCodeLabel")}</span>
+              </div>
+              <input
+                type="text"
+                value={authCode}
+                onChange={(e) => { setAuthCode(e.target.value); setAuthCodeError(""); setAuthCodeValid(false); }}
+                onBlur={handleAuthCodeBlur}
+                placeholder={t("profile.authCodePlaceholder")}
+                className="w-full rounded-xl h-11 px-4 text-[14px] font-mono text-white placeholder:text-white/25 outline-none transition-all"
+                style={{
+                  background: "#222",
+                  border: authCodeError ? "1px solid rgba(239,68,68,0.5)" : authCodeValid ? "1px solid rgba(74,222,128,0.5)" : "1px solid rgba(255,255,255,0.12)",
+                }}
+              />
+              {validatingCode && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <Loader2 className="h-3 w-3 animate-spin text-white/40" />
+                  <span className="text-[11px] text-white/40">{t("common.loading")}</span>
+                </div>
+              )}
+              {authCodeError && (
+                <p className="text-[11px] text-red-400 mt-1.5">{authCodeError}</p>
+              )}
+              {authCodeValid && (
+                <p className="text-[11px] text-green-400 mt-1.5">✓</p>
+              )}
+              {!authCode && !authCodeError && (
+                <p className="text-[11px] text-amber-400/50 mt-1.5">{t("profile.authCodeRequired")}</p>
+              )}
+            </div>
+          )}
+
           <button
             className="w-full rounded-2xl h-12 flex items-center justify-center gap-2 text-[14px] font-bold text-white transition-all active:scale-[0.97] disabled:opacity-50"
             style={{
               background: purchaseMutation.isPending
                 ? "linear-gradient(135deg, #374151, #4b5563)"
+                : (isMAX && !authCodeValid)
+                ? "linear-gradient(135deg, #374151, #4b5563)"
                 : "linear-gradient(135deg, #22c55e, #16a34a)",
-              boxShadow: purchaseMutation.isPending ? "none" : "0 4px 20px rgba(34,197,94,0.35)",
+              boxShadow: purchaseMutation.isPending || (isMAX && !authCodeValid) ? "none" : "0 4px 20px rgba(34,197,94,0.35)",
             }}
             onClick={handlePurchase}
-            disabled={purchaseMutation.isPending}
+            disabled={purchaseMutation.isPending || (isMAX && !authCodeValid)}
           >
             {purchaseMutation.isPending ? (
               <>
