@@ -9,6 +9,7 @@ import type { NodeOverview, NodeEarningsRecord, NodeMembership } from "@shared/t
 import { NODE_PLANS, NODE_MILESTONES } from "@/lib/data";
 import { useTranslation } from "react-i18next";
 import { useMaPrice } from "@/hooks/use-ma-price";
+import { useToast } from "@/hooks/use-toast";
 import { NodePurchaseDialog } from "@/components/nodes/node-purchase-section";
 
 type TabKey = "purchase" | "earnings" | "detail";
@@ -23,6 +24,7 @@ function getMilestoneDaysLeft(startDate: string | null, deadlineDays: number): n
 
 export default function ProfileNodesPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const account = useActiveAccount();
   const [, navigate] = useLocation();
   const walletAddr = account?.address || "";
@@ -285,71 +287,84 @@ export default function ProfileNodesPage() {
         <div className="px-4 sm:px-6 -mt-1 space-y-3">
           {/* Purchase buttons */}
           <div className="grid grid-cols-2 gap-3">
-            {/* MAX node — prominent CTA */}
+            {/* MAX node — metallic premium CTA */}
             <button
-              className="rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all active:translate-y-[1px] active:shadow-none relative overflow-hidden group"
+              className="node-btn-max rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-200 active:translate-y-[2px] relative overflow-hidden group"
               style={{
-                background: "linear-gradient(160deg, #0d3330 0%, #0a2420 40%, #081a18 100%)",
-                border: "1.5px solid rgba(10,186,181,0.4)",
-                boxShadow: "0 4px 0 rgba(10,186,181,0.15), 0 8px 25px rgba(10,186,181,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+                background: "linear-gradient(170deg, #134e4a 0%, #0d3d38 25%, #0a2f2b 50%, #072220 75%, #051a18 100%)",
+                border: "1.5px solid rgba(10,186,181,0.5)",
+                boxShadow: "0 6px 0 #04201e, 0 8px 0 rgba(10,186,181,0.2), 0 12px 30px rgba(10,186,181,0.25), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.3)",
               }}
               onClick={() => { setPurchaseNodeType("MAX"); setPurchaseDialogOpen(true); }}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 opacity-30" style={{ background: `radial-gradient(circle, rgba(10,186,181,0.6), transparent 65%)`, filter: "blur(20px)" }} />
-              <div className="absolute bottom-0 left-0 w-20 h-20 opacity-20" style={{ background: `radial-gradient(circle, rgba(52,211,153,0.5), transparent 65%)`, filter: "blur(15px)" }} />
+              {/* Animated glow orbs */}
+              <div className="node-btn-glow absolute -top-4 -right-4 w-28 h-28" style={{ background: `radial-gradient(circle, rgba(10,186,181,0.5), transparent 60%)`, filter: "blur(18px)" }} />
+              <div className="absolute bottom-0 left-0 w-20 h-20 opacity-25" style={{ background: `radial-gradient(circle, rgba(52,211,153,0.5), transparent 60%)`, filter: "blur(14px)" }} />
+              {/* Top metallic edge highlight */}
+              <div className="absolute top-0 left-[10%] right-[10%] h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), rgba(10,186,181,0.4), rgba(255,255,255,0.25), transparent)" }} />
 
-              <div className="relative flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{
-                  background: `linear-gradient(135deg, ${tiffany}, ${accentGreen})`,
-                  boxShadow: `0 4px 15px rgba(10,186,181,0.5), inset 0 1px 0 rgba(255,255,255,0.25)`,
+              <div className="relative z-[2] flex items-center gap-3">
+                <div className="node-btn-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{
+                  background: `linear-gradient(145deg, #14b8a6, #0d9488, #0f766e)`,
+                  boxShadow: `0 4px 15px rgba(10,186,181,0.5), 0 2px 0 rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.2)`,
                 }}>
-                  <Zap className="h-6 w-6 text-white drop-shadow-sm" />
+                  <Zap className="h-6 w-6 text-white" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
                 </div>
                 <div className="text-left">
-                  <div className="text-[15px] sm:text-base font-extrabold text-white tracking-tight">{t("profile.applyLargeNode")}</div>
-                  <div className="text-[13px] font-bold mt-0.5" style={{ color: tiffanyLight }}>${NODE_PLANS.MAX.price} <span className="text-[11px] font-medium text-white/40">USDT</span></div>
+                  <div className="text-[15px] sm:text-base font-extrabold text-white tracking-tight" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{t("profile.applyLargeNode")}</div>
+                  <div className="text-[14px] font-bold mt-0.5" style={{ color: "#5eead4", textShadow: "0 0 10px rgba(10,186,181,0.4)" }}>${NODE_PLANS.MAX.price} <span className="text-[11px] font-medium text-white/40">USDT</span></div>
                 </div>
               </div>
 
-              <div className="relative flex items-center justify-between w-full">
-                <span className="text-[11px] font-medium" style={{ color: `rgba(10,186,181,0.6)` }}>{t("profile.nodeTotal")} ${NODE_PLANS.MAX.frozenAmount.toLocaleString()}</span>
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: "rgba(10,186,181,0.12)", border: "1px solid rgba(10,186,181,0.2)" }}>
-                  <span className="text-[10px] font-bold" style={{ color: tiffanyLight }}>GO</span>
-                  <ArrowUpRight className="h-3 w-3" style={{ color: tiffanyLight }} />
+              <div className="relative z-[2] flex items-center justify-between w-full">
+                <span className="text-[11px] font-medium" style={{ color: `rgba(94,234,212,0.5)` }}>{t("profile.nodeTotal")} ${NODE_PLANS.MAX.frozenAmount.toLocaleString()}</span>
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all duration-200 group-active:scale-90" style={{
+                  background: "linear-gradient(135deg, rgba(10,186,181,0.2), rgba(10,186,181,0.1))",
+                  border: "1px solid rgba(10,186,181,0.35)",
+                  boxShadow: "0 2px 6px rgba(10,186,181,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+                }}>
+                  <span className="text-[10px] font-extrabold tracking-wider" style={{ color: "#5eead4" }}>GO</span>
+                  <ArrowUpRight className="h-3 w-3" style={{ color: "#5eead4" }} />
                 </div>
               </div>
             </button>
 
-            {/* MINI node — secondary CTA */}
+            {/* MINI node — metallic secondary CTA */}
             <button
-              className="rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all active:translate-y-[1px] active:shadow-none relative overflow-hidden group"
+              className="node-btn-mini rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-200 active:translate-y-[2px] relative overflow-hidden group"
               style={{
-                background: "linear-gradient(160deg, #1a2028 0%, #141820 40%, #101418 100%)",
-                border: "1.5px solid rgba(129,216,208,0.2)",
-                boxShadow: "0 4px 0 rgba(129,216,208,0.08), 0 8px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
+                background: "linear-gradient(170deg, #1e293b 0%, #1a2332 25%, #151c28 50%, #111720 75%, #0d1117 100%)",
+                border: "1.5px solid rgba(148,163,184,0.2)",
+                boxShadow: "0 6px 0 #0a0e14, 0 8px 0 rgba(100,116,139,0.1), 0 12px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.3)",
               }}
               onClick={() => { setPurchaseNodeType("MINI"); setPurchaseDialogOpen(true); }}
             >
-              <div className="absolute top-0 right-0 w-24 h-24 opacity-15 group-hover:opacity-25 transition-opacity" style={{ background: "radial-gradient(circle, rgba(129,216,208,0.5), transparent 65%)", filter: "blur(15px)" }} />
+              <div className="absolute -top-4 -right-4 w-24 h-24 opacity-20 group-active:opacity-40 transition-opacity" style={{ background: "radial-gradient(circle, rgba(148,163,184,0.5), transparent 60%)", filter: "blur(14px)" }} />
+              {/* Top metallic edge highlight */}
+              <div className="absolute top-0 left-[10%] right-[10%] h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), rgba(148,163,184,0.2), rgba(255,255,255,0.12), transparent)" }} />
 
-              <div className="relative flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{
-                  background: "linear-gradient(135deg, #3b6b68, #2a4a48)",
-                  boxShadow: "0 4px 12px rgba(59,107,104,0.35), inset 0 1px 0 rgba(255,255,255,0.1)",
+              <div className="relative z-[2] flex items-center gap-3">
+                <div className="node-btn-icon w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{
+                  background: "linear-gradient(145deg, #475569, #3b4c63, #334155)",
+                  boxShadow: "0 4px 12px rgba(51,65,85,0.5), 0 2px 0 rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
                 }}>
-                  <ShieldCheck className="h-6 w-6 text-white/90 drop-shadow-sm" />
+                  <ShieldCheck className="h-6 w-6 text-white/90" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
                 </div>
                 <div className="text-left">
-                  <div className="text-[15px] sm:text-base font-extrabold text-white tracking-tight">{t("profile.applySmallNode")}</div>
-                  <div className="text-[13px] font-bold mt-0.5 text-white/60">${NODE_PLANS.MINI.price} <span className="text-[11px] font-medium text-white/30">USDT</span></div>
+                  <div className="text-[15px] sm:text-base font-extrabold text-white tracking-tight" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{t("profile.applySmallNode")}</div>
+                  <div className="text-[14px] font-bold mt-0.5 text-slate-400">${NODE_PLANS.MINI.price} <span className="text-[11px] font-medium text-white/25">USDT</span></div>
                 </div>
               </div>
 
-              <div className="relative flex items-center justify-between w-full">
-                <span className="text-[11px] text-white/30 font-medium">{t("profile.nodeTotal")} ${NODE_PLANS.MINI.frozenAmount.toLocaleString()}</span>
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <span className="text-[10px] font-bold text-white/40">GO</span>
-                  <ArrowUpRight className="h-3 w-3 text-white/40" />
+              <div className="relative z-[2] flex items-center justify-between w-full">
+                <span className="text-[11px] text-white/25 font-medium">{t("profile.nodeTotal")} ${NODE_PLANS.MINI.frozenAmount.toLocaleString()}</span>
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all duration-200 group-active:scale-90" style={{
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+                }}>
+                  <span className="text-[10px] font-extrabold tracking-wider text-white/45">GO</span>
+                  <ArrowUpRight className="h-3 w-3 text-white/45" />
                 </div>
               </div>
             </button>
@@ -390,27 +405,23 @@ export default function ProfileNodesPage() {
             </div>
 
             <div className="rounded-2xl p-4 sm:p-5 relative overflow-hidden" style={{ background: "linear-gradient(145deg, #161418, #0e1216)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="flex items-center gap-1.5 mb-2.5">
-                <Lock className="h-4 w-4" style={{ color: "#fbbf24" }} />
-                <span className="text-[11px] sm:text-xs text-white/40 font-medium uppercase tracking-wider">{t("profile.availableBalance")}</span>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-1.5">
+                  <Lock className="h-4 w-4" style={{ color: "#fbbf24" }} />
+                  <span className="text-[11px] sm:text-xs text-white/40 font-medium uppercase tracking-wider">{t("profile.availableBalance")}</span>
+                </div>
+                <button
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg transition-all active:scale-95"
+                  style={{ background: "rgba(10,186,181,0.12)", border: "1px solid rgba(10,186,181,0.25)", color: tiffanyLight }}
+                  onClick={() => toast({ title: t("profile.withdrawNotReady"), description: t("profile.withdrawNotReadyDesc") })}
+                >
+                  {t("profile.withdrawBtn")}
+                </button>
               </div>
               <div className="text-base sm:text-lg font-bold text-white">{formatCompactMA(availableBalance)}</div>
               <div className="text-[11px] text-white/25 mt-0.5">/ {formatCompactMA(lockedEarnings)}</div>
             </div>
           </div>
-
-          {/* Withdraw button */}
-          <button
-            className="w-full rounded-2xl h-12 sm:h-14 flex items-center justify-center gap-2 text-sm sm:text-base font-bold transition-all active:scale-[0.97]"
-            style={{
-              background: `linear-gradient(135deg, rgba(10,186,181,0.1), rgba(52,211,153,0.05))`,
-              border: `1px solid rgba(10,186,181,0.2)`,
-              color: tiffanyLight,
-            }}
-          >
-            {t("profile.withdrawBtn")}
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
 
           {/* Tabs */}
           <div

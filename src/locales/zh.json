@@ -507,6 +507,8 @@
     "releaseStatus": "释放状态",
     "availableBalance": "可用余额",
     "withdrawBtn": "提取",
+    "withdrawNotReady": "暂未达标",
+    "withdrawNotReadyDesc": "您尚未达到提现条件，请继续完成里程碑任务。",
     "purchaseRecords": "购买记录",
     "earningsDetailTab": "收益明细",
     "myDetailTab": "我的明细",
