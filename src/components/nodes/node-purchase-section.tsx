@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Loader2, Zap, ShieldCheck, KeyRound } from "lucide-react";
 import { NODE_PLANS } from "@/lib/data";
 import { usePayment, getPaymentStatusLabel } from "@/hooks/use-payment";
@@ -110,10 +109,8 @@ export function NodePurchaseDialog({ open, onOpenChange, nodeType, walletAddr }:
           flexDirection: "column" as const,
         }}
       >
-        <VisuallyHidden.Root>
-          <DialogTitle>{isMAX ? t("profile.applyLargeNode") : t("profile.applySmallNode")}</DialogTitle>
-          <DialogDescription>{t("profile.confirmPaymentDesc")}</DialogDescription>
-        </VisuallyHidden.Root>
+        <DialogTitle className="sr-only">{isMAX ? t("profile.applyLargeNode") : t("profile.applySmallNode")}</DialogTitle>
+        <DialogDescription className="sr-only">{t("profile.confirmPaymentDesc")}</DialogDescription>
 
         <div
           className="relative overflow-hidden px-5 pt-6 pb-4"
