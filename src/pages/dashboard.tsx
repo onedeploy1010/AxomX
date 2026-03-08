@@ -12,7 +12,6 @@ import { DepthBar } from "@/components/dashboard/depth-bar";
 import { TrendingFeed } from "@/components/dashboard/trending-feed";
 import { ExchangeDepth } from "@/components/dashboard/exchange-depth";
 import { AiModelCarousel } from "@/components/dashboard/ai-model-carousel";
-import { Button } from "@/components/ui/button";
 import { BarChart3 } from "lucide-react";
 
 interface ForecastResponse {
@@ -27,9 +26,6 @@ interface ForecastResponse {
   forecastPoints: { timestamp: number; time: string; price: number; predicted: boolean }[];
 }
 
-interface MultiForecastResponse {
-  forecasts: ForecastResponse[];
-}
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -68,8 +64,6 @@ export default function Dashboard() {
     staleTime: 60_000,
     refetchInterval: 60_000,
   });
-
-  const queryClient = useQueryClient();
 
   // Fire parallel per-model queries — each model shows as soon as it returns
   const modelQueries = useQueries({
