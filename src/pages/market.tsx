@@ -197,6 +197,13 @@ function FearGreedChart({ data, coinSymbol }: { data: { date: string; fgi: numbe
   const hasPrice = sampled.some(d => d.btcPrice > 0);
 
   const formatPrice = (v: number) => {
+    const zh = (() => { try { return (localStorage.getItem("coinmax-lang") || "en") === "zh"; } catch { return false; } })();
+    if (zh) {
+      if (v >= 100_000_000) return `$${(v/100_000_000).toFixed(0)}亿`;
+      if (v >= 10_000) return `$${(v/10_000).toFixed(0)}万`;
+      if (v >= 1) return `$${v.toFixed(0)}`;
+      return `$${v.toFixed(4)}`;
+    }
     if (v >= 1000) return `$${(v/1000).toFixed(0)}K`;
     if (v >= 1) return `$${v.toFixed(0)}`;
     return `$${v.toFixed(4)}`;

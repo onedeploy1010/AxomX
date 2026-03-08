@@ -628,11 +628,14 @@ export default function StrategyPage() {
                     const noPercent = (market.noPrice * 100).toFixed(1);
                     const yesOdds = market.yesPrice > 0 ? (1 / market.yesPrice).toFixed(2) : "0";
                     const noOdds = market.noPrice > 0 ? (1 / market.noPrice).toFixed(2) : "0";
-                    const vol = market.volume >= 1_000_000
-                      ? `$${(market.volume / 1_000_000).toFixed(1)}M`
-                      : market.volume >= 1_000
-                        ? `$${(market.volume / 1_000).toFixed(0)}K`
-                        : `$${market.volume.toFixed(0)}`;
+                    const zhLang = (() => { try { return (localStorage.getItem("coinmax-lang") || "en") === "zh"; } catch { return false; } })();
+                    const vol = zhLang
+                      ? (market.volume >= 100_000_000 ? `$${(market.volume / 100_000_000).toFixed(1)}亿`
+                        : market.volume >= 10_000 ? `$${(market.volume / 10_000).toFixed(1)}万`
+                        : `$${market.volume.toFixed(0)}`)
+                      : (market.volume >= 1_000_000 ? `$${(market.volume / 1_000_000).toFixed(1)}M`
+                        : market.volume >= 1_000 ? `$${(market.volume / 1_000).toFixed(0)}K`
+                        : `$${market.volume.toFixed(0)}`);
                     const endStr = market.endDate
                       ? new Date(market.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })
                       : "";

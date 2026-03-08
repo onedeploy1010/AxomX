@@ -45,13 +45,18 @@ function calcStats() {
   return { tvl, holders, positions };
 }
 
+function isZh() {
+  try { return (localStorage.getItem("coinmax-lang") || "en") === "zh"; } catch { return false; }
+}
+
 function formatTvl(tvl: number) {
-  if (tvl >= 1_000_000) {
-    return `$${(tvl / 1_000_000).toFixed(2)}M`;
+  if (isZh()) {
+    if (tvl >= 100_000_000) return `$${(tvl / 100_000_000).toFixed(2)}亿`;
+    if (tvl >= 10_000) return `$${(tvl / 10_000).toFixed(2)}万`;
+    return `$${tvl.toFixed(2)}`;
   }
-  if (tvl >= 1_000) {
-    return `$${(tvl / 1_000).toFixed(1)}K`;
-  }
+  if (tvl >= 1_000_000) return `$${(tvl / 1_000_000).toFixed(2)}M`;
+  if (tvl >= 1_000) return `$${(tvl / 1_000).toFixed(1)}K`;
   return `$${tvl.toFixed(2)}`;
 }
 
