@@ -107,6 +107,7 @@ export function PriceChart({
   const prevChartTypeRef = useRef<ChartType>(chartType);
   const dataVersionRef = useRef(0);
   const userScrolledRef = useRef(false);
+  const programmaticZoomRef = useRef(false);
 
   const hasOhlc = !!(ohlcData && ohlcData.length > 0);
   const hasDataNow = hasOhlc || !!(data && data.length > 0);
@@ -241,7 +242,8 @@ export function PriceChart({
 
     userScrolledRef.current = false;
     chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-      if (dataVersionRef.current > 1) {
+      if (programmaticZoomRef.current) return;
+      if (dataVersionRef.current > 0) {
         userScrolledRef.current = true;
       }
     });
@@ -457,6 +459,7 @@ export function PriceChart({
     const totalBars = baseBars + forecastBars;
     const visibleBars = getVisibleBars(selectedTimeframe);
     if (!userScrolledRef.current) {
+      programmaticZoomRef.current = true;
       if (forecastBars > 0) {
         // When forecast exists, ensure both recent candles + all forecast bars are visible
         const showBars = Math.max(visibleBars, forecastBars + 20);
@@ -472,6 +475,8 @@ export function PriceChart({
       } else {
         chart.timeScale().fitContent();
       }
+      // Delay clearing to let the listener fire first
+      requestAnimationFrame(() => { programmaticZoomRef.current = false; });
     }
     dataVersionRef.current++;
   }, [ohlcData, data, forecast, targetPrice, forecastLineColor, hasOhlc, chartType, selectedTimeframe, t]);
