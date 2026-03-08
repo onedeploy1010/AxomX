@@ -454,29 +454,27 @@ export function PriceChart({
     // Clear any pending zoom
     if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
 
-    // Auto-zoom — use setTimeout to ensure chart has finished layout
+    // Auto-zoom: always scroll to the end so the last candles + forecast are visible
     const doZoom = () => {
       if (!chartRef.current) return;
       const ts = chartRef.current.timeScale();
-      if (forecastBars > 0) {
-        const showBars = Math.max(visibleBars, forecastBars + 20);
+      // Show last N bars: forecast bars + a few recent candles for context
+      const contextBars = forecastBars > 0 ? 15 : visibleBars;
+      const showBars = forecastBars + contextBars;
+      if (totalBars > showBars) {
         ts.setVisibleLogicalRange({
           from: totalBars - showBars,
-          to: totalBars + 4,
-        });
-      } else if (baseBars > visibleBars) {
-        ts.setVisibleLogicalRange({
-          from: totalBars - visibleBars,
-          to: totalBars + 8,
+          to: totalBars + 2,
         });
       } else {
         ts.fitContent();
       }
     };
 
-    // Zoom immediately + again after a short delay to override any internal resets
+    // Zoom immediately + again after delays to override any internal resets
     doZoom();
     zoomTimerRef.current = setTimeout(doZoom, 50);
+    setTimeout(doZoom, 150);
 
     dataVersionRef.current++;
   }, [ohlcData, data, forecast, targetPrice, forecastLineColor, hasOhlc, chartType, selectedTimeframe, t]);
