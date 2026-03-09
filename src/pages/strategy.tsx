@@ -1617,26 +1617,10 @@ export default function StrategyPage() {
             <Button variant="outline" onClick={() => setBetDialogOpen(false)} data-testid="button-cancel-bet">{t("common.cancel")}</Button>
             <Button
               className="bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
-              disabled={!betAmount || Number(betAmount) <= 0 || !betChoice || placeBetMutation.isPending}
-              onClick={() => {
-                if (!betMarket || !betChoice || !betAmount) return;
-                const chosen = betMarket.choices.find(c => c.label === betChoice);
-                placeBetMutation.mutate({
-                  marketId: betMarket.id,
-                  marketType: betMarket.type,
-                  question: betMarket.question,
-                  choice: betChoice,
-                  odds: chosen?.odds || 0.5,
-                  amount: Number(betAmount),
-                });
-              }}
+              onClick={() => toast({ title: "暂未开放" })}
               data-testid="button-confirm-bet"
             >
-              {placeBetMutation.isPending ? (
-                <RefreshCw className="mr-1 h-4 w-4 animate-spin" />
-              ) : (
-                <DollarSign className="mr-1 h-4 w-4" />
-              )}
+              <DollarSign className="mr-1 h-4 w-4" />
               {t("strategy.placeBet")}
             </Button>
           </DialogFooter>
