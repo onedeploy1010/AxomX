@@ -439,14 +439,10 @@ export default function ProfilePage() {
                 <button
                   className="flex-1 h-9 rounded-xl text-[12px] font-bold text-black transition-all hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center"
                   style={{ background: "linear-gradient(135deg, #facc15, #eab308)" }}
-                  onClick={() => selectedVipPlan && vipMutation.mutate(selectedVipPlan)}
-                  disabled={!selectedVipPlan || vipMutation.isPending}
+                  onClick={() => toast({ title: "暂未开放" })}
+                  disabled={vipMutation.isPending}
                 >
-                  {vipMutation.isPending ? (
-                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {getPaymentStatusLabel(payment.status) || t("common.processing")}</>
-                  ) : (
-                    t("profile.payNow")
-                  )}
+                  {t("profile.payNow")}
                 </button>
               </div>
             </div>
