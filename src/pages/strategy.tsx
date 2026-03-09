@@ -244,15 +244,8 @@ export default function StrategyPage() {
   };
 
   const handleConfirmSubscribe = () => {
-    if (!selectedStrategy || !capitalAmount || Number(capitalAmount) <= 0) {
-      toast({ title: t("strategy.invalidAmount"), description: t("strategy.invalidCapitalDesc"), variant: "destructive" });
-      return;
-    }
-    subscribeMutation.mutate({
-      walletAddress: walletAddr,
-      strategyId: selectedStrategy.id,
-      amount: Number(capitalAmount),
-    });
+    toast({ title: "暂未开发", description: "该功能正在开发中，敬请期待" });
+    return;
   };
 
   const handleHedgePurchase = () => {
@@ -1198,7 +1191,7 @@ export default function StrategyPage() {
             <Button
               className="text-xs bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
               data-testid="button-inv-deposit"
-              onClick={() => setDepositOpen(true)}
+              onClick={() => toast({ title: "暂未开发", description: "该功能正在开发中，敬请期待" })}
             >
               <Wallet className="h-3.5 w-3.5 mr-1" />
               {t("common.deposit")}
@@ -1206,7 +1199,13 @@ export default function StrategyPage() {
             <Button
               className="text-xs bg-gradient-to-r from-cyan-600 to-blue-500 border-cyan-500/50 text-white"
               data-testid="button-inv-bind-api"
-              onClick={() => setBindApiOpen(true)}
+              onClick={() => {
+                if (!walletAddr) {
+                  toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
+                  return;
+                }
+                setBindApiOpen(true);
+              }}
             >
               <Key className="h-3.5 w-3.5 mr-1" />
               {t("strategy.bindApi")}
@@ -1383,18 +1382,7 @@ export default function StrategyPage() {
             <Button
               className="bg-gradient-to-r from-emerald-600 to-teal-500 border-emerald-500/50 text-white"
               onClick={() => {
-                if (!walletAddr) {
-                  toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
-                  return;
-                }
-                const amt = parseFloat(depositAmount);
-                if (!amt || amt < 100) {
-                  toast({ title: t("strategy.invalidAmount"), description: t("strategy.hedgeMinError"), variant: "destructive" });
-                  return;
-                }
-                toast({ title: t("strategy.depositSubmitted"), description: t("strategy.depositSubmittedDesc", { amount: amt, network: depositNetwork, exchange: investmentExchange }) });
-                setDepositAmount("");
-                setDepositOpen(false);
+                toast({ title: "暂未开发", description: "该功能正在开发中，敬请期待" });
               }}
               data-testid="button-confirm-deposit"
             >
@@ -1482,12 +1470,32 @@ export default function StrategyPage() {
                 <Shield className="h-2.5 w-2.5 mr-0.5 text-red-400" />{t("strategy.noWithdraw")}
               </Badge>
             </div>
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-3 space-y-2">
+                <div className="text-xs font-semibold text-primary">订阅费用</div>
+                <div className="flex gap-3">
+                  <div className="flex-1 text-center rounded-lg border border-border/30 bg-background/50 py-2 px-2">
+                    <div className="text-lg font-bold text-foreground">$49</div>
+                    <div className="text-[10px] text-muted-foreground">/ 月</div>
+                  </div>
+                  <div className="flex-1 text-center rounded-lg border border-primary/30 bg-primary/10 py-2 px-2 relative">
+                    <div className="absolute -top-1.5 right-1 text-[8px] bg-primary text-white px-1 rounded font-bold">优惠</div>
+                    <div className="text-lg font-bold text-foreground">$249</div>
+                    <div className="text-[10px] text-muted-foreground">/ 半年</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setBindApiOpen(false)} data-testid="button-cancel-bind-api">{t("common.cancel")}</Button>
             <Button
               className="bg-gradient-to-r from-cyan-600 to-blue-500 border-cyan-500/50 text-white"
               onClick={() => {
+                if (!walletAddr) {
+                  toast({ title: t("common.connectWallet"), description: t("strategy.connectWalletDesc"), variant: "destructive" });
+                  return;
+                }
                 if (!apiKey.trim() || !apiSecret.trim()) {
                   toast({ title: t("strategy.missingFields"), description: t("strategy.missingFieldsDesc"), variant: "destructive" });
                   return;
@@ -1707,13 +1715,7 @@ export default function StrategyPage() {
             <Button
               className="bg-gradient-to-r from-blue-600 to-indigo-500 border-blue-500/50 text-white"
               onClick={() => {
-                if (!telegramUsername.trim()) {
-                  toast({ title: t("strategy.missingUsername"), description: t("strategy.missingUsernameDesc"), variant: "destructive" });
-                  return;
-                }
-                toast({ title: t("strategy.telegramBound"), description: t("strategy.telegramBoundDesc", { username: telegramUsername }) });
-                setTelegramUsername("");
-                setBindTelegramOpen(false);
+                toast({ title: "暂未开发", description: "该功能正在开发中，敬请期待" });
               }}
               data-testid="button-confirm-bind-telegram"
             >

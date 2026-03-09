@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Minus, Plus, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { BET_DEFAULTS } from "@/lib/data";
 
 const DURATIONS = ["1min", "3min", "5min", "15min"];
@@ -17,6 +18,7 @@ interface BetControlsProps {
 
 export function BetControls({ amount, onAmountChange, duration, onDurationChange, onBet, isPending }: BetControlsProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [activeDir, setActiveDir] = useState<"up" | "down" | null>(null);
 
   const durationIndex = DURATIONS.indexOf(duration);
@@ -27,9 +29,8 @@ export function BetControls({ amount, onAmountChange, duration, onDurationChange
   }
 
   function handleBet(direction: "up" | "down") {
-    setActiveDir(direction);
-    onBet(direction);
-    setTimeout(() => setActiveDir(null), 600);
+    toast({ title: "暂未开发", description: "该功能正在开发中，敬请期待" });
+    return;
   }
 
   const ctrl3d = {
