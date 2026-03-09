@@ -20,10 +20,10 @@ function toCamel(obj: any): any {
 export async function adminLogin(
   username: string,
   password: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; role?: string }> {
   const { data, error } = await supabase
     .from("admin_users")
-    .select("id, username, password, is_active")
+    .select("id, username, password, is_active, role")
     .eq("username", username)
     .single();
 
@@ -39,7 +39,66 @@ export async function adminLogin(
     return { success: false, error: "Invalid username or password" };
   }
 
-  return { success: true };
+  return { success: true, role: data.role || "support" };
+}
+
+// ─────────────────────────────────────────────
+// Operation Logs
+// ─────────────────────────────────────────────
+
+export async function adminAddLog(
+  adminUsername: string,
+  adminRole: string,
+  action: string,
+  targetType: string,
+  targetId?: string,
+  details?: Record<string, any>
+) {
+  await supabase.from("operation_logs").insert({
+    admin_username: adminUsername,
+    admin_role: adminRole,
+    action,
+    target_type: targetType,
+    target_id: targetId || null,
+    details: details || {},
+  });
+}
+
+export async function adminGetLogs(page: number, pageSize: number, actionFilter?: string) {
+  let query = supabase
+    .from("operation_logs")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false });
+
+  if (actionFilter) {
+    query = query.eq("action", actionFilter);
+  }
+
+  const from = (page - 1) * pageSize;
+  const { data, error, count } = await query.range(from, from + pageSize - 1);
+  if (error) throw error;
+  return { data: data ?? [], total: count ?? 0 };
+}
+
+// ─────────────────────────────────────────────
+// Contract Configs
+// ─────────────────────────────────────────────
+
+export async function adminGetContractConfigs() {
+  const { data, error } = await supabase
+    .from("contract_configs")
+    .select("*")
+    .order("key");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function adminUpdateContractConfig(key: string, value: string, adminUsername: string) {
+  const { error } = await supabase
+    .from("contract_configs")
+    .update({ value, updated_by: adminUsername, updated_at: new Date().toISOString() })
+    .eq("key", key);
+  if (error) throw error;
 }
 
 // ─────────────────────────────────────────────
