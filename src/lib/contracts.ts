@@ -2,12 +2,12 @@ import { getContract } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
 import type { ThirdwebClient } from "thirdweb";
 
-// opBNB Mainnet
-export const OPBNB_CHAIN = defineChain(204);
+// BSC Mainnet (chain ID 56)
+export const BSC_CHAIN = defineChain(56);
 
-// USDT on opBNB (6 decimals)
-export const USDT_ADDRESS = import.meta.env.VITE_USDT_ADDRESS || "0xD23D95445fe424b653b384e063ef47Bf95850dcb";
-export const USDT_DECIMALS = 6;
+// USDT on BSC (18 decimals)
+export const USDT_ADDRESS = import.meta.env.VITE_USDT_ADDRESS || "0x55d398326f99059fF775485246999027B3197955";
+export const USDT_DECIMALS = 18;
 
 // ── Contract addresses ──
 export const VAULT_CONTRACT_ADDRESS = import.meta.env.VITE_VAULT_CONTRACT_ADDRESS || "";
@@ -21,22 +21,22 @@ export function usdToUsdtUnits(amount: number): bigint {
 }
 
 export function getUsdtContract(client: ThirdwebClient) {
-  return getContract({ client, chain: OPBNB_CHAIN, address: USDT_ADDRESS });
+  return getContract({ client, chain: BSC_CHAIN, address: USDT_ADDRESS });
 }
 
 export function getVaultContract(client: ThirdwebClient) {
   if (!VAULT_CONTRACT_ADDRESS) throw new Error("Vault contract not configured");
-  return getContract({ client, chain: OPBNB_CHAIN, address: VAULT_CONTRACT_ADDRESS });
+  return getContract({ client, chain: BSC_CHAIN, address: VAULT_CONTRACT_ADDRESS });
 }
 
 export function getNodeContract(client: ThirdwebClient) {
   if (!NODE_CONTRACT_ADDRESS) throw new Error("Node contract not configured");
-  return getContract({ client, chain: OPBNB_CHAIN, address: NODE_CONTRACT_ADDRESS });
+  return getContract({ client, chain: BSC_CHAIN, address: NODE_CONTRACT_ADDRESS });
 }
 
 export function getVIPContract(client: ThirdwebClient) {
   if (!VIP_CONTRACT_ADDRESS) throw new Error("VIP contract not configured");
-  return getContract({ client, chain: OPBNB_CHAIN, address: VIP_CONTRACT_ADDRESS });
+  return getContract({ client, chain: BSC_CHAIN, address: VIP_CONTRACT_ADDRESS });
 }
 
 // ── ABIs (minimal, only the pay functions) ──

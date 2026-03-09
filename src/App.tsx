@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThirdwebProvider, ConnectButton, useActiveAccount } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import { useThirdwebClient } from "@/hooks/use-thirdweb";
-import { OPBNB_CHAIN } from "@/lib/contracts";
+import { BSC_CHAIN } from "@/lib/contracts";
 import { BottomNav } from "@/components/bottom-nav";
 import { DesktopSidebar } from "@/components/desktop-sidebar";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -283,7 +283,7 @@ function Header() {
       ) : (
         <ConnectButton
           client={client}
-          chain={OPBNB_CHAIN}
+          chain={BSC_CHAIN}
           wallets={wallets}
           connectButton={{
             label: t("common.connect"),

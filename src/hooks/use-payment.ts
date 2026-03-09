@@ -13,7 +13,7 @@ import {
   VIP_RECEIVER_ADDRESS,
   VAULT_ABI,
   NODE_ABI,
-  OPBNB_CHAIN,
+  BSC_CHAIN,
   USDT_ADDRESS,
 } from "@/lib/contracts";
 import { VIP_PLANS } from "@/lib/data";
@@ -78,7 +78,7 @@ export function usePayment() {
         const approveResult = await sendTransaction(approveTx);
         await waitForReceipt({
           client,
-          chain: OPBNB_CHAIN,
+          chain: BSC_CHAIN,
           transactionHash: approveResult.transactionHash,
         });
 
@@ -91,7 +91,7 @@ export function usePayment() {
         setStatus("confirming");
         const receipt = await waitForReceipt({
           client,
-          chain: OPBNB_CHAIN,
+          chain: BSC_CHAIN,
           transactionHash: payResult.transactionHash,
         });
 
@@ -174,7 +174,7 @@ export function usePayment() {
         setStatus("confirming");
         const receipt = await waitForReceipt({
           client,
-          chain: OPBNB_CHAIN,
+          chain: BSC_CHAIN,
           transactionHash: payResult.transactionHash,
         });
 

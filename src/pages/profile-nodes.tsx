@@ -586,7 +586,7 @@ export default function ProfileNodesPage() {
                             <div className="text-[11px] font-mono text-white/50 truncate">{m.txHash}</div>
                           </div>
                           <a
-                            href={`https://opbnbscan.com/tx/${m.txHash}`}
+                            href={`https://bscscan.com/tx/${m.txHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="shrink-0 ml-2 flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all active:scale-95"
