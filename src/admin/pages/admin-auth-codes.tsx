@@ -21,6 +21,7 @@ import {
 } from "@/admin/admin-api";
 import { useAdminAuth } from "@/admin/admin-auth";
 import { shortenAddress } from "@/lib/constants";
+import { copyText } from "@/lib/copy";
 
 const PAGE_SIZE = 20;
 
@@ -76,8 +77,8 @@ export default function AdminAuthCodes() {
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const copyCode = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
+  const copyCode = async (code: string, id: string) => {
+    await copyText(code);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 1500);
   };

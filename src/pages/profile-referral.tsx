@@ -5,6 +5,7 @@ import { shortenAddress, formatCompact } from "@/lib/constants";
 import { useMaPrice } from "@/hooks/use-ma-price";
 import { ArrowLeft, Copy, Users, UserPlus, DollarSign, WalletCards, Layers, ChevronRight, History, Network } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { copyText } from "@/lib/copy";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { getProfile, getReferralTree, getCommissionRecords } from "@/lib/api";
@@ -92,24 +93,8 @@ export default function ProfileReferralPage() {
   const parentWallet = (profile as any)?.parentWallet || null;
 
   const copyToClipboard = async (text: string) => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      toast({ title: t("common.copied"), description: t("common.copiedDesc") });
-    } catch {
-      toast({ title: t("common.copied"), description: t("common.copiedDesc") });
-    }
+    await copyText(text);
+    toast({ title: t("common.copied"), description: t("common.copiedDesc") });
   };
 
   const totalTeamDeposits = teamData?.referrals.reduce((sum, ref) => {

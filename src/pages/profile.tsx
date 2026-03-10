@@ -4,6 +4,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { useMaPrice } from "@/hooks/use-ma-price";
 import { Copy, Crown, WalletCards, Wallet, ArrowUpFromLine, ChevronRight, Bell, Settings, History, GitBranch, Loader2, Server, TrendingUp, Share2, Link2, ArrowLeftRight, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { copyText } from "@/lib/copy";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, getNodeOverview, getVaultPositions, subscribeVip } from "@/lib/api";
@@ -111,24 +112,8 @@ export default function ProfilePage() {
   }, [refCode]);
 
   const copyToClipboard = async (text: string) => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      toast({ title: t("common.copied"), description: t("common.copiedDesc") });
-    } catch {
-      toast({ title: t("common.copied"), description: text });
-    }
+    await copyText(text);
+    toast({ title: t("common.copied"), description: t("common.copiedDesc") });
   };
 
   const shareReferralLink = () => {
