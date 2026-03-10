@@ -509,8 +509,8 @@ END;
 $$;
 
 -- get_team_counts: batch get recursive team count for multiple profiles
-CREATE OR REPLACE FUNCTION get_team_counts(profile_ids UUID[])
-RETURNS TABLE(profile_id UUID, team_count INT)
+CREATE OR REPLACE FUNCTION get_team_counts(profile_ids TEXT[])
+RETURNS TABLE(profile_id TEXT, team_count INT)
 LANGUAGE plpgsql SECURITY DEFINER
 AS $$
 BEGIN
