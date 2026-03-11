@@ -364,6 +364,10 @@ export async function purchaseNode(walletAddress: string, nodeType: string, txHa
     payment_mode_param: paymentMode || "FULL",
   });
   if (error) throw error;
+
+  // Auto-distribute FundManager balance after purchase (fire and forget)
+  supabase.functions.invoke("distribute-funds").catch(() => {});
+
   return toCamel(data);
 }
 
