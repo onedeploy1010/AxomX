@@ -594,6 +594,70 @@ export async function adminDeleteAdminUser(id: string) {
   if (error) throw error;
 }
 
+// ─────────────────────────────────────────────
+// Node Fund Records (on-chain)
+// ─────────────────────────────────────────────
+
+export async function adminGetNodeFundRecords(page: number, pageSize: number) {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  // Get NODE_PURCHASE transactions with tx_hash (on-chain payments)
+  const { data, error, count } = await supabase
+    .from("transactions")
+    .select("*", { count: "exact" })
+    .eq("type", "NODE_PURCHASE")
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) throw error;
+
+  const transactions = data ?? [];
+
+  // Enrich with user wallet addresses
+  const userIds = Array.from(
+    new Set(transactions.map((t: any) => t.user_id).filter(Boolean))
+  );
+
+  let userMap: Record<string, string> = {};
+  if (userIds.length > 0) {
+    const { data: users } = await supabase
+      .from("profiles")
+      .select("id, wallet_address")
+      .in("id", userIds);
+    if (users) {
+      for (const u of users) {
+        userMap[u.id] = u.wallet_address;
+      }
+    }
+  }
+
+  const enriched = transactions.map((t: any) => ({
+    ...toCamel(t),
+    userWallet: userMap[t.user_id] ?? null,
+  }));
+
+  return { data: enriched, total: count ?? 0 };
+}
+
+export async function adminGetNodeFundStats() {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("amount, details")
+    .eq("type", "NODE_PURCHASE");
+
+  if (error) throw error;
+
+  const rows = data ?? [];
+  const totalAmount = rows.reduce((sum: number, r: any) => sum + Number(r.amount || 0), 0);
+  const totalContribution = rows.reduce((sum: number, r: any) => {
+    const contribution = r.details?.contribution;
+    return sum + Number(contribution || 0);
+  }, 0);
+
+  return { totalRecords: rows.length, totalAmount, totalContribution };
+}
+
 export async function adminGetAuthCodeStats() {
   const { data, error } = await supabase
     .from("node_auth_codes")

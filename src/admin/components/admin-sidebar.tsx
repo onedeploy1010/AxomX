@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { LayoutDashboard, Users, GitBranch, Wallet, Server, TrendingUp, KeyRound, LogOut, Menu, X, ScrollText, FileCode2, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, GitBranch, Wallet, Server, TrendingUp, KeyRound, LogOut, Menu, X, ScrollText, FileCode2, ShieldCheck, Banknote } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, createContext, useContext } from "react";
 import { useAdminAuth } from "@/admin/admin-auth";
@@ -18,6 +18,7 @@ export const navItems: NavItem[] = [
   { path: "/admin/referrals", icon: GitBranch, label: "推荐", permission: "referrals" },
   { path: "/admin/vaults", icon: Wallet, label: "金库", permission: "vaults" },
   { path: "/admin/nodes", icon: Server, label: "节点", permission: "nodes" },
+  { path: "/admin/node-funds", icon: Banknote, label: "节点资金", permission: "node-funds" },
   { path: "/admin/auth-codes", icon: KeyRound, label: "授权码", permission: "auth-codes" },
   { path: "/admin/performance", icon: TrendingUp, label: "业绩", permission: "performance" },
   { path: "/admin/contracts", icon: FileCode2, label: "合约", permission: "contracts" },
