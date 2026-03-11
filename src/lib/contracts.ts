@@ -9,9 +9,13 @@ export const BSC_CHAIN = bsc;
 export const USDT_ADDRESS = import.meta.env.VITE_USDT_ADDRESS || "0x55d398326f99059fF775485246999027B3197955";
 export const USDT_DECIMALS = 18;
 
+// USDC on BSC (18 decimals)
+export const USDC_ADDRESS = import.meta.env.VITE_USDC_ADDRESS || "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+export const USDC_DECIMALS = 18;
+
 // ── Contract addresses ──
 export const VAULT_CONTRACT_ADDRESS = import.meta.env.VITE_VAULT_CONTRACT_ADDRESS || "";
-export const NODE_CONTRACT_ADDRESS = import.meta.env.VITE_NODE_CONTRACT_ADDRESS || "0x941C3A9459cEe89644996d48A640544DA202ae35";
+export const NODE_CONTRACT_ADDRESS = import.meta.env.VITE_NODE_CONTRACT_ADDRESS || "0x71237E535d5E00CDf18A609eA003525baEae3489";
 export const VIP_CONTRACT_ADDRESS = import.meta.env.VITE_VIP_CONTRACT_ADDRESS || "";
 export const VIP_RECEIVER_ADDRESS = import.meta.env.VITE_VIP_RECEIVER_ADDRESS || "";
 
@@ -22,6 +26,10 @@ export function usdToUsdtUnits(amount: number): bigint {
 
 export function getUsdtContract(client: ThirdwebClient) {
   return getContract({ client, chain: BSC_CHAIN, address: USDT_ADDRESS });
+}
+
+export function getUsdcContract(client: ThirdwebClient) {
+  return getContract({ client, chain: BSC_CHAIN, address: USDC_ADDRESS });
 }
 
 export function getVaultContract(client: ThirdwebClient) {
@@ -73,6 +81,7 @@ export const VIP_ABI = [
     name: "subscribe",
     inputs: [
       { name: "planLabel", type: "string", internalType: "string" },
+      { name: "token", type: "address", internalType: "address" },
     ],
     outputs: [],
     stateMutability: "nonpayable",

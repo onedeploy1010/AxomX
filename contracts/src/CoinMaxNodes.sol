@@ -72,11 +72,11 @@ contract CoinMaxNodes is Ownable, ReentrancyGuard, Pausable {
         emit TokenAllowed(_usdt, true);
         emit TokenAllowed(_usdc, true);
 
-        // Initialize node plans (6 decimals)
-        nodePlans["MINI"] = NodePlan(100 * 1e6, true);  // $100 small node
-        nodePlans["MAX"]  = NodePlan(600 * 1e6, true);  // $600 large node
-        emit PlanUpdated("MINI", 100 * 1e6, true);
-        emit PlanUpdated("MAX", 600 * 1e6, true);
+        // Initialize node plans (18 decimals for BSC USDT/USDC)
+        nodePlans["MINI"] = NodePlan(100 * 1e18, true);  // $100 small node
+        nodePlans["MAX"]  = NodePlan(600 * 1e18, true);  // $600 large node
+        emit PlanUpdated("MINI", 100 * 1e18, true);
+        emit PlanUpdated("MAX", 600 * 1e18, true);
     }
 
     // ─── Core ───────────────────────────────────────────────────────────

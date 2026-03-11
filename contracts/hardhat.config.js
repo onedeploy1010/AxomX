@@ -16,4 +16,11 @@ module.exports = {
     cache: "./cache",
     artifacts: "./artifacts",
   },
+  networks: {
+    bsc: {
+      url: "https://bsc-dataseed1.binance.org",
+      chainId: 56,
+      accounts: [process.env.DEPLOYER_PRIVATE_KEY].filter(Boolean),
+    },
+  },
 };

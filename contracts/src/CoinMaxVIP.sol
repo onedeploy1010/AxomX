@@ -2,16 +2,20 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title CoinMax VIP
-/// @notice Accepts USDC payments for VIP subscriptions (monthly / yearly). Status tracking is off-chain.
+/// @notice Accepts USDT/USDC payments for VIP subscriptions. Status tracking is off-chain.
 contract CoinMaxVIP is Ownable, ReentrancyGuard {
-    IERC20 public immutable usdc;
+    using SafeERC20 for IERC20;
+
+    /// @notice Whitelisted payment tokens (USDT, USDC)
+    mapping(address => bool) public allowedTokens;
 
     struct VIPPlan {
-        uint256 price; // USDC (6 decimals)
+        uint256 price; // 18 decimals for BSC
         bool active;
     }
 
@@ -20,50 +24,69 @@ contract CoinMaxVIP is Ownable, ReentrancyGuard {
     event VIPSubscribed(
         address indexed payer,
         string planLabel,
+        address indexed token,
         uint256 amount,
         uint256 timestamp
     );
-    event Withdrawn(address indexed to, uint256 amount);
+    event TokenAllowed(address indexed token, bool allowed);
+    event Withdrawn(address indexed token, address indexed to, uint256 amount);
 
-    constructor(address _usdc) Ownable(msg.sender) {
+    /// @param _usdt USDT token address
+    /// @param _usdc USDC token address
+    constructor(address _usdt, address _usdc) Ownable(msg.sender) {
+        require(_usdt != address(0), "Invalid USDT");
         require(_usdc != address(0), "Invalid USDC");
-        usdc = IERC20(_usdc);
 
-        // Initialize VIP plans
-        vipPlans["monthly"] = VIPPlan(69 * 1e6, true);   // $69/month
-        vipPlans["yearly"]  = VIPPlan(899 * 1e6, true);   // $899/year
+        allowedTokens[_usdt] = true;
+        allowedTokens[_usdc] = true;
+        emit TokenAllowed(_usdt, true);
+        emit TokenAllowed(_usdc, true);
+
+        // Initialize VIP plans (18 decimals for BSC USDT/USDC)
+        vipPlans["monthly"]  = VIPPlan(49 * 1e18, true);    // $49/month
+        vipPlans["halfyear"] = VIPPlan(249 * 1e18, true);   // $249/half-year
     }
 
-    /// @notice Subscribe to VIP
-    /// @param planLabel "monthly" or "yearly"
-    function subscribe(string calldata planLabel) external nonReentrant {
+    /// @notice Subscribe to VIP with chosen payment token
+    /// @param planLabel "monthly" or "halfyear"
+    /// @param token Payment token address (USDT or USDC)
+    function subscribe(string calldata planLabel, address token) external nonReentrant {
+        require(allowedTokens[token], "Token not allowed");
         VIPPlan storage plan = vipPlans[planLabel];
         require(plan.price > 0 && plan.active, "Invalid VIP plan");
-        require(usdc.transferFrom(msg.sender, address(this), plan.price), "Transfer failed");
-        emit VIPSubscribed(msg.sender, planLabel, plan.price, block.timestamp);
+
+        IERC20(token).safeTransferFrom(msg.sender, address(this), plan.price);
+
+        emit VIPSubscribed(msg.sender, planLabel, token, plan.price, block.timestamp);
     }
 
-    /// @notice Owner updates a VIP plan price
+    // ─── Admin ──────────────────────────────────────────────────────────
+
     function setPlan(string calldata planLabel, uint256 price, bool active) external onlyOwner {
         vipPlans[planLabel] = VIPPlan(price, active);
     }
 
-    /// @notice Owner withdraws funds
-    function withdraw(address to, uint256 amount) external onlyOwner {
-        require(to != address(0), "Invalid address");
-        require(usdc.transfer(to, amount), "Withdraw failed");
-        emit Withdrawn(to, amount);
+    function setAllowedToken(address token, bool allowed) external onlyOwner {
+        require(token != address(0), "Invalid token");
+        allowedTokens[token] = allowed;
+        emit TokenAllowed(token, allowed);
     }
 
-    function withdrawAll(address to) external onlyOwner {
+    function withdraw(address token, address to, uint256 amount) external onlyOwner {
         require(to != address(0), "Invalid address");
-        uint256 bal = usdc.balanceOf(address(this));
+        IERC20(token).safeTransfer(to, amount);
+        emit Withdrawn(token, to, amount);
+    }
+
+    function withdrawAll(address token, address to) external onlyOwner {
+        require(to != address(0), "Invalid address");
+        uint256 bal = IERC20(token).balanceOf(address(this));
         require(bal > 0, "No balance");
-        require(usdc.transfer(to, bal), "Withdraw failed");
-        emit Withdrawn(to, bal);
+        IERC20(token).safeTransfer(to, bal);
+        emit Withdrawn(token, to, bal);
     }
 
-    function getBalance() external view returns (uint256) {
-        return usdc.balanceOf(address(this));
+    function getBalance(address token) external view returns (uint256) {
+        return IERC20(token).balanceOf(address(this));
     }
 }
