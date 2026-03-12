@@ -34,13 +34,14 @@ function JitterPercent({ value, color }: { value: number; color: string }) {
 
   useEffect(() => {
     const tick = () => {
-      setDisplay(() => {
-        const jitter = (Math.random() - 0.5) * 0.5;
-        return Math.max(0, Math.min(100, value + jitter));
+      setDisplay((prev) => {
+        const target = value + (Math.random() - 0.5) * 0.6;
+        const clamped = Math.max(0, Math.min(100, target));
+        return prev + (clamped - prev) * 0.3;
       });
-      tickRef.current = setTimeout(tick, 300 + Math.random() * 300);
+      tickRef.current = setTimeout(tick, 500 + Math.random() * 500);
     };
-    tickRef.current = setTimeout(tick, 400);
+    tickRef.current = setTimeout(tick, 500);
     return () => clearTimeout(tickRef.current);
   }, [value]);
 
@@ -75,13 +76,14 @@ function DepthBarRow({ ex, mounted, index }: { ex: ExchangeRow; mounted: boolean
 
   useEffect(() => {
     const oscillate = () => {
-      setBuyWidth(() => {
-        const jitter = (Math.random() - 0.5) * 1.2;
-        return Math.max(1, Math.min(99, ex.buy + jitter));
+      setBuyWidth((prev) => {
+        const target = ex.buy + (Math.random() - 0.5) * 1.5;
+        const clamped = Math.max(1, Math.min(99, target));
+        return prev + (clamped - prev) * 0.3;
       });
-      tickRef.current = setTimeout(oscillate, 250 + Math.random() * 300);
+      tickRef.current = setTimeout(oscillate, 500 + Math.random() * 500);
     };
-    tickRef.current = setTimeout(oscillate, 300);
+    tickRef.current = setTimeout(oscillate, 500);
     return () => clearTimeout(tickRef.current);
   }, [ex.buy]);
 
@@ -107,14 +109,14 @@ function DepthBarRow({ ex, mounted, index }: { ex: ExchangeRow; mounted: boolean
       <div className="flex-1 relative h-[18px] min-w-0">
         <div className="absolute inset-0 flex h-full rounded-sm overflow-hidden">
           <div
-            className="transition-[width] duration-200 ease-out"
+            className="transition-[width] duration-500 ease-in-out"
             style={{
               width: mounted ? `${buyWidth}%` : "0%",
               background: 'linear-gradient(90deg, rgba(16,185,129,0.5), rgba(16,185,129,0.8))',
             }}
           />
           <div
-            className="transition-[width] duration-200 ease-out"
+            className="transition-[width] duration-500 ease-in-out"
             style={{
               width: mounted ? `${sellWidth}%` : "0%",
               background: 'linear-gradient(90deg, rgba(239,68,68,0.8), rgba(239,68,68,0.5))',

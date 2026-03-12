@@ -17,7 +17,7 @@ interface AiModelCarouselProps {
   forecasts: ForecastItem[] | undefined;
   isLoading: boolean;
   activeModel: string | null;
-  onSelectModel: (model: string) => void;
+  onSelectModel: (model: string | null) => void;
 }
 
 const MODEL_META: Record<string, { accent: string; icon: string; glow: string }> = {
@@ -241,10 +241,12 @@ function CompactModelPill({
   forecast,
   isActive,
   onSelect,
+  onRelease,
 }: {
   forecast: ForecastItem;
   isActive: boolean;
   onSelect: () => void;
+  onRelease: () => void;
 }) {
   const { t } = useTranslation();
   const meta = getModelMeta(forecast.model);
@@ -256,7 +258,9 @@ function CompactModelPill({
 
   return (
     <button
-      onClick={(e) => { e.stopPropagation(); onSelect(); }}
+      onPointerDown={(e) => { e.stopPropagation(); onSelect(); }}
+      onPointerUp={(e) => { e.stopPropagation(); onRelease(); }}
+      onPointerLeave={(e) => { e.stopPropagation(); onRelease(); }}
       className="ai-marquee-pill shrink-0 relative overflow-hidden rounded-lg transition-all duration-300 active:scale-[0.96]"
       style={{
         width: 140,
@@ -456,6 +460,7 @@ export function AiModelCarousel({ forecasts, isLoading, activeModel, onSelectMod
                 forecast={f}
                 isActive={activeModel === f.model}
                 onSelect={() => onSelectModel(f.model)}
+                onRelease={() => onSelectModel(null)}
               />
             ))}
           </MarqueeRow>

@@ -38,14 +38,15 @@ function AnimatedPercent({ value, color, suffix = "%" }: { value: number; color:
 
   useEffect(() => {
     const tick = () => {
-      setDisplay(() => {
-        // Big random swings around the real value, ±8 range
-        const swing = (Math.random() - 0.5) * 16;
-        return Math.max(5, Math.min(95, value + swing));
+      setDisplay((prev) => {
+        // Smooth small drift ±2 around real value
+        const target = value + (Math.random() - 0.5) * 4;
+        const clamped = Math.max(5, Math.min(95, target));
+        return prev + (clamped - prev) * 0.3;
       });
-      tickRef.current = setTimeout(tick, 80 + Math.random() * 150);
+      tickRef.current = setTimeout(tick, 400 + Math.random() * 400);
     };
-    tickRef.current = setTimeout(tick, 80 + Math.random() * 150);
+    tickRef.current = setTimeout(tick, 400 + Math.random() * 400);
     return () => clearTimeout(tickRef.current);
   }, [value]);
 
@@ -112,14 +113,15 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
 
   useEffect(() => {
     const oscillate = () => {
-      setBuyWidth(() => {
-        // Wide swings ±8% around real value for dramatic movement
-        const swing = (Math.random() - 0.5) * 16;
-        return Math.max(10, Math.min(90, buyNum + swing));
+      setBuyWidth((prev) => {
+        // Smooth drift ±3% around real value
+        const target = buyNum + (Math.random() - 0.5) * 6;
+        const clamped = Math.max(15, Math.min(85, target));
+        return prev + (clamped - prev) * 0.3;
       });
-      tickRef.current = setTimeout(oscillate, 100 + Math.random() * 200);
+      tickRef.current = setTimeout(oscillate, 500 + Math.random() * 500);
     };
-    tickRef.current = setTimeout(oscillate, 100 + Math.random() * 200);
+    tickRef.current = setTimeout(oscillate, 500 + Math.random() * 500);
     return () => clearTimeout(tickRef.current);
   }, [buyNum]);
 
@@ -185,7 +187,7 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
             <div className="relative h-3 rounded-full bg-white/[0.03] overflow-visible" data-testid="bar-depth-ratio">
               <div className="absolute inset-0 flex h-full rounded-full overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-emerald-600 to-emerald-400 relative transition-[width] duration-75 ease-out"
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-400 relative transition-[width] duration-500 ease-in-out"
                   style={{ width: `${buyWidth}%` }}
                 >
                   <div className="absolute inset-0 opacity-50"
@@ -196,7 +198,7 @@ export function DepthBar({ buyPercent, sellPercent, isLoading, fearGreedIndex, f
                   />
                 </div>
                 <div
-                  className="bg-gradient-to-r from-red-400 to-red-600 relative transition-[width] duration-75 ease-out"
+                  className="bg-gradient-to-r from-red-400 to-red-600 relative transition-[width] duration-500 ease-in-out"
                   style={{ width: `${sellWidth}%` }}
                 >
                   <div className="absolute inset-0 opacity-50"
