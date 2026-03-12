@@ -229,6 +229,26 @@ export function StrategyHeader() {
                 </div>
               ))}
             </div>
+            {/* Monthly summary */}
+            {(() => {
+              const monthPnl = calendarDays.reduce((sum, c) => sum + c.pnl, 0);
+              const monthWins = calendarDays.filter((c) => c.day > 0 && c.pnl > 0).length;
+              const monthLosses = calendarDays.filter((c) => c.day > 0 && c.pnl < 0).length;
+              const hasData = monthWins + monthLosses > 0;
+              return hasData ? (
+                <div className="flex items-center justify-between mt-2 px-1 py-1.5 rounded-md bg-muted/20 border border-border/20">
+                  <div className="text-[10px] text-muted-foreground">{t("strategy.monthly")}</div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[11px] font-bold tabular-nums ${monthPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      {monthPnl >= 0 ? "+" : ""}{monthPnl.toFixed(1)}%
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      <span className="text-emerald-400">{monthWins}W</span> / <span className="text-red-400">{monthLosses}L</span>
+                    </span>
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </div>
         </DialogContent>
       </Dialog>
