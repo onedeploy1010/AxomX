@@ -41,26 +41,47 @@ function getCalendarDays(calendarMonth: Date) {
   const dataStartDate = new Date(now.getFullYear(), now.getMonth() - 9, 1);
   const isHistorical = new Date(year, month, 1) >= dataStartDate && new Date(year, month, 1) <= now;
 
+  if (!isHistorical) {
+    for (let d = 1; d <= daysInMonth; d++) days.push({ day: d, pnl: 0 });
+    return days;
+  }
+
+  // Target monthly total: 28-45%, seeded per month
+  const monthSeed = year * 100 + (month + 1);
+  const monthRng = ((Math.sin(monthSeed * 4729 + 17389) % 1) + 1) % 1;
+  const targetMonthly = 28 + monthRng * 17; // 28% ~ 45%
+
+  // First pass: generate raw daily PnL
+  const rawPnls: number[] = [];
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(year, month, d);
-    if (isHistorical && date <= now) {
-      const seed = year * 10000 + (month + 1) * 100 + d;
-      const rng = ((Math.sin(seed * 9301 + 49297) % 1) + 1) % 1;
-      const rng2 = ((Math.sin(seed * 7919 + 31337) % 1) + 1) % 1;
-      const rng3 = ((Math.sin(seed * 6271 + 15731) % 1) + 1) % 1;
-      const isWin = rng > 0.30;
-      let pnl: number;
-      if (isWin) {
-        pnl = 0.8 + rng2 * 2.4;
-      } else {
-        pnl = -(0.3 + rng3 * 1.7);
-      }
-      const dow = date.getDay();
-      if (dow === 0 || dow === 6) pnl *= 0.4;
-      days.push({ day: d, pnl: Math.round(pnl * 100) / 100 });
-    } else {
-      days.push({ day: d, pnl: 0 });
+    if (date > now) {
+      rawPnls.push(0);
+      continue;
     }
+    const seed = year * 10000 + (month + 1) * 100 + d;
+    const rng = ((Math.sin(seed * 9301 + 49297) % 1) + 1) % 1;
+    const rng2 = ((Math.sin(seed * 7919 + 31337) % 1) + 1) % 1;
+    const rng3 = ((Math.sin(seed * 6271 + 15731) % 1) + 1) % 1;
+    const isWin = rng > 0.30;
+    let pnl: number;
+    if (isWin) {
+      pnl = 0.8 + rng2 * 2.4;
+    } else {
+      pnl = -(0.3 + rng3 * 1.7);
+    }
+    const dow = date.getDay();
+    if (dow === 0 || dow === 6) pnl *= 0.4;
+    rawPnls.push(pnl);
+  }
+
+  // Scale to hit target monthly total
+  const rawTotal = rawPnls.reduce((s, v) => s + v, 0);
+  const scale = rawTotal > 0 ? targetMonthly / rawTotal : 1;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const scaled = rawPnls[d - 1] * scale;
+    days.push({ day: d, pnl: Math.round(scaled * 100) / 100 });
   }
   return days;
 }
@@ -73,27 +94,11 @@ function getCumulativeStats() {
   let losses = 0;
   for (let m = 0; m < 9; m++) {
     const mDate = new Date(dataStart.getFullYear(), dataStart.getMonth() + m, 1);
-    const mYear = mDate.getFullYear();
-    const mMonth = mDate.getMonth();
-    const mDays = new Date(mYear, mMonth + 1, 0).getDate();
-    for (let d = 1; d <= mDays; d++) {
-      const date = new Date(mYear, mMonth, d);
-      if (date > now) break;
-      const seed = mYear * 10000 + (mMonth + 1) * 100 + d;
-      const rng = ((Math.sin(seed * 9301 + 49297) % 1) + 1) % 1;
-      const rng2 = ((Math.sin(seed * 7919 + 31337) % 1) + 1) % 1;
-      const rng3 = ((Math.sin(seed * 6271 + 15731) % 1) + 1) % 1;
-      const isWin = rng > 0.30;
-      let pnl: number;
-      if (isWin) {
-        pnl = 0.8 + rng2 * 2.4;
-      } else {
-        pnl = -(0.3 + rng3 * 1.7);
-      }
-      const dow = date.getDay();
-      if (dow === 0 || dow === 6) pnl *= 0.4;
-      totalPnl += pnl;
-      if (pnl > 0) wins++; else losses++;
+    const days = getCalendarDays(mDate);
+    for (const cell of days) {
+      if (cell.day === 0 || cell.pnl === 0) continue;
+      totalPnl += cell.pnl;
+      if (cell.pnl > 0) wins++; else losses++;
     }
   }
   return { totalPnl, wins, losses };

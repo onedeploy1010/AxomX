@@ -66,7 +66,7 @@ export function StrategyCard({ strategy, index }: StrategyCardProps) {
 
   return (
     <Card
-      className="border-border bg-card hover-elevate relative overflow-hidden"
+      className="border-border bg-card hover-elevate relative overflow-hidden h-full"
       data-testid={`strategy-card-${strategy.id}`}
       style={{ animation: `fadeSlideIn 0.4s ease-out ${index * 0.08}s both` }}
     >

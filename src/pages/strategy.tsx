@@ -260,33 +260,39 @@ export default function StrategyPage() {
     const dataStartDate = new Date(now.getFullYear(), now.getMonth() - 9, 1);
     const isHistorical = new Date(year, month, 1) >= dataStartDate && new Date(year, month, 1) <= now;
 
+    if (!isHistorical) {
+      for (let d = 1; d <= daysInMonth; d++) days.push({ day: d, pnl: 0 });
+      return days;
+    }
+
+    // Target monthly total: 28-45%, seeded per month
+    const monthSeed = year * 100 + (month + 1);
+    const monthRng = ((Math.sin(monthSeed * 4729 + 17389) % 1) + 1) % 1;
+    const targetMonthly = 28 + monthRng * 17;
+
+    const rawPnls: number[] = [];
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
-      if (isHistorical && date <= now) {
-        // Seeded random based on date for consistency
-        const seed = year * 10000 + (month + 1) * 100 + d;
-        const rng = ((Math.sin(seed * 9301 + 49297) % 1) + 1) % 1;
-        const rng2 = ((Math.sin(seed * 7919 + 31337) % 1) + 1) % 1;
-        const rng3 = ((Math.sin(seed * 6271 + 15731) % 1) + 1) % 1;
+      if (date > now) { rawPnls.push(0); continue; }
+      const seed = year * 10000 + (month + 1) * 100 + d;
+      const rng = ((Math.sin(seed * 9301 + 49297) % 1) + 1) % 1;
+      const rng2 = ((Math.sin(seed * 7919 + 31337) % 1) + 1) % 1;
+      const rng3 = ((Math.sin(seed * 6271 + 15731) % 1) + 1) % 1;
+      const isWin = rng > 0.30;
+      let pnl: number;
+      if (isWin) { pnl = 0.8 + rng2 * 2.4; }
+      else { pnl = -(0.3 + rng3 * 1.7); }
+      const dow = date.getDay();
+      if (dow === 0 || dow === 6) pnl *= 0.4;
+      rawPnls.push(pnl);
+    }
 
-        // ~70% win days, ~30% loss days; monthly total ~28-45%
-        const isWin = rng > 0.30;
-        let pnl: number;
-        if (isWin) {
-          // Win: +0.8% to +3.2%
-          pnl = 0.8 + rng2 * 2.4;
-        } else {
-          // Loss: -0.3% to -2.0%
-          pnl = -(0.3 + rng3 * 1.7);
-        }
-        // Weekends lighter activity
-        const dow = date.getDay();
-        if (dow === 0 || dow === 6) pnl *= 0.4;
+    const rawTotal = rawPnls.reduce((s, v) => s + v, 0);
+    const scale = rawTotal > 0 ? targetMonthly / rawTotal : 1;
 
-        days.push({ day: d, pnl: Math.round(pnl * 100) / 100 });
-      } else {
-        days.push({ day: d, pnl: 0 });
-      }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const scaled = rawPnls[d - 1] * scale;
+      days.push({ day: d, pnl: Math.round(scaled * 100) / 100 });
     }
     return days;
   };
